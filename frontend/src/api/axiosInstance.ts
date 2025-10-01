@@ -3,7 +3,7 @@ import axios from 'axios';
 // Axios 인스턴스를 생성합니다.
 const axiosInstance = axios.create({
   // API의 기본 URL을 설정합니다.
-  baseURL: 'http://localhost:4000/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL,
 });
 
 // 요청 인터셉터(Request Interceptor)를 추가합니다.
