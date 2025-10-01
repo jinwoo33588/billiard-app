@@ -109,22 +109,24 @@ function DashboardPage({ games, refreshGames }: DashboardPageProps) {
           {ranking.length === 0 ? (
             <Text>랭킹 데이터가 없습니다.</Text>
           ) : (
-            <Table striped highlightOnHover withTableBorder>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>순위</Table.Th>
-                  <Table.Th>닉네임</Table.Th>
-                  <Table.Th>총 전적</Table.Th>
-                  <Th sorted={sortBy === 'average'} reversed={reverseSortDirection} onSort={() => setSorting('average')}>
-                    에버리지
-                  </Th>
-                  <Th sorted={sortBy === 'winRate'} reversed={reverseSortDirection} onSort={() => setSorting('winRate')}>
-                    승률
-                  </Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>{rankingRows}</Table.Tbody>
-            </Table>
+            <Table.ScrollContainer minWidth={600}>
+              <Table striped highlightOnHover withTableBorder>
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th>순위</Table.Th>
+                    <Table.Th>닉네임</Table.Th>
+                    <Table.Th>총 전적</Table.Th>
+                    <Th sorted={sortBy === 'average'} reversed={reverseSortDirection} onSort={() => setSorting('average')}>
+                      에버리지
+                    </Th>
+                    <Th sorted={sortBy === 'winRate'} reversed={reverseSortDirection} onSort={() => setSorting('winRate')}>
+                      승률
+                    </Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>{rankingRows}</Table.Tbody>
+              </Table>
+            </Table.ScrollContainer>
           )}
         </Tabs.Panel>
       </Tabs>

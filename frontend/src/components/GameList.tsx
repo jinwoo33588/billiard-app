@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { useForm } from '@mantine/form';
-import { Card, Table, Title, Text, Group, ActionIcon, Modal, Grid, NumberInput, Select, Textarea, Button , Box} from '@mantine/core';
+import { Card, Table, Title, Text, Group, ActionIcon, Modal, Grid, NumberInput, Select, Textarea, Button, Box } from '@mantine/core';
 import { IconPencil, IconTrash } from '@tabler/icons-react';
 import { DatePickerInput } from '@mantine/dates';
 
@@ -100,21 +100,23 @@ function GameList({ games, onListChange }: GameListProps) {
         {games.length === 0 ? (
           <Text>기록된 경기가 없습니다.</Text>
         ) : (
-          <Table striped highlightOnHover withTableBorder withColumnBorders>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>날짜</Table.Th>
-                <Table.Th>방식</Table.Th>
-                <Table.Th>결과</Table.Th>
-                <Table.Th>점수</Table.Th>
-                <Table.Th>이닝</Table.Th>
-                <Table.Th>에버리지</Table.Th>
-                <Table.Th>메모</Table.Th>
-                <Table.Th>관리</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>{rows}</Table.Tbody>
-          </Table>
+          <Table.ScrollContainer minWidth={800}>
+            <Table striped highlightOnHover withTableBorder withColumnBorders>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>날짜</Table.Th>
+                  <Table.Th>방식</Table.Th>
+                  <Table.Th>결과</Table.Th>
+                  <Table.Th>점수</Table.Th>
+                  <Table.Th>이닝</Table.Th>
+                  <Table.Th>에버리지</Table.Th>
+                  <Table.Th>메모</Table.Th>
+                  <Table.Th>관리</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>{rows}</Table.Tbody>
+            </Table>
+          </Table.ScrollContainer>
         )}
       </Card>
       
@@ -125,10 +127,7 @@ function GameList({ games, onListChange }: GameListProps) {
             <Grid.Col span={{ base: 12, sm: 4 }}><NumberInput label="내 점수" required {...form.getInputProps('score')} /></Grid.Col>
             <Grid.Col span={{ base: 12, sm: 4 }}><NumberInput label="이닝 수" required {...form.getInputProps('inning')} /></Grid.Col>
             <Grid.Col span={{ base: 12, sm: 6 }}><Select label="승/무/패" data={['승', '무', '패']} required {...form.getInputProps('result')} /></Grid.Col>
-            <Grid.Col span={{ base: 12, sm: 6 }}>
-              {/* [수정] 게임 방식 옵션 추가 */}
-              <Select label="게임 방식" data={['1v1', '2v2', '2v2v2', '3v3', '3v3v3']} required {...form.getInputProps('gameType')} />
-            </Grid.Col>
+            <Grid.Col span={{ base: 12, sm: 6 }}><Select label="게임 방식" data={['1v1', '2v2', '2v2v2', '3v3', '3v3v3']} required {...form.getInputProps('gameType')} /></Grid.Col>
             <Grid.Col span={12}><Textarea label="메모" {...form.getInputProps('memo')} /></Grid.Col>
           </Grid>
           <Group justify="flex-end" mt="xl">

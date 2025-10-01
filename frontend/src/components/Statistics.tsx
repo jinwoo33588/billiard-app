@@ -12,13 +12,10 @@ function Statistics({ games }: StatisticsProps) {
       acc.totalGames += 1;
       acc.totalScore += game.score;
       acc.totalInnings += game.inning;
-      // [수정] 한글 결과값을 기준으로 계산
       if (game.result === '승') acc.wins += 1;
-      else if (game.result === '무') acc.draws += 1;
-      else if (game.result === '패') acc.losses += 1;
       return acc;
     },
-    { totalGames: 0, wins: 0, draws: 0, losses: 0, totalScore: 0, totalInnings: 0 }
+    { totalGames: 0, wins: 0, totalScore: 0, totalInnings: 0 }
   );
 
   const winRate = stats.totalGames > 0 ? ((stats.wins / stats.totalGames) * 100).toFixed(1) : '0.0';
@@ -27,13 +24,12 @@ function Statistics({ games }: StatisticsProps) {
   return (
     <Card shadow="sm" p="lg" radius="md" withBorder>
       <Title order={3} mb="md">종합 통계</Title>
-      <SimpleGrid cols={3} spacing="lg">
+      {/* [수정] cols를 반응형 객체로 변경합니다. */}
+      {/* base: 가장 작은 화면에서는 1줄, sm: small 사이즈 이상에서는 3줄 */}
+      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="lg">
         <div>
           <Text size="sm" c="dimmed">총 전적</Text>
-          {/* [수정] 표시 형식 변경 */}
-          <Text size="xl" fw={700}>
-            {`${stats.totalGames}전 ${stats.wins}승 ${stats.draws}무 ${stats.losses}패`}
-          </Text>
+          <Text size="xl" fw={700}>{stats.totalGames} 전</Text>
         </div>
         <div>
           <Text size="sm" c="dimmed">승률</Text>
