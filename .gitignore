@@ -1,0 +1,9 @@
+# Dependencies
+/backend/node_modules
+/frontend/node_modules
+
+# Vite build output
+/frontend/dist
+
+# Environment files
+.env

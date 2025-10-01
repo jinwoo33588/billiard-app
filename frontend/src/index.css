@@ -1,0 +1,22 @@
+/* 기본 스타일 초기화 */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  /* 페이지 전체 배경색을 약간 어둡게 해서 카드 형태가 더 잘 보이게 합니다. */
+  background-color: #f0f2f5; 
+}
+
+/* #root div를 Flexbox 컨테이너로 만들어서
+  그 안의 자식들(우리 앱)을 정렬합니다.
+*/
+#root {
+  display: flex;
+  justify-content: center; /* 가로 중앙 정렬 */
+  align-items: flex-start;   /* 세로로는 상단에 정렬 */
+  padding-top: 2rem;       /* 앱 상단에 약간의 여백 추가 */
+}
