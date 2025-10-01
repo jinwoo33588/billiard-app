@@ -1,10 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+require('dotenv').config(); // [추가] .env 파일을 읽어들입니다.
 
 const app = express();
 const port = 4000;
-const MONGO_URI = "mongodb+srv://jinwoo3358_db_user:Aa834646@cluster0.ydy0clf.mongodb.net/billiard-app?retryWrites=true&w=majority&appName=Cluster0";
+const MONGO_URI = process.env.MONGO_URI; 
 
 // --- 미들웨어 설정 ---
 app.use(cors());

@@ -28,7 +28,7 @@ router.post('/login', async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).send({ message: '이메일 또는 비밀번호가 잘못되었습니다.' });
     }
-    const token = jwt.sign({ userId: user._id }, 'MY_SECRET_KEY', { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
     res.status(200).send({
       message: '로그인 성공!',
       user: { _id: user._id, nickname: user.nickname, email: user.email },
