@@ -4,12 +4,12 @@ import GameList, { Game } from '../components/GameList';
 import { Stack, Title } from '@mantine/core';
 import { User } from '../components/Login';
 
-interface DashboardPageProps {
+interface HomePageProps {
   user: User;
   games: Game[];
 }
 
-function DashboardPage({ user, games }: DashboardPageProps) {
+function HomePage({ user, games }: HomePageProps) {
   return (
     <Stack>
       <Title order={2}>{user.nickname}님의 기록</Title>
@@ -18,4 +18,5 @@ function DashboardPage({ user, games }: DashboardPageProps) {
     </Stack>
   );
 }
-export default DashboardPage;
+
+export default HomePage;

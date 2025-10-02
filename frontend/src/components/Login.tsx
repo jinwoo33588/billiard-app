@@ -1,7 +1,7 @@
 import React from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { useForm } from '@mantine/form';
-import { TextInput, PasswordInput, Button, Card, Title, Stack } from '@mantine/core';
+import { TextInput, PasswordInput, Button, Card, Title, Stack, Text, Anchor, Center } from '@mantine/core';
 
 export interface User {
   _id: string;
@@ -9,16 +9,15 @@ export interface User {
   email: string;
 }
 
+// [수정] onToggleForm prop 추가
 interface LoginProps {
   onLoginSuccess: (user: User) => void;
+  onToggleForm: () => void;
 }
 
-function Login({ onLoginSuccess }: LoginProps) {
+function Login({ onLoginSuccess, onToggleForm }: LoginProps) {
   const form = useForm({
-    initialValues: {
-      email: '',
-      password: '',
-    },
+    initialValues: { email: '', password: '' },
     validate: {
       email: (value) => (/^\S+@\S+$/.test(value) ? null : '유효한 이메일이 아닙니다.'),
       password: (value) => (value.length < 6 ? '비밀번호는 6자 이상이어야 합니다.' : null),
@@ -33,14 +32,13 @@ function Login({ onLoginSuccess }: LoginProps) {
       onLoginSuccess(user);
     } catch (error) {
       console.error('로그인 실패:', error);
-      alert('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
+      alert('로그인에 실패했습니다.');
     }
   };
 
   return (
-    <Card shadow="sm" p="lg" radius="md" withBorder>
+    <Card shadow="sm" p={{ base: 'md', sm: 'lg' }} radius="md" withBorder w={400}>
       <Stack>
-        <Title order={3}>로그인</Title>
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput
             label="이메일"
@@ -59,6 +57,14 @@ function Login({ onLoginSuccess }: LoginProps) {
             로그인
           </Button>
         </form>
+        
+        {/* [추가] 회원가입 페이지로 이동하는 링크 */}
+        <Text ta="center" mt="sm">
+          계정이 없으신가요?{' '}
+          <Anchor component="button" type="button" onClick={onToggleForm}>
+            회원가입
+          </Anchor>
+        </Text>
       </Stack>
     </Card>
   );

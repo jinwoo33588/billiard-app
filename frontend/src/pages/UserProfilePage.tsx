@@ -27,7 +27,6 @@ function UserProfilePage() {
         setGames(gamesResponse.data);
       } catch (err) {
         setError('사용자 정보를 불러오는 데 실패했습니다.');
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -35,13 +34,8 @@ function UserProfilePage() {
     fetchUserData();
   }, [userId]);
 
-  if (loading) {
-    return <Center style={{ height: 200 }}><Loader /></Center>;
-  }
-
-  if (error) {
-    return <Alert icon={<IconAlertCircle size="1rem" />} title="오류 발생!" color="red">{error}</Alert>;
-  }
+  if (loading) return <Center style={{ height: 200 }}><Loader /></Center>;
+  if (error) return <Alert icon={<IconAlertCircle size="1rem" />} title="오류!" color="red">{error}</Alert>;
 
   return (
     <Container>
@@ -56,5 +50,4 @@ function UserProfilePage() {
     </Container>
   );
 }
-
 export default UserProfilePage;
