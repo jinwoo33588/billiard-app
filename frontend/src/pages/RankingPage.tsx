@@ -5,9 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import { IconArrowUp, IconArrowDown } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
 
+// [수정] RankItem 인터페이스에 handicap 추가
 interface RankItem {
   userId: string;
   nickname: string;
+  handicap: number;
   totalGames: number;
   wins: number;
   draws: number;
@@ -20,7 +22,6 @@ function RankingPage() {
   const [ranking, setRanking] = useState<RankItem[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const isMobile = useMediaQuery('(max-width: 768px)');
   
   const [sortBy, setSortBy] = useState<keyof RankItem>('average');
   const [sortDirection, setSortDirection] = useState<'desc' | 'asc'>('desc');
@@ -50,9 +51,9 @@ function RankingPage() {
   }, [ranking, sortBy, sortDirection]);
 
   const handleSortChange = (value: string) => {
-    if (value === 'average' || value === 'winRate') {
-      setSortBy(value);
-      setSortDirection('desc'); // 기준이 바뀌면 항상 내림차순으로 초기화
+    if (value === 'average' || value === 'winRate' || value === 'handicap') {
+      setSortBy(value as keyof RankItem);
+      setSortDirection('desc');
     }
   };
 
@@ -68,7 +69,6 @@ function RankingPage() {
     <Stack>
       <Title order={2} ta="center">🏆 전체 랭킹</Title>
 
-      {/* 정렬 컨트롤러 UI */}
       <Group justify="center">
         <SegmentedControl
           value={sortBy}
@@ -76,6 +76,7 @@ function RankingPage() {
           data={[
             { label: '에버리지 순', value: 'average' },
             { label: '승률 순', value: 'winRate' },
+            { label: '핸디 순', value: 'handicap' },
           ]}
         />
         <ActionIcon variant="default" size="lg" onClick={toggleSortDirection}>
@@ -94,7 +95,8 @@ function RankingPage() {
                   <Group>
                     <Title order={4} c={index < 3 ? 'blue' : 'gray'}>#{index + 1}</Title>
                     <div>
-                      <Text fw={700}>{item.nickname}</Text>
+                      {/* [수정] 닉네임 옆에 핸디캡 점수 표시 */}
+                      <Text fw={700}>{item.nickname} ({item.handicap}점)</Text>
                       <Text size="xs" c="dimmed">
                         {`${item.totalGames}전 ${item.wins}승 ${item.draws}무 ${item.losses}패`}
                       </Text>

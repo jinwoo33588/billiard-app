@@ -75,7 +75,11 @@ router.get('/ranking', async (req, res) => {
         $project: {
           userId: '$_id',
           nickname: '$nickname',
-          totalGames: 1, wins: 1, draws: 1, losses: 1,
+          handicap: '$handicap', // [추가] handicap 필드를 결과에 포함
+          totalGames: 1,
+          wins: 1,
+          draws: 1,
+          losses: 1,
           average: { $cond: [{ $eq: ['$totalInnings', 0] }, 0, { $divide: ['$totalScore', '$totalInnings'] }] },
           winRate: { $cond: [{ $eq: ['$totalGames', 0] }, 0, { $multiply: [{ $divide: ['$wins', '$totalGames'] }, 100] }] }
         }

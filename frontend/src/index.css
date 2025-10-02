@@ -1,5 +1,5 @@
-/* 기본 스타일 초기화 */
 html, body, #root {
+  /* height와 width 100% 설정은 그대로 두는 것이 좋습니다. */
   height: 100%;
   width: 100%;
   margin: 0;
@@ -11,12 +11,5 @@ body {
   background-color: #f0f2f5; 
 }
 
-/* #root div를 Flexbox 컨테이너로 만들어서
-  그 안의 자식들(우리 앱)을 정렬합니다.
-*/
-#root {
-  display: flex;
-  justify-content: center; /* 가로 중앙 정렬 */
-  align-items: flex-start;   /* 세로로는 상단에 정렬 */
-  padding-top: 2rem;       /* 앱 상단에 약간의 여백 추가 */
-}
+/* #root에 적용했던 display:flex 관련 코드를 모두 제거합니다. */
+/* 이제 레이아웃은 App.tsx와 각 페이지의 Container가 전적으로 담당합니다. */

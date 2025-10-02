@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Title, Stack, Card, Text, SimpleGrid, Table, UnstyledButton, Group, Center, rem, SegmentedControl, Box } from '@mantine/core';
+import { Title, Stack, Card, Text, SimpleGrid, Table, UnstyledButton, Group, Center, rem, SegmentedControl, Container } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { Game } from '../components/GameList';
 import StatsChart from '../components/StatsChart';
@@ -124,87 +124,90 @@ function ArchivePage({ games }: ArchivePageProps) {
   ));
 
   return (
-    <Stack gap="xl">
-      <Title order={2}>기록 보관함</Title>
-      
-      <Card shadow="sm" p="lg" radius="md" withBorder>
-        <Stack>
-          <DatePickerInput
-            type="range"
-            label="기간 직접 선택"
-            placeholder="분석할 기간 선택"
-            value={dateRange}
-            // [수정] onChange의 value 타입을 명시적으로 지정하여 에러 해결
-            onChange={(value: [Date | null, Date | null]) => {
-              setDateRange(value);
-              setQuickFilter('');
-            }}
-            clearable
-          />
-          <SegmentedControl
-            data={[{ label: '이번 주', value: 'week' }, { label: '이번 달', value: 'month' }, { label: '전체', value: 'all'}]}
-            value={quickFilter}
-            onChange={setQuickFilter}
-            fullWidth
-          />
-        </Stack>
-      </Card>
-
-      <Card shadow="sm" p="lg" radius="md" withBorder>
-        <Title order={3} mb="md">선택 기간 통계</Title>
-        <SimpleGrid cols={{ base: 2, xs: 3 }}>
-          <div><Text size="xs" c="dimmed" ta="center">총 전적</Text><Text size="lg" fw={700} ta="center">{`${stats.totalGames}전 ${stats.wins}승 ${stats.draws}무 ${stats.losses}패`}</Text></div>
-          <div><Text size="xs" c="dimmed" ta="center">승률</Text><Text size="lg" fw={700} ta="center">{winRate}%</Text></div>
-          <div><Text size="xs" c="dimmed" ta="center">에버리지</Text><Text size="lg" fw={700} ta="center">{average}</Text></div>
-        </SimpleGrid>
-      </Card>
-      
-      <StatsChart games={filteredGames} />
-
-      <Card shadow="sm" p="lg" radius="md" withBorder>
-        <Title order={3} mb="md">상세 기록</Title>
-        {isDesktop ? (
-          <Table.ScrollContainer minWidth={600}>
-            <Table striped highlightOnHover withTableBorder>
-              <Table.Thead>
-                <Table.Tr>
-                  <Th sorted={sortBy === 'gameDate'} reversed={reverseSortDirection} onSort={() => setSorting('gameDate')}>날짜</Th>
-                  <Th sorted={sortBy === 'gameType'} reversed={reverseSortDirection} onSort={() => setSorting('gameType')}>방식</Th>
-                  <Th sorted={sortBy === 'result'} reversed={reverseSortDirection} onSort={() => setSorting('result')}>결과</Th>
-                  <Th sorted={sortBy === 'score'} reversed={reverseSortDirection} onSort={() => setSorting('score')}>점수</Th>
-                  <Th sorted={sortBy === 'inning'} reversed={reverseSortDirection} onSort={() => setSorting('inning')}>이닝</Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>{desktopRows}</Table.Tbody>
-            </Table>
-          </Table.ScrollContainer>
-        ) : (
+    // [수정] Container의 size를 "xl"로 변경하여 HomePage와 동일하게 맞춥니다.
+    <Container size="xl" p={0}>
+      <Stack gap="xl" align="stretch">
+        <Title order={2}>기록 보관함</Title>
+        
+        <Card shadow="sm" p="lg" radius="md" withBorder>
           <Stack>
-            {filteredGames.length > 0 ? (
-              filteredGames.sort((a, b) => new Date(b.gameDate).getTime() - new Date(a.gameDate).getTime())
-              .map(game => (
-                <Card key={game._id} withBorder p="sm" radius="md">
-                  <Group justify="space-between">
-                    <div>
-                      <Text fw={500}>{new Date(game.gameDate).toLocaleDateString()}</Text>
-                      <Text size="xs" c="dimmed">{game.gameType}</Text>
-                    </div>
-                    <Text size="xl" fw={700}>{game.result}</Text>
-                  </Group>
-                  <Group grow mt="xs">
-                    <Text size="sm">이닝: {game.inning}</Text>
-                    <Text size="sm">점수: {game.score}</Text>
-                    <Text size="sm">Avg: {game.inning > 0 ? (game.score / game.inning).toFixed(3) : 'N/A'}</Text>
-                  </Group>
-                </Card>
-              ))
-            ) : (
-              <Text c="dimmed" ta="center">해당 기간의 기록이 없습니다.</Text>
-            )}
+            <DatePickerInput
+              type="range"
+              label="기간 직접 선택"
+              placeholder="분석할 기간 선택"
+              value={dateRange}
+              onChange={(value: [Date | null, Date | null]) => {
+                setDateRange(value);
+                setQuickFilter('');
+              }}
+              clearable
+            />
+            <SegmentedControl
+              data={[{ label: '이번 주', value: 'week' }, { label: '이번 달', value: 'month' }, { label: '전체', value: 'all'}]}
+              value={quickFilter}
+              onChange={setQuickFilter}
+              fullWidth
+            />
           </Stack>
-        )}
-      </Card>
-    </Stack>
+        </Card>
+
+        <Card shadow="sm" p="lg" radius="md" withBorder>
+          <Title order={3} mb="md">선택 기간 통계</Title>
+          <SimpleGrid cols={2} spacing="lg" verticalSpacing="xs">
+           <div><Text size="xs" c="dimmed" ta="center">총 게임 수</Text><Text size="lg" fw={700} ta="center">{`${stats.totalGames}판 `}</Text></div>
+            <div><Text size="xs" c="dimmed" ta="center">총 전적</Text><Text size="lg" fw={700} ta="center">{`${stats.wins}승 ${stats.draws}무 ${stats.losses}패`}</Text></div>
+            <div><Text size="xs" c="dimmed" ta="center">승률</Text><Text size="lg" fw={700} ta="center">{winRate}%</Text></div>
+            <div><Text size="xs" c="dimmed" ta="center">에버리지</Text><Text size="lg" fw={700} ta="center">{average}</Text></div>
+          </SimpleGrid>
+        </Card>
+        
+        <StatsChart games={filteredGames} />
+
+        <Card shadow="sm" p="lg" radius="md" withBorder>
+          <Title order={3} mb="md">상세 기록</Title>
+          {isDesktop ? (
+            <Table.ScrollContainer minWidth={600}>
+              <Table striped highlightOnHover withTableBorder>
+                <Table.Thead>
+                  <Table.Tr>
+                    <Th sorted={sortBy === 'gameDate'} reversed={reverseSortDirection} onSort={() => setSorting('gameDate')}>날짜</Th>
+                    <Th sorted={sortBy === 'gameType'} reversed={reverseSortDirection} onSort={() => setSorting('gameType')}>방식</Th>
+                    <Th sorted={sortBy === 'result'} reversed={reverseSortDirection} onSort={() => setSorting('result')}>결과</Th>
+                    <Th sorted={sortBy === 'score'} reversed={reverseSortDirection} onSort={() => setSorting('score')}>점수</Th>
+                    <Th sorted={sortBy === 'inning'} reversed={reverseSortDirection} onSort={() => setSorting('inning')}>이닝</Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>{desktopRows}</Table.Tbody>
+              </Table>
+            </Table.ScrollContainer>
+          ) : (
+            <Stack>
+              {filteredGames.length > 0 ? (
+                filteredGames.sort((a, b) => new Date(b.gameDate).getTime() - new Date(a.gameDate).getTime())
+                .map(game => (
+                  <Card key={game._id} withBorder p="sm" radius="md">
+                    <Group justify="space-between">
+                      <div>
+                        <Text fw={500}>{new Date(game.gameDate).toLocaleDateString()}</Text>
+                        <Text size="xs" c="dimmed">{game.gameType}</Text>
+                      </div>
+                      <Text size="xl" fw={700}>{game.result}</Text>
+                    </Group>
+                    <Group grow mt="xs">
+                      <Text size="sm">이닝: {game.inning}</Text>
+                      <Text size="sm">점수: {game.score}</Text>
+                      <Text size="sm">Avg: {game.inning > 0 ? (game.score / game.inning).toFixed(3) : 'N/A'}</Text>
+                    </Group>
+                  </Card>
+                ))
+              ) : (
+                <Text c="dimmed" ta="center">해당 기간의 기록이 없습니다.</Text>
+              )}
+            </Stack>
+          )}
+        </Card>
+      </Stack>
+    </Container>
   );
 }
 
