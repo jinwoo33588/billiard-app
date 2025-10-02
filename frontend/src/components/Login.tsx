@@ -1,15 +1,15 @@
 import React from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { useForm } from '@mantine/form';
-import { TextInput, PasswordInput, Button, Card, Title, Stack, Text, Anchor, Center } from '@mantine/core';
+import { TextInput, PasswordInput, Button, Card, Title, Stack, Text, Anchor } from '@mantine/core';
 
 export interface User {
   _id: string;
   nickname: string;
   email: string;
+  handicap: number;
 }
 
-// [수정] onToggleForm prop 추가
 interface LoginProps {
   onLoginSuccess: (user: User) => void;
   onToggleForm: () => void;
@@ -58,7 +58,6 @@ function Login({ onLoginSuccess, onToggleForm }: LoginProps) {
           </Button>
         </form>
         
-        {/* [추가] 회원가입 페이지로 이동하는 링크 */}
         <Text ta="center" mt="sm">
           계정이 없으신가요?{' '}
           <Anchor component="button" type="button" onClick={onToggleForm}>

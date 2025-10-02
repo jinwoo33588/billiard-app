@@ -61,18 +61,14 @@ function App() {
   };
 
   if (loading) {
-    return (
-      <Center style={{ height: '100vh' }}>
-        <Loader />
-      </Center>
-    );
+    return <Center style={{ height: '100vh' }}><Loader /></Center>;
   }
 
   return (
     <AppShell
       header={{ height: 60 }}
       footer={user ? { height: 60 } : undefined}
-      
+     
     >
       <AppShell.Header>
         <Container size="xl" h="100%">
@@ -80,7 +76,7 @@ function App() {
             <Title order={3}>🎱 테크노 당구 기록</Title>
             {user && (
               <Group>
-                <Text size="sm" visibleFrom="xs">{user.nickname}님!</Text>
+                <Text size="sm" visibleFrom="xs">{user.nickname} ({user.handicap}점)</Text>
                 <Button onClick={handleLogout} variant="light" size="xs">로그아웃</Button>
               </Group>
             )}
