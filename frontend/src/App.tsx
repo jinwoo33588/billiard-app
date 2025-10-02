@@ -5,11 +5,11 @@ import { User } from './components/Login';
 import { Game } from './components/GameList';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
-import RecordPage from './pages/RecordPage';
+import ArchivePage from './pages/ArchivePage';
 import RankingPage from './pages/RankingPage';
 import UserProfilePage from './pages/UserProfilePage';
 import { AppShell, Group, Title, Center, Loader, Button, Text, ActionIcon, Container } from '@mantine/core';
-import { IconHome, IconList, IconChartBar } from '@tabler/icons-react';
+import { IconHome, IconArchive, IconChartBar } from '@tabler/icons-react';
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -72,14 +72,12 @@ function App() {
     <AppShell
       header={{ height: 60 }}
       footer={user ? { height: 60 } : undefined}
-      // [수정] padding을 반응형으로 변경합니다.
-      // base(모바일)에서는 0, xs(작은 태블릿) 이상에서는 md(중간) 크기의 여백을 줍니다.
       
     >
       <AppShell.Header>
         <Container size="xl" h="100%">
           <Group h="100%" px="md" justify="space-between">
-            <Title order={3}>🎱 당구 기록</Title>
+            <Title order={3}>🎱 테크노 당구 기록</Title>
             {user && (
               <Group>
                 <Text size="sm" visibleFrom="xs">{user.nickname}님!</Text>
@@ -94,19 +92,18 @@ function App() {
         <AppShell.Footer>
           <Group h="100%" grow justify="center" gap={0}>
             <ActionIcon component={NavLink} to="/" variant="subtle" size="xl"><IconHome /></ActionIcon>
-            <ActionIcon component={NavLink} to="/record" variant="subtle" size="xl"><IconList /></ActionIcon>
+            <ActionIcon component={NavLink} to="/archive" variant="subtle" size="xl"><IconArchive /></ActionIcon>
             <ActionIcon component={NavLink} to="/ranking" variant="subtle" size="xl"><IconChartBar /></ActionIcon>
           </Group>
         </AppShell.Footer>
       )}
 
       <AppShell.Main>
-        {/* [수정] Container의 my(상하 여백)을 p(전체 여백)으로 변경하여 모바일에서 좌우 여백을 줍니다. */}
-        <Container fluid p={{ base: 'sm', sm: 'md' }} >
+        <Container fluid p={{ base: 'sm', sm: 'md' }} style={{ paddingBottom: '80px' }}>
           <Routes>
             <Route path="/auth" element={!user ? <AuthPage onLoginSuccess={handleLoginSuccess} /> : <Navigate to="/" replace />} />
-            <Route path="/" element={user ? <HomePage user={user} games={games} /> : <Navigate to="/auth" replace />} />
-            <Route path="/record" element={user ? <RecordPage onGameAdded={fetchGames} /> : <Navigate to="/auth" replace />} />
+            <Route path="/" element={user ? <HomePage user={user} games={games} refreshGames={fetchGames} /> : <Navigate to="/auth" replace />} />
+            <Route path="/archive" element={user ? <ArchivePage games={games} /> : <Navigate to="/auth" replace />} />
             <Route path="/ranking" element={user ? <RankingPage /> : <Navigate to="/auth" replace />} />
             <Route path="/users/:userId" element={user ? <UserProfilePage /> : <Navigate to="/auth" replace />} />
           </Routes>

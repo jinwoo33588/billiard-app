@@ -54,27 +54,47 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
-// 랭킹 조회 API
+// 랭킹 조회 API (수정)
 router.get('/ranking', async (req, res) => {
   try {
-    const ranking = await Game.aggregate([
+    const ranking = await User.aggregate([
+      // 1. User 컬렉션의 모든 사용자를 기준으로, Game 컬렉션과 'left join'을 수행합니다.
       {
-        $group: {
-          _id: '$userId',
-          totalScore: { $sum: '$score' },
-          totalInnings: { $sum: '$inning' },
-          totalGames: { $sum: 1 },
-          wins: { $sum: { $cond: [{ $eq: ['$result', '승'] }, 1, 0] } },
-          draws: { $sum: { $cond: [{ $eq: ['$result', '무'] }, 1, 0] } },
-          losses: { $sum: { $cond: [{ $eq: ['$result', '패'] }, 1, 0] } },
+        $lookup: {
+          from: 'games', // Game 모델에 해당하는 컬렉션 이름 (보통 소문자 복수형)
+          localField: '_id', // User 컬렉션의 _id 필드
+          foreignField: 'userId', // Game 컬렉션의 userId 필드
+          as: 'games' // 조인된 게임 기록들을 'games'라는 배열 필드에 저장
         }
       },
-      { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'user' } },
-      { $unwind: '$user' },
+      // 2. 각 사용자의 통계를 계산하여 새로운 필드를 추가합니다.
+      {
+        $addFields: {
+          totalGames: { $size: '$games' },
+          wins: {
+            $size: {
+              $filter: { input: '$games', as: 'game', cond: { $eq: ['$$game.result', '승'] } }
+            }
+          },
+          draws: {
+            $size: {
+              $filter: { input: '$games', as: 'game', cond: { $eq: ['$$game.result', '무'] } }
+            }
+          },
+          losses: {
+            $size: {
+              $filter: { input: '$games', as: 'game', cond: { $eq: ['$$game.result', '패'] } }
+            }
+          },
+          totalScore: { $sum: '$games.score' },
+          totalInnings: { $sum: '$games.inning' }
+        }
+      },
+      // 3. 최종적으로 보여줄 필드를 선택하고 에버리지, 승률을 계산합니다.
       {
         $project: {
           userId: '$_id',
-          nickname: '$user.nickname',
+          nickname: '$nickname',
           totalGames: 1,
           wins: 1,
           draws: 1,
@@ -83,25 +103,13 @@ router.get('/ranking', async (req, res) => {
           winRate: { $cond: [{ $eq: ['$totalGames', 0] }, 0, { $multiply: [{ $divide: ['$wins', '$totalGames'] }, 100] }] }
         }
       },
-      { $sort: { average: -1 } }
+      // 4. 에버리지 높은 순, 에버리지가 같으면 총 경기수가 많은 순으로 정렬합니다.
+      { $sort: { average: -1, totalGames: -1 } }
     ]);
+
     res.status(200).send(ranking);
   } catch (error) {
     console.error('랭킹 조회 중 에러 발생:', error);
-    res.status(500).send({ message: '서버 에러가 발생했습니다.' });
-  }
-});
-
-// 특정 사용자 정보 조회
-router.get('/:userId', async (req, res) => {
-  try {
-    const user = await User.findById(req.params.userId).select('nickname');
-    if (!user) {
-      return res.status(404).send({ message: '사용자를 찾을 수 없습니다.' });
-    }
-    res.status(200).send(user);
-  } catch (error) {
-    console.error('사용자 정보 조회 중 에러 발생:', error);
     res.status(500).send({ message: '서버 에러가 발생했습니다.' });
   }
 });
