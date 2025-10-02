@@ -1,3 +1,5 @@
+// frontend/src/pages/ArchivePage.tsx
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { Title, Stack, Card, Text, SimpleGrid, Table, UnstyledButton, Group, Center, rem, SegmentedControl, Container } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
@@ -9,6 +11,20 @@ import { useMediaQuery } from '@mantine/hooks';
 interface ArchivePageProps {
   games: Game[];
 }
+
+// [추가] 경기 결과에 따라 색상을 반환하는 헬퍼 함수
+const getResultColor = (result: '승' | '무' | '패') => {
+    switch (result) {
+      case '승':
+        return 'blue';
+      case '패':
+        return 'red';
+      case '무':
+        return 'gray';
+      default:
+        return 'black';
+    }
+  };
 
 // 테이블 헤더를 위한 인터페이스와 컴포넌트 (데스크탑용)
 interface ThProps {
@@ -116,7 +132,8 @@ function ArchivePage({ games }: ArchivePageProps) {
     <Table.Tr key={game._id}>
       <Table.Td>{new Date(game.gameDate).toLocaleDateString()}</Table.Td>
       <Table.Td>{game.gameType}</Table.Td>
-      <Table.Td>{game.result}</Table.Td>
+      {/* [수정] 결과 텍스트에 color 속성으로 색상 적용 */}
+      <Table.Td><Text c={getResultColor(game.result)}>{game.result}</Text></Table.Td>
       <Table.Td>{game.score}</Table.Td>
       <Table.Td>{game.inning}</Table.Td>
       <Table.Td>{game.inning > 0 ? (game.score / game.inning).toFixed(3) : 'N/A'}</Table.Td>
@@ -124,7 +141,6 @@ function ArchivePage({ games }: ArchivePageProps) {
   ));
 
   return (
-    // [수정] Container의 size를 "xl"로 변경하여 HomePage와 동일하게 맞춥니다.
     <Container size="xl" p={0}>
       <Stack gap="xl" align="stretch">
         <Title order={2}>기록 보관함</Title>
@@ -191,7 +207,8 @@ function ArchivePage({ games }: ArchivePageProps) {
                         <Text fw={500}>{new Date(game.gameDate).toLocaleDateString()}</Text>
                         <Text size="xs" c="dimmed">{game.gameType}</Text>
                       </div>
-                      <Text size="xl" fw={700}>{game.result}</Text>
+                      {/* [수정] 결과 텍스트에 c 속성으로 색상 적용 */}
+                      <Text size="xl" fw={700} c={getResultColor(game.result)}>{game.result}</Text>
                     </Group>
                     <Group grow mt="xs">
                       <Text size="sm">이닝: {game.inning}</Text>

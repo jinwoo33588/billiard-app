@@ -1,9 +1,11 @@
+// frontend/src/components/Statistics.tsx
+
 import React from 'react';
 import { Game } from './GameList';
-import { Card, Title, Text, SimpleGrid } from '@mantine/core';
+import { Card, Title, Text, SimpleGrid, Group } from '@mantine/core'; // [수정] Group 추가
 
-interface StatisticsProps { 
-  games: Game[]; 
+interface StatisticsProps {
+  games: Game[];
 }
 
 function Statistics({ games }: StatisticsProps) {
@@ -26,13 +28,15 @@ function Statistics({ games }: StatisticsProps) {
   return (
     <Card shadow="sm" p="lg" radius="md" withBorder>
       <Title order={3} mb="md">종합 통계</Title>
-      {/* [수정] spacing 오타를 "lg"로 수정하고, 각 Text에 ta="center"를 추가합니다. */}
       <SimpleGrid cols={3} spacing="lg">
         <div>
           <Text size="xs" c="dimmed" ta="center">총 전적</Text>
-          <Text size="lg" fw={700} ta="center">
-            {` ${stats.wins}승 ${stats.draws}무 ${stats.losses}패`}
-          </Text>
+          {/* [수정] Group과 Text를 사용하여 승, 무, 패를 각각 다른 색으로 표시 */}
+          <Group gap="xs" justify="center" mt={4}>
+            <Text size="lg" fw={700} c="blue">{stats.wins}승</Text>
+            <Text size="lg" fw={700} c="gray">{stats.draws}무</Text>
+            <Text size="lg" fw={700} c="red">{stats.losses}패</Text>
+          </Group>
         </div>
         <div>
           <Text size="xs" c="dimmed" ta="center">승률</Text>

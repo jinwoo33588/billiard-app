@@ -1,3 +1,5 @@
+// frontend/src/components/GameList.tsx
+
 import React, { useState } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import { useForm } from '@mantine/form';
@@ -18,9 +20,23 @@ export interface Game {
 
 interface GameListProps {
   games: Game[];
-  onListChange?: () => void; // [수정] ?를 추가하여 선택적 prop으로 변경
+  onListChange?: () => void;
   showActions?: boolean;
 }
+
+// [추가] 경기 결과에 따라 색상을 반환하는 헬퍼 함수
+const getResultColor = (result: '승' | '무' | '패') => {
+  switch (result) {
+    case '승':
+      return 'blue';
+    case '패':
+      return 'red';
+    case '무':
+      return 'gray';
+    default:
+      return 'black';
+  }
+};
 
 function GameList({ games, onListChange = () => {}, showActions = false }: GameListProps) {
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -113,7 +129,8 @@ function GameList({ games, onListChange = () => {}, showActions = false }: GameL
                 </Group>
                 
                 <Group justify="space-around" mt="md" mb="xs">
-                  <div><Text size="sm" c="dimmed">결과</Text><Text size="xl" fw={700}>{game.result}</Text></div>
+                  {/* [수정] 결과 텍스트에 c 속성으로 색상 적용 */}
+                  <div><Text size="sm" c="dimmed">결과</Text><Text size="xl" fw={700} c={getResultColor(game.result)}>{game.result}</Text></div>
                   <div><Text size="sm" c="dimmed">이닝</Text><Text size="xl" fw={700}>{game.inning}</Text></div>
                   <div><Text size="sm" c="dimmed">점수</Text><Text size="xl" fw={700}>{game.score}</Text></div>
                   <div>
