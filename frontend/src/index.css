@@ -8,7 +8,7 @@ html, body, #root {
 
 body {
   /* 페이지 전체 배경색을 약간 어둡게 해서 카드 형태가 더 잘 보이게 합니다. */
-  background-color: #f0f2f5; 
+  background-color: #ffffff; 
 }
 
 /* #root에 적용했던 display:flex 관련 코드를 모두 제거합니다. */

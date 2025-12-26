@@ -71,14 +71,13 @@ function App() {
      
     >
       <AppShell.Header>
-        <Container size="xl" h="100%">
-          <Group h="100%" px="md" justify="space-between">
-            <Title order={3}>🎱 테크노 당구 기록</Title>
+        <Container fluid px="sm" h="100%">
+          <Group h="100%" justify="space-between">
+            <Title order={4}>🎱 테크노 당구 기록</Title>
             {user && (
-              <Group>
-                <Text size="sm" visibleFrom="xs">{user.nickname} ({user.handicap}점)</Text>
-                <Button onClick={handleLogout} variant="light" size="xs">로그아웃</Button>
-              </Group>
+              <Button size="xs" variant="light" onClick={handleLogout}>
+                로그아웃
+              </Button>
             )}
           </Group>
         </Container>
@@ -95,7 +94,7 @@ function App() {
       )}
 
       <AppShell.Main>
-        <Container fluid p={{ base: 'sm', sm: 'md' }} style={{ paddingBottom: '80px' }}>
+      <Container style={{ paddingBottom: '80px' }}>
           <Routes>
             <Route path="/auth" element={!user ? <AuthPage onLoginSuccess={handleLoginSuccess} /> : <Navigate to="/" replace />} />
             <Route path="/" element={user ? <HomePage user={user} games={games} refreshGames={fetchGames} /> : <Navigate to="/auth" replace />} />

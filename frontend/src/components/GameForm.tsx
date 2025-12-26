@@ -39,7 +39,7 @@ function GameForm({ onGameAdded }: GameFormProps) {
   };
 
   return (
-    <Card shadow="sm" p={{ base: 'md', sm: 'lg' }} radius="md" withBorder>
+    <Card  p={{ base: 'md', sm: 'lg' }} radius="md" withBorder>
       <Title order={3} mb="md">새 경기 기록</Title>
       <Box component="form" onSubmit={form.onSubmit(handleSubmit)}>
         <Grid>

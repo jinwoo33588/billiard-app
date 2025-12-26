@@ -46,8 +46,8 @@ function UserProfilePage() {
   }
 
   return (
-    <Container>
-      <Stack gap="xl">
+    <Container fluid px="sm" >
+      <Stack gap="sm">
         <Group justify="space-between">
           <Title order={2}>{nickname}님의 기록</Title>
           <Button variant="light" onClick={() => navigate(-1)}>뒤로가기</Button>

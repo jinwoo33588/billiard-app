@@ -50,7 +50,7 @@ function StatsChart({ games }: StatsChartProps) {
   const yAxisDomain = getAxisDomain();
 
   return (
-    <Card shadow="sm" p="lg" radius="md" withBorder>
+    <Card  p="sm" radius="md" withBorder>
       <Title order={3} mb="md">에버리지 변화 추이</Title>
       {games.length < 2 ? (
         <Text>차트를 표시하려면 2개 이상의 경기 기록이 필요합니다.</Text>

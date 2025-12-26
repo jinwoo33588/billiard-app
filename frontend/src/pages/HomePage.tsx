@@ -2,8 +2,9 @@ import React from 'react';
 import Statistics from '../components/Statistics';
 import GameList, { Game } from '../components/GameList';
 import GameForm from '../components/GameForm';
+import UserMonthlyTrends from '../components/UserMonthlyTrends';
 import { Stack, Title, Group, Button, Modal, Text, Container } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { User } from '../components/Login';
 
 interface HomePageProps {
@@ -14,6 +15,7 @@ interface HomePageProps {
 
 function HomePage({ user, games, refreshGames }: HomePageProps) {
   const [gameModalOpened, { open: openGameModal, close: closeGameModal }] = useDisclosure(false);
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const handleGameAdded = () => {
     refreshGames();
@@ -22,17 +24,23 @@ function HomePage({ user, games, refreshGames }: HomePageProps) {
 
   return (
     <>
-      <Container size="lg" p={0}>
-        <Stack>
-          <Group justify="space-between">
-            <Group>
-              <Title order={2}>{user.nickname}님의 기록</Title>
-              {/* [수정] c -> color 로 속성명 변경 */}
-              <Text color="dimmed">({user.handicap}점)</Text>
+      {/* ✅ 모바일에서 좌우 여백을 약간만 주고(0도 가능), Stack gap도 줄임 */}
+      <Container fluid px="sm" py="sm">
+        <Stack gap={isMobile ? 'sm' : 'lg'}>
+          <Group justify="space-between" align="center" wrap="nowrap">
+            <Group gap={8} wrap="nowrap">
+              <Title order={isMobile ? 3 : 2}>{user.nickname}님의 기록</Title>
+              <Text c="dimmed" size={isMobile ? 'sm' : 'md'}>
+                ({user.handicap}점)
+              </Text>
             </Group>
-            <Button onClick={openGameModal}>새 경기 기록</Button>
+            <Button size={isMobile ? 'sm' : 'md'} onClick={openGameModal}>
+              새 경기 기록
+            </Button>
           </Group>
+
           <Statistics games={games} />
+          <UserMonthlyTrends games={games} />
           <GameList games={games} onListChange={refreshGames} showActions={true} />
         </Stack>
       </Container>

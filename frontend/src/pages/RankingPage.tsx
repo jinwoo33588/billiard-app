@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axiosInstance from '../api/axiosInstance';
-import { Card, Title, Text, Center, Loader, Stack, UnstyledButton, Group, rem, SegmentedControl, ActionIcon } from '@mantine/core';
+import { Card, Title, Text, Center, Loader, Stack, UnstyledButton, Group, rem, SegmentedControl, ActionIcon, Container } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { IconArrowUp, IconArrowDown } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
@@ -66,11 +66,13 @@ function RankingPage() {
   }
 
   return (
-    <Stack>
-      <Title order={2} ta="center">🏆 전체 랭킹</Title>
+    <Container fluid px="sm" py={0}>
+    <Stack gap="sm">
+    <Title order={3} ta="center">🏆 전체 랭킹</Title>
 
-      <Group justify="center">
+    <Group justify="center" gap="xs" wrap="wrap">
         <SegmentedControl
+          size='sm'
           value={sortBy}
           onChange={handleSortChange}
           data={[
@@ -79,7 +81,7 @@ function RankingPage() {
             { label: '핸디 순', value: 'handicap' },
           ]}
         />
-        <ActionIcon variant="default" size="lg" onClick={toggleSortDirection}>
+        <ActionIcon variant="default" size="md" onClick={toggleSortDirection}>
           {sortDirection === 'desc' ? <IconArrowDown size={16} /> : <IconArrowUp size={16} />}
         </ActionIcon>
       </Group>
@@ -87,10 +89,10 @@ function RankingPage() {
       {sortedData.length === 0 ? (
         <Text ta="center" mt="md">랭킹 데이터가 없습니다.</Text>
       ) : (
-        <Stack mt="md">
+        <Stack mt="sm" gap="sm">
           {sortedData.map((item, index) => (
             <UnstyledButton key={item.userId} onClick={() => navigate(`/users/${item.userId}`)}>
-              <Card shadow="sm" p="md" radius="md" withBorder>
+              <Card  p="sm" radius="sm" withBorder>
                 <Group justify="space-between">
                   <Group>
                     <Title order={4} c={index < 3 ? 'blue' : 'gray'}>#{index + 1}</Title>
@@ -120,6 +122,7 @@ function RankingPage() {
         </Stack>
       )}
     </Stack>
+    </Container>
   );
 }
 

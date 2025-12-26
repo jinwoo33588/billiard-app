@@ -93,14 +93,14 @@ function GameList({ games, onListChange = () => {}, showActions = false }: GameL
         ) : (
           <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
             {games.map((game) => (
-              <Card key={game._id} shadow="sm" p="lg" radius="md" withBorder>
+              <Card key={game._id} >
                 <Group justify="space-between">
                   <Stack gap={0}>
                     <Text fw={500}>{new Date(game.gameDate).toLocaleDateString()}</Text>
                     <Text size="sm" c="dimmed">{game.gameType}</Text>
                   </Stack>
                   {showActions && (
-                    <Menu shadow="md" width={200}>
+                    <Menu  width={200}>
                       <Menu.Target>
                         <ActionIcon variant="subtle" color="gray"><IconDotsVertical size={16} /></ActionIcon>
                       </Menu.Target>
