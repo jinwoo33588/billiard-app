@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Game = require('../models/Game');
 const authMiddleware = require('../middleware/auth');
+const { getInsightsForUser } = require('../services/insights.service');
 
 // 회원가입 API
 router.post('/register', async (req, res) => {
@@ -54,12 +55,56 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
+// 내 정보 수정 API (핸디캡/닉네임 등)
+router.put('/me', authMiddleware, async (req, res) => {
+  const { handicap, nickname } = req.body;
+  const update = {};
+  if (handicap !== undefined) update.handicap = Number(handicap);
+  if (nickname !== undefined) update.nickname = nickname;
+
+  const user = await User.findByIdAndUpdate(req.user.userId, { $set: update }, { new: true }).select('-password');
+  res.status(200).send(user);
+});
+
+// ✅ ✅ ✅ 인사이트 API (JWT 필요)
+router.get('/insights', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const windowSize = Number(req.query.window) || 10;
+
+    const data = await getInsightsForUser(userId, windowSize);
+    res.status(200).send(data);
+  } catch (error) {
+    console.error('인사이트 조회 중 에러:', error);
+    res.status(500).send({ message: '서버 에러가 발생했습니다.' });
+  }
+});
+
 // 랭킹 조회 API
 router.get('/ranking', async (req, res) => {
   try {
+    const year = Number(req.query.year);
+    const month = Number(req.query.month); // 1~12
+
+    const hasMonthFilter = Number.isInteger(year) && Number.isInteger(month) && month >= 1 && month <= 12;
+
+    const start = hasMonthFilter ? new Date(year, month - 1, 1) : null;
+    const end = hasMonthFilter ? new Date(year, month, 1) : null;
+
     const ranking = await User.aggregate([
       {
-        $lookup: { from: 'games', localField: '_id', foreignField: 'userId', as: 'games' }
+        // ✅ 월별이면 해당 월 게임만, 아니면 전체 게임
+        $lookup: {
+          from: 'games',
+          let: { uid: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$userId', '$$uid'] } } },
+            ...(hasMonthFilter
+              ? [{ $match: { gameDate: { $gte: start, $lt: end } } }]
+              : []),
+          ],
+          as: 'games',
+        },
       },
       {
         $addFields: {
@@ -75,17 +120,27 @@ router.get('/ranking', async (req, res) => {
         $project: {
           userId: '$_id',
           nickname: '$nickname',
-          handicap: '$handicap', // [추가] handicap 필드를 결과에 포함
+          handicap: '$handicap',
           totalGames: 1,
           wins: 1,
           draws: 1,
           losses: 1,
           average: { $cond: [{ $eq: ['$totalInnings', 0] }, 0, { $divide: ['$totalScore', '$totalInnings'] }] },
-          winRate: { $cond: [{ $eq: ['$totalGames', 0] }, 0, { $multiply: [{ $divide: ['$wins', '$totalGames'] }, 100] }] }
+          winRate: {
+            $cond: [
+              { $eq: [{ $add: ['$wins', '$losses'] }, 0] },
+              0,
+              { $multiply: [{ $divide: ['$wins', { $add: ['$wins', '$losses'] }] }, 100] }
+            ]
+          }
         }
       },
+      // 월별일 때 "0전" 유저가 너무 많으면 보기 안 좋으니 숨기고 싶다면 아래 주석 해제
+      // ...(hasMonthFilter ? [{ $match: { totalGames: { $gt: 0 } } }] : []),
+
       { $sort: { average: -1, totalGames: -1 } }
     ]);
+
     res.status(200).send(ranking);
   } catch (error) {
     console.error('랭킹 조회 중 에러 발생:', error);
@@ -106,5 +161,7 @@ router.get('/:userId', async (req, res) => {
     res.status(500).send({ message: '서버 에러가 발생했습니다.' });
   }
 });
+
+
 
 module.exports = router;

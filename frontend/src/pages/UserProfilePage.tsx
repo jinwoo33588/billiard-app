@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
-import Statistics from '../components/Statistics';
+import Statistics from '../components/StatsOverview';
 import GameList, { Game } from '../components/GameList';
 import { Container, Title, Stack, Center, Loader, Alert, Button, Group } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';

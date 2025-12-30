@@ -7,7 +7,6 @@ import {
   Table,
   Text,
   Title,
-  Select,
   Badge,
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
@@ -26,7 +25,6 @@ import { Game } from './GameList';
 
 type ViewMode = 'chart' | 'table';
 type Metric = 'average' | 'winRate';
-type Range = 'recent6' | 'recent12' | 'all';
 
 type MonthlyRow = {
   monthKey: string; // "2025-10"
@@ -48,11 +46,6 @@ function toMonthKey(d: Date) {
 function addMonths(date: Date, delta: number) {
   return new Date(date.getFullYear(), date.getMonth() + delta, 1);
 }
-function sliceByRange<T>(data: T[], range: Range) {
-  if (range === 'all') return data;
-  const n = range === 'recent6' ? 6 : 12;
-  return data.slice(Math.max(0, data.length - n));
-}
 
 export default function UserMonthlyTrends({
   games,
@@ -65,7 +58,6 @@ export default function UserMonthlyTrends({
 
   const [view, setView] = useState<ViewMode>('chart');
   const [metric, setMetric] = useState<Metric>('average');
-  const [range, setRange] = useState<Range>('recent6');
 
   // ✅ 월별 집계 + ✅ 연속 월 채우기(0경기 월 포함)
   const monthlyData: MonthlyRow[] = useMemo(() => {
@@ -149,10 +141,12 @@ export default function UserMonthlyTrends({
     return rows;
   }, [games]);
 
-  const viewData = useMemo(() => sliceByRange(monthlyData, range), [monthlyData, range]);
+  // ✅ 항상 전체 범위 사용 (range 필터 제거)
+  const viewData = monthlyData;
+
   const hasEnough = viewData.length >= 2;
 
-  // ✅ Y축 범위 고정 (요청)
+  // ✅ Y축 범위 고정
   const yDomain: [number, number] = metric === 'winRate' ? [0, 100] : [0.2, 1.2];
 
   const metricLabel = metric === 'average' ? '에버리지' : '승률(%)';
@@ -179,7 +173,7 @@ export default function UserMonthlyTrends({
   };
 
   return (
-    <Card  p={isMobile ? 'sm' : 'lg'} radius="md" withBorder>
+    <Card p={isMobile ? 'sm' : 'lg'} radius="md" withBorder>
       <Stack gap={isMobile ? 'xs' : 'md'}>
         <Group justify="space-between" align="flex-start" wrap="nowrap">
           <div>
@@ -199,31 +193,17 @@ export default function UserMonthlyTrends({
             </Group>
           </div>
 
-          <Group gap="xs" wrap="nowrap">
-            <Select
-              value={range}
-              onChange={(v) => setRange((v as Range) || 'recent6')}
-              data={[
-                { value: 'recent6', label: '최근 6개월' },
-                { value: 'recent12', label: '최근 12개월' },
-                { value: 'all', label: '전체' },
-              ]}
-              w={isMobile ? 110 : 130}
-              radius="xl"
-              size="sm"
-            />
-            <Select
-              value={metric}
-              onChange={(v) => setMetric((v as Metric) || 'average')}
-              data={[
-                { value: 'average', label: '에버' },
-                { value: 'winRate', label: '승률' },
-              ]}
-              w={isMobile ? 90 : 110}
-              radius="xl"
-              size="sm"
-            />
-          </Group>
+          {/* ✅ metric 선택: Select 제거 → pill(SegmentedControl)로 */}
+          <SegmentedControl
+            value={metric}
+            onChange={(v) => setMetric(v as Metric)}
+            data={[
+              { value: 'average', label: '에버' },
+              { value: 'winRate', label: '승률' },
+            ]}
+            size="sm"
+            radius="xl"
+          />
         </Group>
 
         <SegmentedControl
@@ -282,13 +262,7 @@ export default function UserMonthlyTrends({
 
                 {!isMobile && <Legend />}
 
-                <Area
-                  dataKey={metric}
-                  type="monotone"
-                  fill="url(#trendFillUMT)"
-                  stroke="none"
-                  connectNulls={true}
-                />
+                <Area dataKey={metric} type="monotone" fill="url(#trendFillUMT)" stroke="none" connectNulls />
 
                 <Line
                   dataKey={metric}
@@ -297,7 +271,7 @@ export default function UserMonthlyTrends({
                   strokeWidth={3}
                   dot={{ r: 5, fill: 'white', stroke: strokeColor, strokeWidth: 2 }}
                   activeDot={{ r: 9, fill: 'white', stroke: strokeColor, strokeWidth: 4 }}
-                  connectNulls={true}
+                  connectNulls
                   label={renderPointLabel}
                 />
               </AreaChart>
@@ -306,14 +280,7 @@ export default function UserMonthlyTrends({
         ) : (
           // ✅ 표: 모바일은 3컬럼로 "스크롤 없이" 꽉 차게
           isMobile ? (
-            <Table
-              striped
-              highlightOnHover
-              withTableBorder
-              horizontalSpacing="xs"
-              verticalSpacing="xs"
-              
-            >
+            <Table striped highlightOnHover withTableBorder horizontalSpacing="xs" verticalSpacing="xs">
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>월</Table.Th>

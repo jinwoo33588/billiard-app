@@ -12,13 +12,13 @@ import {
   rem,
   Container,
   Button,
-  Divider,
   Badge,
 } from '@mantine/core';
 import { DatePickerInput, DatesRangeValue } from '@mantine/dates';
 import { Game } from '../components/GameList';
 import { IconSelector, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
+import UserMonthlyTrends from '../components/UserMonthlyTrends';
 
 interface ArchivePageProps {
   games: Game[];
@@ -57,59 +57,105 @@ function computeStats(list: Game[]) {
       acc.totalGames += 1;
       acc.totalScore += game.score;
       acc.totalInnings += game.inning;
+
       if (game.result === '승') acc.wins += 1;
       else if (game.result === '무') acc.draws += 1;
       else if (game.result === '패') acc.losses += 1;
+
+      // ✅ 단일 경기 에버(점수/이닝) 최고값
+      if (game.inning > 0) {
+        const gameAvg = game.score / game.inning;
+        if (gameAvg > acc.bestAverage) acc.bestAverage = gameAvg;
+      }
+
+      // ✅ 단일 경기 점수 최고값
+      if (game.score > acc.bestScore) acc.bestScore = game.score;
+
       return acc;
     },
-    { totalGames: 0, wins: 0, draws: 0, losses: 0, totalScore: 0, totalInnings: 0 }
+    {
+      totalGames: 0,
+      wins: 0,
+      draws: 0,
+      losses: 0,
+      totalScore: 0,
+      totalInnings: 0,
+      bestAverage: 0, // ✅ 추가
+      bestScore: 0,   // ✅ 추가
+    }
   );
 
   const winRate = s.totalGames > 0 ? ((s.wins / s.totalGames) * 100).toFixed(1) : '0.0';
   const average = s.totalInnings > 0 ? (s.totalScore / s.totalInnings).toFixed(3) : '0.000';
 
-  return { ...s, winRate, average };
+  // ✅ 표시용 포맷
+  const bestAverage = s.totalGames > 0 && s.bestAverage > 0 ? s.bestAverage.toFixed(3) : '0.000';
+  const bestScore = s.totalGames > 0 ? String(s.bestScore) : '0';
+
+  return { ...s, winRate, average, bestAverage, bestScore };
 }
 
 export default function ArchivePage({ games }: ArchivePageProps) {
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
-  // ✅ 기간 필터 (중요: Mantine 타입이 string range로 잡혀있어서 여기도 string으로 맞춤)
-  const [dateRange, setDateRange] = useState<DatesRangeValue<string>>([null, null]);
-  const [filterMode, setFilterMode] = useState<FilterMode>('all');
+  // ✅ 현재 연/월 (월은 0~11)
+  const now = useMemo(() => new Date(), []);
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
 
-  // ✅ 연/월 선택
+  // ✅ 처음 진입: "현재 연/월 pill이 선택된 상태"로 시작
+  const [filterMode, setFilterMode] = useState<FilterMode>('yearMonth');
+  const [selectedYear, setSelectedYear] = useState<number | null>(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(currentMonth);
+
+  // ✅ DatePickerInput은 Date 범위를 기대함
+  const [dateRange, setDateRange] = useState<DatesRangeValue<Date>>([null, null]);
+
+  // ✅ 연도 pill 목록: games에 없어도 "현재 연도"는 항상 포함
   const years = useMemo(() => {
-    const ys = Array.from(new Set(games.map((g) => new Date(g.gameDate).getFullYear()))).sort((a, b) => b - a);
-    return ys.filter((y) => Number.isFinite(y));
-  }, [games]);
+    const ys = new Set<number>();
+    for (const g of games) ys.add(new Date(g.gameDate).getFullYear());
+    ys.add(currentYear);
+    return Array.from(ys).filter(Number.isFinite).sort((a, b) => b - a);
+  }, [games, currentYear]);
 
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
-
+  // ✅ 월 pill 목록: (해당 연도 기록 월들) + (현재 월) + (선택된 월) 을 항상 포함
   const monthsInYear = useMemo(() => {
     if (selectedYear === null) return [];
+
     const set = new Set<number>();
+
+    // 기록에서 추출
     for (const g of games) {
       const d = new Date(g.gameDate);
       if (d.getFullYear() === selectedYear) set.add(d.getMonth());
     }
-    return Array.from(set).sort((a, b) => a - b);
-  }, [games, selectedYear]);
 
+    // ✅ 현재 연도면 현재 월도 무조건 보여주기
+    if (selectedYear === currentYear) set.add(currentMonth);
+
+    // ✅ 선택된 월이 있으면 기록이 없어도 무조건 보여주기
+    if (selectedMonth !== null) set.add(selectedMonth);
+
+    return Array.from(set).sort((a, b) => a - b);
+  }, [games, selectedYear, selectedMonth, currentYear, currentMonth]);
+
+  // ✅ 월별 기록 카운트(기록 없으면 0)
   const monthCounts = useMemo(() => {
     const map = new Map<number, number>();
     if (selectedYear === null) return map;
+
     for (const g of games) {
       const d = new Date(g.gameDate);
       if (d.getFullYear() !== selectedYear) continue;
       const m = d.getMonth();
       map.set(m, (map.get(m) || 0) + 1);
     }
+
     return map;
   }, [games, selectedYear]);
 
-  // ✅ 연/월 선택이 바뀌면 dateRange 자동 세팅 (string으로 저장)
+  // ✅ yearMonth 모드일 때 dateRange 자동 세팅
   useEffect(() => {
     if (filterMode !== 'yearMonth') return;
 
@@ -123,7 +169,7 @@ export default function ArchivePage({ games }: ArchivePageProps) {
       const start = new Date(selectedYear, 0, 1);
       const end = new Date(selectedYear, 11, 31);
       end.setHours(23, 59, 59, 999);
-      setDateRange([start.toISOString(), end.toISOString()]);
+      setDateRange([start, end]);
       return;
     }
 
@@ -131,33 +177,26 @@ export default function ArchivePage({ games }: ArchivePageProps) {
     const start = new Date(selectedYear, selectedMonth, 1);
     const end = new Date(selectedYear, selectedMonth + 1, 0);
     end.setHours(23, 59, 59, 999);
-    setDateRange([start.toISOString(), end.toISOString()]);
+    setDateRange([start, end]);
   }, [filterMode, selectedYear, selectedMonth]);
 
-  // ✅ 필터된 게임 (여기서만 string → Date 변환해서 사용)
+  // ✅ 필터된 게임
   const filteredGames = useMemo(() => {
-    const [startStr, endStr] = dateRange;
+    const [startDate, endDate] = dateRange;
+    if (!startDate && !endDate) return games;
 
-    if (!startStr && !endStr) return games;
-
-    const startDate = startStr ? new Date(startStr) : new Date(0);
-    const endDateBase = endStr ? new Date(endStr) : startStr ? new Date(startStr) : new Date();
-    const endDate = new Date(endDateBase);
-    endDate.setHours(23, 59, 59, 999);
+    const start = startDate ? new Date(startDate) : new Date(0);
+    const endBase = endDate ? new Date(endDate) : startDate ? new Date(startDate) : new Date();
+    const end = new Date(endBase);
+    end.setHours(23, 59, 59, 999);
 
     return games.filter((game) => {
       const gd = new Date(game.gameDate);
-      return gd >= startDate && gd <= endDate;
+      return gd >= start && gd <= end;
     });
   }, [games, dateRange]);
 
   const stats = useMemo(() => computeStats(filteredGames), [filteredGames]);
-
-  const isMonthSelected = filterMode === 'yearMonth' && selectedYear !== null && selectedMonth !== null;
-  const monthSummary = useMemo(() => {
-    if (!isMonthSelected) return null;
-    return computeStats(filteredGames);
-  }, [isMonthSelected, filteredGames]);
 
   // ✅ 정렬
   const [sortBy, setSortBy] = useState<keyof Game | null>('gameDate');
@@ -211,9 +250,11 @@ export default function ArchivePage({ games }: ArchivePageProps) {
   };
 
   return (
-    <Container fluid px="sm" py="sm">
+    <Container fluid >
       <Stack gap="sm" align="stretch">
         <Title order={2}>기록 보관함</Title>
+
+        <UserMonthlyTrends games={games} /> 
 
         {/* ✅ 필터 카드 */}
         <Card p="sm" radius="md" withBorder>
@@ -258,6 +299,7 @@ export default function ArchivePage({ games }: ArchivePageProps) {
                     variant={pillVariant(selectedYear === y && filterMode === 'yearMonth')}
                     onClick={() => {
                       setSelectedYear(y);
+                      // ✅ 연도만 누르면 "연도 전체"로 보는 UX
                       setSelectedMonth(null);
                       setFilterMode('yearMonth');
                     }}
@@ -282,41 +324,34 @@ export default function ArchivePage({ games }: ArchivePageProps) {
                     setSelectedMonth(null);
                     setFilterMode('yearMonth');
                   }}
-                  disabled={monthsInYear.length === 0}
                 >
                   {selectedYear} 전체
                 </Button>
 
-                {monthsInYear.length === 0 ? (
-                  <Text c="dimmed" size="sm">
-                    선택한 연도에 기록이 없습니다.
-                  </Text>
-                ) : (
-                  monthsInYear.map((m) => {
-                    const count = monthCounts.get(m) || 0;
-                    const active = selectedMonth === m && filterMode === 'yearMonth';
+                {monthsInYear.map((m) => {
+                  const count = monthCounts.get(m) || 0;
+                  const active = selectedMonth === m && filterMode === 'yearMonth';
 
-                    return (
-                      <Button
-                        key={m}
-                        size="xs"
-                        radius="xl"
-                        variant={pillVariant(active)}
-                        onClick={() => {
-                          setSelectedMonth(m);
-                          setFilterMode('yearMonth');
-                        }}
-                        rightSection={
-                          <Badge size="xs" variant={active ? 'filled' : 'light'}>
-                            {count}
-                          </Badge>
-                        }
-                      >
-                        {m + 1}월
-                      </Button>
-                    );
-                  })
-                )}
+                  return (
+                    <Button
+                      key={m}
+                      size="xs"
+                      radius="xl"
+                      variant={pillVariant(active)}
+                      onClick={() => {
+                        setSelectedMonth(m);
+                        setFilterMode('yearMonth');
+                      }}
+                      rightSection={
+                        <Badge size="xs" variant={active ? 'filled' : 'light'}>
+                          {count}
+                        </Badge>
+                      }
+                    >
+                      {m + 1}월
+                    </Button>
+                  );
+                })}
               </Group>
             )}
 
@@ -327,31 +362,46 @@ export default function ArchivePage({ games }: ArchivePageProps) {
         </Card>
 
         {/* ✅ 선택 기간 통계 */}
-        <Stack p="sm">
-          <Title order={3} mb="md">선택 기간 통계</Title>
-          <Card p="sm" radius="md" withBorder>
-            <SimpleGrid cols={2} spacing="sm" verticalSpacing="xs">
-              <div>
-                <Text size="xs" c="dimmed" ta="center">총 게임 수</Text>
-                <Text size="lg" fw={700} ta="center">{stats.totalGames}판</Text>
-              </div>
-              <div>
-                <Text size="xs" c="dimmed" ta="center">총 전적</Text>
-                <Text size="lg" fw={700} ta="center">
-                  {stats.wins}승 {stats.draws}무 {stats.losses}패
-                </Text>
-              </div>
-              <div>
-                <Text size="xs" c="dimmed" ta="center">승률</Text>
-                <Text size="lg" fw={700} ta="center">{stats.winRate}%</Text>
-              </div>
-              <div>
-                <Text size="xs" c="dimmed" ta="center">에버리지</Text>
-                <Text size="lg" fw={700} ta="center">{stats.average}</Text>
-              </div>
-            </SimpleGrid>
-          </Card>
-        </Stack>
+<Stack p="sm">
+  <Title order={3} mb="md">선택 기간 통계</Title>
+  <Card p="sm" radius="md" withBorder>
+    <SimpleGrid cols={2} spacing="sm" verticalSpacing="xs">
+      <div>
+        <Text size="xs" c="dimmed" ta="center">총 게임 수</Text>
+        <Text size="lg" fw={700} ta="center">{stats.totalGames}판</Text>
+      </div>
+
+      <div>
+        <Text size="xs" c="dimmed" ta="center">총 전적</Text>
+        <Text size="lg" fw={700} ta="center">
+          {stats.wins}승 {stats.draws}무 {stats.losses}패
+        </Text>
+      </div>
+
+      <div>
+        <Text size="xs" c="dimmed" ta="center">승률</Text>
+        <Text size="lg" fw={700} ta="center">{stats.winRate}%</Text>
+      </div>
+
+      <div>
+        <Text size="xs" c="dimmed" ta="center">에버리지</Text>
+        <Text size="lg" fw={700} ta="center">{stats.average}</Text>
+      </div>
+
+      {/* ✅ 추가: 최고 에버 */}
+      <div>
+        <Text size="xs" c="dimmed" ta="center">최고 에버</Text>
+        <Text size="lg" fw={700} ta="center">{stats.bestAverage}</Text>
+      </div>
+
+      {/* ✅ 추가: 최고 점수 */}
+      <div>
+        <Text size="xs" c="dimmed" ta="center">최고 점수</Text>
+        <Text size="lg" fw={700} ta="center">{stats.bestScore}점</Text>
+      </div>
+    </SimpleGrid>
+  </Card>
+</Stack>
 
         {/* ✅ 상세 기록 */}
         <Stack p="sm">
