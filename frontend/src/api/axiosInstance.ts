@@ -11,6 +11,9 @@ axiosInstance.interceptors.request.use(
   (config) => {
     // localStorage에서 토큰을 가져옵니다.
     const token = localStorage.getItem('token');
+    // ✅ 로그로 확정
+  console.log('[REQ]', config.method?.toUpperCase(), (config.baseURL ?? '') + (config.url ?? ''));
+  console.log('  token exists?', !!token);
     
     // 토큰이 존재하면, Authorization 헤더에 Bearer 토큰을 추가합니다.
     if (token) {

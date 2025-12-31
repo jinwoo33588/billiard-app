@@ -55,22 +55,33 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
-// 내 정보 수정 API (핸디캡/닉네임 등)
+// 내 정보 수정
 router.put('/me', authMiddleware, async (req, res) => {
-  const { handicap, nickname } = req.body;
-  const update = {};
-  if (handicap !== undefined) update.handicap = Number(handicap);
-  if (nickname !== undefined) update.nickname = nickname;
+  try {
+    const { handicap, nickname } = req.body;
+    const update = {};
+    if (handicap !== undefined) update.handicap = Number(handicap);
+    if (nickname !== undefined) update.nickname = nickname;
 
-  const user = await User.findByIdAndUpdate(req.user.userId, { $set: update }, { new: true }).select('-password');
-  res.status(200).send(user);
+    const user = await User.findByIdAndUpdate(
+      req.user.userId,
+      { $set: update },
+      { new: true }
+    ).select('-password');
+
+    res.status(200).send(user);
+  } catch (error) {
+    console.error('내 정보 수정 중 에러:', error);
+    res.status(500).send({ message: '서버 에러가 발생했습니다.' });
+  }
 });
 
 // ✅ ✅ ✅ 인사이트 API (JWT 필요)
 router.get('/insights', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.userId;
-    const windowSize = Number(req.query.window) || 10;
+    const windowSizeRaw = Number(req.query.window) || 10;
+    const windowSize = Math.max(1, Math.min(50, windowSizeRaw));
 
     const data = await getInsightsForUser(userId, windowSize);
     res.status(200).send(data);

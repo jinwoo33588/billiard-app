@@ -13,7 +13,9 @@ app.use(express.json());
 
 // --- 데이터베이스 연결 ---
 mongoose.connect(MONGO_URI)
-  .then(() => console.log('✅ MongoDB에 성공적으로 연결되었습니다.'))
+.then(() => {
+  console.log("✅ MongoDB connected:", mongoose.connection.name);
+})
   .catch(err => console.error('❌ MongoDB 연결 실패:', err));
 
 // --- 라우터 불러오기 ---
