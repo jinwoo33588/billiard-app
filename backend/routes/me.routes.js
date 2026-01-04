@@ -8,6 +8,7 @@ const usersService = require('../services/users/users.service');
 const gamesService = require('../services/games/games.service');
 const insightsService = require('../services/insights/insights.service');
 const statsService = require('../services/stats/stats.service'); 
+const monthlyStatsService = require('../services/stats/stats.monthly');
 
 const {
   isObjectId,
@@ -164,6 +165,43 @@ router.get(
       selector,
       pick,
     });
+
+    res.json(data);
+  })
+);
+
+
+
+router.get(
+  '/stats/monthly',
+  asyncHandler(async (req, res) => {
+    const { type = 'all' } = req.query;
+
+    // selector 파싱 로직은 /stats랑 동일
+    let selector;
+    switch (type) {
+      case 'lastN':
+        selector = { type: 'lastN', n: clamp(toInt(req.query.n), 1, 2000) };
+        break;
+      case 'range':
+        selector = { type: 'range', from: toDate(req.query.from), to: toDate(req.query.to) };
+        break;
+      case 'thisMonth':
+        selector = { type: 'thisMonth', now: req.query.now ? toDate(req.query.now) : undefined };
+        break;
+      case 'yearMonth':
+        selector = { type: 'yearMonth', year: toInt(req.query.year), month: toInt(req.query.month) };
+        break;
+      case 'all':
+      default:
+        selector = { type: 'all' };
+        break;
+    }
+
+    const data = await monthlyStatsService.buildMonthlyStatsForUser(
+      req.user.userId,
+      { selector }
+    );
 
     res.json(data);
   })
