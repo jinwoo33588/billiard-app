@@ -27,3 +27,20 @@ export type BuildStatsResponse = {
   updatedAt: string;
   stats: FullStats; // ✅ flat
 };
+
+export type MonthlyRow = {
+  monthKey: string; // "2025-10"
+  label: string; // "2025.10"
+  games: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  winRate: number | null; // 0~100
+  average: number | null; // totalScore/totalInnings
+};
+
+export type MonthlyStatsResponse = {
+  selector: StatsSelector;
+  updatedAt: string;
+  rows: MonthlyRow[];
+};

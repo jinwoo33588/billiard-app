@@ -6,6 +6,7 @@ import UserMonthlyTrends from "../components/UserMonthlyTrends";
 import { useMyGames } from "../features/games/useMyGames";
 import { useArchive } from "../features/games/useArchive";
 import { useMyStats } from "../features/stats/useMyStats";
+import { useMyMonthlyStats } from "../features/stats/useMyMonthlyStats";
 
 import ArchiveFilters from "../components/archive/ArchiveFilters";
 import ArchiveStats from "../components/archive/ArchiveStats";
@@ -15,8 +16,15 @@ export default function ArchivePage() {
   const { games, loading: gamesLoading } = useMyGames();
   const a = useArchive(games);
 
+  // ✅ 선택 기간 통계: 기존 유지 (현재월 기본)
   const { data: statsRes, loading: statsLoading, errorMsg } = useMyStats({
     selector: a.statsSelector,
+  });
+
+  // ✅ 월별 변화추이: 항상 전체(all)
+  const monthlySelector = { type: "all" } as const;
+  const { data: monthlyRes, loading: monthlyLoading, errorMsg: monthlyError } = useMyMonthlyStats({
+    selector: monthlySelector,
   });
 
   if (gamesLoading) {
@@ -32,7 +40,18 @@ export default function ArchivePage() {
       <Stack gap="sm" align="stretch">
         <Title order={2}>기록 보관함</Title>
 
-        <UserMonthlyTrends games={games as any} />
+        {/* ✅ 월별 변화 추이 */}
+        {monthlyLoading ? (
+          <Center>
+            <Loader size="sm" />
+          </Center>
+        ) : monthlyError ? (
+          <Text c="red" size="sm" px="xs">
+            {monthlyError}
+          </Text>
+        ) : (
+          <UserMonthlyTrends rows={monthlyRes?.rows ?? []} />
+        )}
 
         <ArchiveFilters
           dateRange={a.dateRange}
@@ -50,6 +69,7 @@ export default function ArchivePage() {
           clearAllFilters={a.clearAllFilters}
         />
 
+        {/* ✅ 선택 기간 통계 */}
         {errorMsg ? (
           <Text c="red" size="sm" px="xs">
             {errorMsg}

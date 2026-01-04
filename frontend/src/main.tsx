@@ -7,6 +7,7 @@ import "@mantine/dates/styles.css";
 import App from "./App";
 import "./index.css";
 import { AuthProvider } from "./features/auth/AuthProvider";
+import { redirectIfPreviewHost } from "./app/bootstrap";
 
 const theme = createTheme({
   spacing: { xs: "0.5rem", sm: "0.75rem", md: "1rem", lg: "1.25rem", xl: "1.5rem" },
@@ -23,6 +24,8 @@ const theme = createTheme({
     Button: { defaultProps: { radius: "xl", size: "xs" } },
   },
 });
+
+redirectIfPreviewHost();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

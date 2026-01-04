@@ -9,6 +9,7 @@ export const EP = {
     games: "/me/games",
     insights: "/me/insights",
     stats: "/me/stats",
+    statsMonthly: "/me/stats/monthly",
   },
   users: {
     profile: (userId: string) => `/users/${userId}`,
