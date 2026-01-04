@@ -1,116 +1,86 @@
-import React, { useMemo } from 'react';
-import { Badge, Card, Divider, Group, Progress, SimpleGrid, Text } from '@mantine/core';
-import type { TeamIndicators } from '../types';
-import { fmt, teamLuckScoreFromRates } from '../metrics';
+// src/features/insights/components/TeamLuckCard.tsx
+import React from "react";
+import { Badge, Card, Divider, Group, Progress, SimpleGrid, Text } from "@mantine/core";
+import type { TeamIndicators } from "../types";
+import { fmt } from "../utils";
 
 function num(v: any, fallback = 0) {
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
 }
 
-function safeHeadline(team: TeamIndicators) {
-  const h = (team as any)?.headline;
-  if (typeof h === 'string' && h.trim().length > 0) return h;
-  // headline이 없을 때 자동 요약
-  const bad = num(team?.rates?.teamLuckBadRate, 0);
-  const bus = num(team?.rates?.teamCarryRate, 0);
-  if (bad >= 25 && bad >= bus * 1.1) return '할만패 비중이 높아요 → 팀/매칭 영향 가능';
-  if (bus >= 25 && bus >= bad * 1.1) return '덜승 비중이 높아요 → 버스/캐리 구간 가능';
-  return '팀전 결과가 비교적 균형적이에요';
+function clamp01(v: any) {
+  return Math.max(0, Math.min(100, num(v, 0)));
+}
+
+function mainLabel(team: TeamIndicators) {
+  if (num(team.sampleN) < 5) return "표본 부족(보류)";
+  const { luckBadScore, busScore, carryScore, selfIssueScore } = team.weighted;
+
+  const arr = [
+    { k: "bad", v: luckBadScore, label: "팀운(억울) 성향" },
+    { k: "bus", v: busScore, label: "버스 성향" },
+    { k: "carry", v: carryScore, label: "캐리 성향" },
+    { k: "self", v: selfIssueScore, label: "내 이슈 성향" },
+  ].sort((a, b) => b.v - a.v);
+
+  if (arr[0].v < 18) return "팀전 흐름이 비교적 균형적";
+  return arr[0].label;
 }
 
 export default function TeamLuckCard({ team }: { team: TeamIndicators }) {
-  const sampleN = num(team?.sampleN, 0);
-  const rates = team?.rates;
+  const n = num(team.sampleN);
 
-  const score = useMemo(() => {
-    // teamLuckScoreFromRates 내부에서 sampleN<5면 null 반환하도록 되어있음
-    return teamLuckScoreFromRates(rates as any, sampleN);
-  }, [rates, sampleN]);
-
-  const headline = useMemo(() => safeHeadline(team), [team]);
-
-  const badRate = num(rates?.teamLuckBadRate, NaN);
-  const carryRate = num(rates?.teamCarryRate, NaN);
-  const needImproveRate = num(rates?.needImproveRate, NaN);
-  const synergyWinRate = num(rates?.synergyWinRate, NaN);
+  const impact = n < 5
+    ? 0
+    : Math.round(
+        clamp01(team.weighted.luckBadScore) * 0.7 +
+        clamp01(team.weighted.busScore) * 0.3
+      ); // “팀운/버스 영향도” 느낌의 단일 바(가벼운 요약)
 
   return (
     <Card withBorder radius="md" p="sm">
       <Group justify="space-between" mb={4}>
-        <Text fw={700}>팀운 지표</Text>
-        <Badge variant="light" radius="xl" color="gray">
-          팀전
+        <Text fw={700}>팀전 지표</Text>
+        <Badge variant="light" radius="xl" color={n >= 5 ? "blue" : "gray"}>
+          표본 {n}판(승/패)
         </Badge>
       </Group>
 
-      {sampleN < 5 || score === null ? (
-        <Text size="sm" c="dimmed">
-          팀전 표본이 부족해요. (승/패 기준 최소 5판 권장)
-        </Text>
+      {n < 5 ? (
+        <Text size="sm" c="dimmed">팀전 표본이 부족해요. (승/패 기준 최소 5판)</Text>
       ) : (
         <>
+          <Text fw={800}>{mainLabel(team)}</Text>
           <Text size="xs" c="dimmed">
-            “내 점수 vs 내 핸디”와 결과 불일치가 클수록 팀/매칭 영향 가능
+            diff = (내 점수 score) - (내 핸디 handicap), +는 “할만큼(이상)”
           </Text>
 
-          <Progress value={num(score, 0)} mt="sm" radius="xl" />
-
-          <Group justify="space-between" mt={6}>
-            <Text size="xs" c="dimmed">
-              영향 적음
-            </Text>
-            <Text size="xs" c="dimmed">
-              영향 큼
-            </Text>
-          </Group>
-
-          <Text mt="sm" fw={800}>
-            {headline}
-          </Text>
+          <Progress value={impact} mt="sm" radius="xl" />
 
           <Divider my="sm" />
 
           <SimpleGrid cols={2} spacing="xs" verticalSpacing="xs">
-            <div style={{ textAlign: 'center' }}>
-              <Text size="xs" c="dimmed">
-                할 만큼 했는데 패
-              </Text>
-              <Text fw={800} size="lg">
-                {fmt(badRate, 1)}%
-              </Text>
+            <div style={{ textAlign: "center" }}>
+              <Text size="xs" c="dimmed">억울(잘했는데 패)</Text>
+              <Text fw={800} size="lg">{fmt(team.rates.teamLuckBadRate, 0)}%</Text>
             </div>
-
-            <div style={{ textAlign: 'center' }}>
-              <Text size="xs" c="dimmed">
-                덜 했는데 승
-              </Text>
-              <Text fw={800} size="lg">
-                {fmt(carryRate, 1)}%
-              </Text>
+            <div style={{ textAlign: "center" }}>
+              <Text size="xs" c="dimmed">버스(못했는데 승)</Text>
+              <Text fw={800} size="lg">{fmt(team.rates.busRate, 0)}%</Text>
             </div>
-
-            <div style={{ textAlign: 'center' }}>
-              <Text size="xs" c="dimmed">
-                덜 했는데 패
-              </Text>
-              <Text fw={800} size="lg">
-                {fmt(needImproveRate, 1)}%
-              </Text>
+            <div style={{ textAlign: "center" }}>
+              <Text size="xs" c="dimmed">내 이슈(못했는데 패)</Text>
+              <Text fw={800} size="lg">{fmt(team.rates.selfIssueRate, 0)}%</Text>
             </div>
-
-            <div style={{ textAlign: 'center' }}>
-              <Text size="xs" c="dimmed">
-                할 만큼 하고 승
-              </Text>
-              <Text fw={800} size="lg">
-                {fmt(synergyWinRate, 1)}%
-              </Text>
+            <div style={{ textAlign: "center" }}>
+              <Text size="xs" c="dimmed">캐리(잘해서 승)</Text>
+              <Text fw={800} size="lg">{fmt(team.rates.carryRate, 0)}%</Text>
             </div>
           </SimpleGrid>
 
           <Text size="xs" c="dimmed" mt="sm">
-            팀전 표본 {sampleN}판(승/패) · 무승부 제외
+            평균 diff {fmt(team.diffSummary.avgDiff, 2)} · +비율 {fmt(team.diffSummary.overRate, 0)}%
           </Text>
         </>
       )}

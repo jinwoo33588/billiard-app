@@ -1,70 +1,75 @@
-import React from 'react';
-import StatsOverview from '../components/StatsOverview';
-import GameList, { Game } from '../components/GameList';
-import GameForm from '../components/GameForm';
-// import UserMonthlyTrends from '../components/UserMonthlyTrends';
-import { Stack, Title, Group, Button, Modal, Text, Container } from '@mantine/core';
-import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import { User } from '../components/Login';
+import React from "react";
+import StatsOverview from "../components/StatsOverview";
+import GameList from "../components/GameList";
+import GameUpsertModal from "../components/GameUpsertModal";
 
-// ✅ 추가: 인사이트 데이터(최근 10판) + 배지 UI
-import { useInsights } from '../features/insights/hooks';
-import { InsightBadgeRow } from '../features/insights/components/InsightBadges';
+import { Stack, Title, Group, Button, Text, Container } from "@mantine/core";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 
-interface HomePageProps {
-  user: User;
-  games: Game[];
-  refreshGames: () => void;
-}
+import { useAuth } from "../features/auth/useAuth";
+import { useMyGames } from "../features/games/useMyGames";
+import { createMyGameApi } from "../features/games/api";
 
-function HomePage({ user, games, refreshGames }: HomePageProps) {
-  const [gameModalOpened, { open: openGameModal, close: closeGameModal }] = useDisclosure(false);
-  const isMobile = useMediaQuery('(max-width: 768px)');
+import { useInsights } from "../features/insights/hooks";
+import { InsightBadgeRow } from "../features/insights/components/InsightBadges";
 
-  // ✅ 홈에서는 "가볍게" 최근 10판 기준으로 배지 표시
-  // (로딩은 페이지 전체를 막지 않고, 데이터 들어오면 자연스럽게 배지만 뜨게)
+export default function HomePage() {
+  const { user } = useAuth();
+  const { games, refresh } = useMyGames({ limit: 10 });
+
+  const [opened, { open, close }] = useDisclosure(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
   const { data: insights } = useInsights(10);
 
-  const handleGameAdded = () => {
-    refreshGames();
-    closeGameModal();
-  };
+  if (!user) return null;
 
   return (
     <>
-      {/* ✅ 모바일에서 좌우 여백을 약간만 주고(0도 가능), Stack gap도 줄임 */}
-      <Container >
-        <Stack gap={isMobile ? 'sm' : 'lg'}>
+      <Container>
+        <Stack gap={isMobile ? "sm" : "lg"}>
           <Group justify="space-between" align="center" wrap="nowrap">
             <Group gap={8} wrap="nowrap">
               <Title order={isMobile ? 3 : 2}>{user.nickname}님의 기록</Title>
-              <Text c="dimmed" size={isMobile ? 'sm' : 'md'}>
+              <Text c="dimmed" size={isMobile ? "sm" : "md"}>
                 ({user.handicap}점)
               </Text>
             </Group>
 
-            <Button size={isMobile ? 'sm' : 'md'} onClick={openGameModal}>
+            <Button size={isMobile ? "sm" : "md"} onClick={open}>
               새 경기 기록
             </Button>
           </Group>
 
-          {/* ✅ 여기 추가: 요즘 폼 / 팀운 배지 (있을 때만 표시) */}
           {insights?.all && insights?.teamIndicators && (
             <InsightBadgeRow all={insights.all} team={insights.teamIndicators} />
           )}
 
-          <StatsOverview games={games} />
-          {/* <UserMonthlyTrends games={games} /> */}
+          <StatsOverview />
 
-          <GameList games={games} onListChange={refreshGames} showActions={true} />
+
+          <GameList games={games} onListChange={refresh} showActions />
+
+          
         </Stack>
       </Container>
 
-      <Modal opened={gameModalOpened} onClose={closeGameModal} title="새 경기 기록" centered>
-        <GameForm onGameAdded={handleGameAdded} />
-      </Modal>
+      <GameUpsertModal
+        opened={opened}
+        mode="create"
+        onClose={close}
+        onSubmit={async (v) => {
+          await createMyGameApi({
+            score: Number(v.score),
+            inning: Number(v.inning),
+            result: v.result === "" ? undefined : v.result,
+            gameType: v.gameType,
+            gameDate: v.gameDate ? v.gameDate.toISOString() : new Date().toISOString(),
+            memo: v.memo,
+          });
+          refresh();
+        }}
+      />
     </>
   );
 }
-
-export default HomePage;

@@ -52,7 +52,7 @@ function UserProfilePage() {
           <Title order={2}>{nickname}님의 기록</Title>
           <Button variant="light" onClick={() => navigate(-1)}>뒤로가기</Button>
         </Group>
-        <Statistics games={games} />
+        <Statistics />
         {/* onListChange는 필요 없으므로 빈 함수를, showActions는 생략하여 메뉴를 숨깁니다. */}
         <GameList games={games} onListChange={() => {}} />
       </Stack>

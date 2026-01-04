@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
-import axiosInstance from '../../api/axiosInstance';
-import type { InsightsResponse } from './types';
+// src/features/insights/hooks.ts
+import { useEffect, useState } from "react";
+import type { InsightsResponse } from "./types";
+import { fetchInsights } from "./api";
+import { normalizeTeamIndicators } from "./nomalize";
 
 export function useInsights(windowSize: number) {
   const [data, setData] = useState<InsightsResponse | null>(null);
@@ -8,28 +10,32 @@ export function useInsights(windowSize: number) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    let mounted = true;
+    let alive = true;
 
     (async () => {
       try {
         setLoading(true);
         setErrorMsg(null);
 
-        const res = await axiosInstance.get<InsightsResponse>('/users/insights', {
-          params: { window: windowSize },
-        });
+        const raw = await fetchInsights(windowSize);
 
-        if (mounted) setData(res.data);
+        // ✅ 팀지표는 항상 V2로 정규화
+        const normalized: InsightsResponse = {
+          ...raw,
+          teamIndicators: normalizeTeamIndicators(raw.teamIndicators),
+        };
+
+        if (alive) setData(normalized);
       } catch (e) {
         console.error(e);
-        if (mounted) setErrorMsg('분석 데이터를 불러오지 못했습니다.');
+        if (alive) setErrorMsg("분석 데이터를 불러오지 못했습니다.");
       } finally {
-        if (mounted) setLoading(false);
+        if (alive) setLoading(false);
       }
     })();
 
     return () => {
-      mounted = false;
+      alive = false;
     };
   }, [windowSize]);
 

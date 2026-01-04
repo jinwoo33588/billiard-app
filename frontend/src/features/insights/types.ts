@@ -1,58 +1,56 @@
-// features/insights/types.ts
+// src/features/insights/types.ts
+
+export type InsightStatus = "데이터부족" | "매우좋음" | "좋음" | "보통" | "부진" | "매우부진";
+
+export type InsightStats = {
+  totalGames: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  recentAvg: number;    // score/inning 평균
+  winRate: number;      // 무 제외 승률 %
+  volatility: number;   // 표준편차 기반 기복
+  delta: number;        // recentAvg - expected
+};
+
 export type InsightAnalysis = {
-  gameType: string;
+  gameType: string; // "ALL" 등
   sampleN: number;
-  status: '데이터부족' | '매우좋음' | '좋음' | '보통' | '부진' | '매우부진';
+  status: InsightStatus;
   recommendation: { handicapDelta: number; label: string };
   benchmark: { handicap: number; expected: number; min: number; max: number };
-  stats: null | {
-    totalGames: number;
-    wins: number;
-    draws: number;
-    losses: number;
-    recentAvg: number;
-    winRate: number;
-    volatility: number;
-    delta: number;
-  };
+  stats: InsightStats | null;
   reasons: string[];
 };
 
+/**
+ * ✅ "신버전 팀 지표" (backend buildTeamIndicators에서 나오는 형태)
+ */
 export type TeamIndicators = {
   sampleN: number;
+
   counts: {
     TEAM_LUCK_BAD: number;
-    TEAM_CARRY: number;
-    NEED_IMPROVE: number;
-    TEAM_SYNERGY_GOOD: number;
-
-    // ✅ 백엔드 신버전(있어도 되고 없어도 됨)
-    BUS?: number;
-    CARRY?: number;
-    SELF_ISSUE?: number;
-    NEUTRAL?: number;
+    BUS: number;
+    CARRY: number;
+    SELF_ISSUE: number;
+    NEUTRAL: number;
   };
+
   rates: {
     teamLuckBadRate: number;
-    teamCarryRate: number;
-    needImproveRate: number;
-    synergyWinRate: number;
-
-    // ✅ 신버전
-    busRate?: number;
-    carryRate?: number;
-    selfIssueRate?: number;
+    busRate: number;
+    carryRate: number;
+    selfIssueRate: number;
   };
+
   weighted: {
     luckBadScore: number;
+    busScore: number;
     carryScore: number;
-    needImproveScore: number;
-    synergyScore: number;
-
-    // ✅ 신버전
-    busScore?: number;
-    selfIssueScore?: number;
+    selfIssueScore: number;
   };
+
   diffSummary: {
     avgDiff: number;
     overRate: number;
@@ -60,10 +58,12 @@ export type TeamIndicators = {
     meanOver: number;
     meanUnder: number;
   };
+
   extremes: {
-    bestCarry: null | { gameId: string; date: string; diff: number; result: '승' | '패' | '무' };
-    biggestBus: null | { gameId: string; date: string; diff: number; result: '승' | '패' | '무' };
+    bestCarry: null | { gameId: string; date: string; diff: number; result: string };
+    biggestBus: null | { gameId: string; date: string; diff: number; result: string };
   };
+
   headline: string;
   note?: string;
 };
