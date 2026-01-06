@@ -1,3 +1,5 @@
+// frontend/src/features/games/types.ts
+
 export type Game = {
   _id: string;
   userId: string;

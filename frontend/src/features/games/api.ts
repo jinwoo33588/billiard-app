@@ -1,3 +1,5 @@
+//frontend/src/features/games/api.ts
+
 import axiosInstance from "../../api/axiosInstance";
 import { EP } from "../../api/endpoints";
 import type { Game } from "./types";

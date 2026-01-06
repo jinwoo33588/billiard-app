@@ -23,16 +23,16 @@ const HANDICAP_BENCHMARKS = [
   { handicap: 30, expected: 0.900, min: 0.850, max: 0.950 },
 
   
-  { handicap: 31, expected: 0.720, min: 0.670, max: 0.770 },
-  { handicap: 32, expected: 0.740, min: 0.690, max: 0.790 },
-  { handicap: 33, expected: 0.760, min: 0.710, max: 0.810 },
-  { handicap: 34, expected: 0.780, min: 0.730, max: 0.830 },
-  { handicap: 35, expected: 0.800, min: 0.750, max: 0.850 },
-  { handicap: 36, expected: 0.820, min: 0.770, max: 0.870 },
-  { handicap: 37, expected: 0.840, min: 0.790, max: 0.890 },
-  { handicap: 38, expected: 0.860, min: 0.810, max: 0.910 },
-  { handicap: 39, expected: 0.880, min: 0.830, max: 0.930 },
-  { handicap: 40, expected: 0.900, min: 0.850, max: 0.950 },
+  // { handicap: 31, expected: 0.720, min: 0.670, max: 0.770 },
+  // { handicap: 32, expected: 0.740, min: 0.690, max: 0.790 },
+  // { handicap: 33, expected: 0.760, min: 0.710, max: 0.810 },
+  // { handicap: 34, expected: 0.780, min: 0.730, max: 0.830 },
+  // { handicap: 35, expected: 0.800, min: 0.750, max: 0.850 },
+  // { handicap: 36, expected: 0.820, min: 0.770, max: 0.870 },
+  // { handicap: 37, expected: 0.840, min: 0.790, max: 0.890 },
+  // { handicap: 38, expected: 0.860, min: 0.810, max: 0.910 },
+  // { handicap: 39, expected: 0.880, min: 0.830, max: 0.930 },
+  // { handicap: 40, expected: 0.900, min: 0.850, max: 0.950 },
 ];
 
 const BENCHMARK_MAP = new Map(HANDICAP_BENCHMARKS.map((b) => [b.handicap, b]));

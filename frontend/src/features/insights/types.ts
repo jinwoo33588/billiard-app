@@ -1,77 +1,56 @@
-// src/features/insights/types.ts
-
-export type InsightStatus = "데이터부족" | "매우좋음" | "좋음" | "보통" | "부진" | "매우부진";
-
-export type InsightStats = {
-  totalGames: number;
-  wins: number;
-  draws: number;
-  losses: number;
-  recentAvg: number;    // score/inning 평균
-  winRate: number;      // 무 제외 승률 %
-  volatility: number;   // 표준편차 기반 기복
-  delta: number;        // recentAvg - expected
+export type InsightAll = {
+  status: string;
+  recommendation?: any;
+  benchmark?: { handicap: number; expected: number; min?: number; max?: number };
+  stats: null | {
+    totalGames: number;
+    wins: number;
+    draws: number;
+    losses: number;
+    recentAvg: number;
+    winRate: number;
+    volatility: number;
+    delta: number;
+  };
+  reasons?: string[];
 };
 
-export type InsightAnalysis = {
-  gameType: string; // "ALL" 등
-  sampleN: number;
-  status: InsightStatus;
-  recommendation: { handicapDelta: number; label: string };
-  benchmark: { handicap: number; expected: number; min: number; max: number };
-  stats: InsightStats | null;
-  reasons: string[];
+export type TeamGameRow = {
+  gameId: string;
+  date: string | null;
+  result: "WIN" | "LOSE";
+  gameType: string;
+
+  score: number;
+  inning: number;
+
+  avg: number;
+  eff: number;
+  expectedScore: number;
+  vol: number;
+
+  effScore: number;
+  volScore: number;
+  gps: number;
+
+  label: "BUS" | "LUCK_BAD" | "CARRY" | "SELF_ISSUE" | "NEUTRAL";
 };
 
-/**
- * ✅ "신버전 팀 지표" (backend buildTeamIndicators에서 나오는 형태)
- */
 export type TeamIndicators = {
   sampleN: number;
-
-  counts: {
-    TEAM_LUCK_BAD: number;
-    BUS: number;
-    CARRY: number;
-    SELF_ISSUE: number;
-    NEUTRAL: number;
+  benchmark: { handicap: number; expected: number };
+  cuts: null | {
+    eff: { p05: number; p95: number };
+    vol: { p05: number; p95: number };
   };
-
-  rates: {
-    teamLuckBadRate: number;
-    busRate: number;
-    carryRate: number;
-    selfIssueRate: number;
-  };
-
-  weighted: {
-    luckBadScore: number;
-    busScore: number;
-    carryScore: number;
-    selfIssueScore: number;
-  };
-
-  diffSummary: {
-    avgDiff: number;
-    overRate: number;
-    underRate: number;
-    meanOver: number;
-    meanUnder: number;
-  };
-
-  extremes: {
-    bestCarry: null | { gameId: string; date: string; diff: number; result: string };
-    biggestBus: null | { gameId: string; date: string; diff: number; result: string };
-  };
-
+  counts: { LUCK_BAD: number; BUS: number; SELF_ISSUE: number; CARRY: number; NEUTRAL: number };
+  rates: { luckBadRate: number; busRate: number; selfIssueRate: number; carryRate: number; neutralRate: number };
   headline: string;
   note?: string;
+  games: TeamGameRow[];
 };
 
 export type InsightsResponse = {
-  window: number;
-  handicap: number;
-  updatedAt: string;
-  all: InsightAnalysis;
-  teamIndicators: TeamIndicators;
+  all: InsightAll;
+  team: TeamIndicators;
 };

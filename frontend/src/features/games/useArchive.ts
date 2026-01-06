@@ -1,3 +1,5 @@
+// frontend/src/features/games/useArchive.ts
+
 import { useEffect, useMemo, useState } from "react";
 import type { DatesRangeValue } from "@mantine/dates";
 import type { StatsSelector } from "../stats";

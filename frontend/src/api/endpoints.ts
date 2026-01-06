@@ -13,6 +13,7 @@ export const EP = {
   },
   users: {
     profile: (userId: string) => `/users/${userId}`,
+    games: (userId: string) => `/users/${userId}/games`,
   },
   rankings: "/rankings",
 } as const;

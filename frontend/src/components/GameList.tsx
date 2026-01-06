@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { Text, Group, Stack, Title, Divider, Button } from "@mantine/core";
 
-import GameRow from "./GameRow";
+import GameRow from "./game/GameRow";
 import GameUpsertModal, { GameUpsertValues } from "./GameUpsertModal";
 
 import type { Game } from "../features/games/types";

@@ -1,42 +1,61 @@
-import type { InsightAnalysis, TeamIndicators } from "./types";
+import type { TeamGameRow } from "./types";
 
-export function statusMeta(status: InsightAnalysis["status"]) {
-  switch (status) {
-    case "매우좋음":
-      return { color: "green", label: "매우 좋음", emoji: "🔥" } as const;
-    case "좋음":
-      return { color: "teal", label: "좋음", emoji: "⬆️" } as const;
-    case "보통":
-      return { color: "blue", label: "보통", emoji: "➖" } as const;
-    case "부진":
-      return { color: "orange", label: "부진", emoji: "⬇️" } as const;
-    case "매우부진":
-      return { color: "red", label: "매우 부진", emoji: "🧊" } as const;
-    case "데이터부족":
-    default:
-      return { color: "gray", label: "데이터 부족", emoji: "🧪" } as const;
+export function fmt(n: any, d = 3) {
+  const x = Number(n);
+  if (!Number.isFinite(x)) return "-";
+  return x.toFixed(d);
+}
+
+export function fmt0(n: any) {
+  const x = Number(n);
+  if (!Number.isFinite(x)) return "-";
+  return String(Math.round(x));
+}
+
+export function clamp01(v: any) {
+  const x = Number(v);
+  if (!Number.isFinite(x)) return 0;
+  return Math.max(0, Math.min(100, x));
+}
+
+export function statusMeta(status: string) {
+  const s = String(status || "");
+  if (s.includes("매우좋")) return { color: "teal", emoji: "🔥", label: "매우 좋음" } as const;
+  if (s.includes("좋")) return { color: "green", emoji: "✅", label: "좋음" } as const;
+  if (s.includes("보통")) return { color: "gray", emoji: "🙂", label: "보통" } as const;
+  if (s.includes("부진")) return { color: "orange", emoji: "🧊", label: "부진" } as const;
+  if (s.includes("데이터")) return { color: "gray", emoji: "🧩", label: "데이터 부족" } as const;
+  return { color: "gray", emoji: "ℹ️", label: status || "상태" } as const;
+}
+
+export function labelMeta(label: TeamGameRow["label"]) {
+  switch (label) {
+    case "CARRY": return { color: "teal", text: "🔥 캐리" } as const;
+    case "BUS": return { color: "yellow", text: "🚌 버스" } as const;
+    case "LUCK_BAD": return { color: "red", text: "🎲 억울" } as const;
+    case "SELF_ISSUE": return { color: "orange", text: "🧊 내 이슈" } as const;
+    default: return { color: "gray", text: "✅ 중립" } as const;
   }
 }
 
-export function fmt(n: number | null | undefined, d: number) {
-  if (n === null || n === undefined || Number.isNaN(Number(n))) return "-";
-  return Number(n).toFixed(d);
+export function gpsColor(gps: number) {
+  if (gps >= 75) return "teal";
+  if (gps >= 60) return "green";
+  if (gps <= 40) return "red";
+  return "gray";
 }
 
-export function getConfidence(sampleN: number) {
-  let level: "높음" | "보통" | "낮음" = "낮음";
-  if (sampleN >= 20) level = "높음";
-  else if (sampleN >= 10) level = "보통";
-  const color = level === "높음" ? "green" : level === "보통" ? "blue" : "gray";
-  return { level, color } as const;
+export function skillScore(delta: number) {
+  const v = Math.max(-0.1, Math.min(0.1, Number(delta)));
+  return Math.round(((v + 0.1) / 0.2) * 100);
 }
 
-export function splitReasons(reasons: string[], topN = 2) {
-  return { top: reasons.slice(0, topN), rest: reasons.slice(topN) };
-}
-
-/** (옵션) 팀전 표본 부족 방어용 */
-export function safeTeamSampleN(team?: TeamIndicators | null) {
-  const n = Number(team?.sampleN ?? 0);
-  return Number.isFinite(n) ? n : 0;
+export function niceDate(iso: string | null) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}.${m}.${day}`;
 }

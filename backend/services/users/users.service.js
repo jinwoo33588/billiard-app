@@ -1,3 +1,5 @@
+// backend/services/users/users.service.js
+
 const usersRepo = require('./users.repo');
 
 async function getMe(userId) {

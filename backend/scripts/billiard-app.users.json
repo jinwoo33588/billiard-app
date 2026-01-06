@@ -1,0 +1,90 @@
+[{
+  "_id": {
+    "$oid": "68dce97f9c35fe0b3ace6ba3"
+  },
+  "email": "jinwoo3358@naver.com",
+  "password": "$2b$10$Er/nM0iIFspvA5eNSOT93OFvisnq1I7DwZp4CX9WKe9dDfVlU3f5G",
+  "nickname": "김진우",
+  "__v": 0,
+  "handicap": 26
+},
+{
+  "_id": {
+    "$oid": "68de0e41cc714adb3c55f337"
+  },
+  "email": "ksbum915@naver.com",
+  "password": "$2b$10$bdpleI5ZrqXc1QhqrDu0VuyG1EYmBth/G4XJ0KZIIloAvYhC6qOuC",
+  "nickname": "알파카",
+  "__v": 0,
+  "handicap": 27
+},
+{
+  "_id": {
+    "$oid": "68de0e71cc714adb3c55f33f"
+  },
+  "email": "rosebut@empal.com",
+  "password": "$2b$10$gjLRMaQp8bg/R9Owg6zTFuHaM4SIZr8kFu.6NMVfKczckI9NahfK2",
+  "nickname": "소닉",
+  "__v": 0,
+  "handicap": 28
+},
+{
+  "_id": {
+    "$oid": "68de0f35cc714adb3c55f361"
+  },
+  "email": "idkjm991204@naver.com",
+  "password": "$2b$10$iSFzoaP87tipf73chhbPCerdFhhIlv/DLbaWmbLzdzk2PuZkF.LE2",
+  "nickname": "종민",
+  "__v": 0,
+  "handicap": 24
+},
+{
+  "_id": {
+    "$oid": "68de1178cc714adb3c55f39d"
+  },
+  "email": "sainbang@hanmail.net",
+  "password": "$2b$10$v.WqcETI9nBFXhz4HfEBM.cxKTzs7SBw9K8rfNBgzS2oclnyXQeAi",
+  "nickname": "미나미",
+  "__v": 0,
+  "handicap": 25
+},
+{
+  "_id": {
+    "$oid": "68de12d2cc714adb3c55f3b0"
+  },
+  "email": "pwj1206@naver.com",
+  "password": "$2b$10$RrHm.BAetBar7K3dIaHYOOkpTxwkI5FWL7jWvJJwRh61WjwVszeV2",
+  "nickname": "막내삼촌",
+  "__v": 0,
+  "handicap": 28
+},
+{
+  "_id": {
+    "$oid": "68de1fbbcc714adb3c55f42c"
+  },
+  "email": "hjy2311@daum.net",
+  "password": "$2b$10$zE8Rv5dxDE80oY8cMkhnOusm0lgHUQdr1f.w35gbb2DlvAX.UHTK2",
+  "nickname": "깁슨",
+  "__v": 0,
+  "handicap": 27
+},
+{
+  "_id": {
+    "$oid": "68dfa06d61d6cf59569a6615"
+  },
+  "email": "soccerljs@naver.com",
+  "password": "$2b$10$A1uV/1CKKcweTVUl35OyDessDbAaPwoSGfAivKgiJoX1bqdw3dLWa",
+  "nickname": "테크노마귀",
+  "__v": 0,
+  "handicap": 35
+},
+{
+  "_id": {
+    "$oid": "68e3449d548d4dd65855f901"
+  },
+  "email": "dlswjdrmfu@naver.com",
+  "password": "$2b$10$A9CBspI40Z33aK3j.lLJ3eX6PzGgVQ0Sx463U2NY4qBHrdb7DsiYm",
+  "nickname": "버스태워줘잉",
+  "__v": 0,
+  "handicap": 21
+}]

@@ -1,3 +1,5 @@
+// frontend/src/features/games/useMyGames.ts
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Game } from "./types";
 import { listMyGamesApi } from "./api";

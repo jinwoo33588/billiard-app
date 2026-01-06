@@ -1,0 +1,54 @@
+[{
+  "_id": {
+    "$oid": "68dce97f9c35fe0b3ace6ba3"
+  },
+  "handicap": 26
+},
+{
+  "_id": {
+    "$oid": "68de0e41cc714adb3c55f337"
+  },
+  "handicap": 27
+},
+{
+  "_id": {
+    "$oid": "68de0e71cc714adb3c55f33f"
+  },
+  "handicap": 28
+},
+{
+  "_id": {
+    "$oid": "68de0f35cc714adb3c55f361"
+  },
+  "handicap": 24
+},
+{
+  "_id": {
+    "$oid": "68de1178cc714adb3c55f39d"
+  },
+  "handicap": 25
+},
+{
+  "_id": {
+    "$oid": "68de12d2cc714adb3c55f3b0"
+  },
+  "handicap": 28
+},
+{
+  "_id": {
+    "$oid": "68de1fbbcc714adb3c55f42c"
+  },
+  "handicap": 27
+},
+{
+  "_id": {
+    "$oid": "68dfa06d61d6cf59569a6615"
+  },
+  "handicap": 35
+},
+{
+  "_id": {
+    "$oid": "68e3449d548d4dd65855f901"
+  },
+  "handicap": 21
+}]

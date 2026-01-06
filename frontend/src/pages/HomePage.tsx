@@ -2,6 +2,7 @@ import React from "react";
 import StatsOverview from "../components/StatsOverview";
 import GameList from "../components/GameList";
 import GameUpsertModal from "../components/GameUpsertModal";
+import { toIso } from "../utils/date"
 
 import { Stack, Title, Group, Button, Text, Container } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
@@ -10,7 +11,7 @@ import { useAuth } from "../features/auth/useAuth";
 import { useMyGames } from "../features/games/useMyGames";
 import { createMyGameApi } from "../features/games/api";
 
-import { useInsights } from "../features/insights/hooks";
+import { useMyInsights } from "../features/insights/hooks";
 import { InsightBadgeRow } from "../features/insights/components/InsightBadges";
 
 export default function HomePage() {
@@ -20,7 +21,7 @@ export default function HomePage() {
   const [opened, { open, close }] = useDisclosure(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-  const { data: insights } = useInsights(10);
+  const { data: insights } = useMyInsights(10);
 
   if (!user) return null;
 
@@ -41,9 +42,9 @@ export default function HomePage() {
             </Button>
           </Group>
 
-          {insights?.all && insights?.teamIndicators && (
+          {/* {insights?.all && insights?.teamIndicators && (
             <InsightBadgeRow all={insights.all} team={insights.teamIndicators} />
-          )}
+          )} */}
 
           <StatsOverview />
 
@@ -64,7 +65,7 @@ export default function HomePage() {
             inning: Number(v.inning),
             result: v.result === "" ? undefined : v.result,
             gameType: v.gameType,
-            gameDate: v.gameDate ? v.gameDate.toISOString() : new Date().toISOString(),
+            gameDate: toIso(v.gameDate),
             memo: v.memo,
           });
           refresh();

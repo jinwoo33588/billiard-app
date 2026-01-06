@@ -1,8 +1,8 @@
 import React from "react";
 import { Card, Group, Text, Badge, ActionIcon, Menu } from "@mantine/core";
 import { IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react";
-import type { Game } from "../features/games/types";
-import { resultColor, resultLabel, gameTypeLabel } from "../features/games/label";
+import type { Game } from "../../features/games/types";
+import { resultColor, resultLabel, gameTypeLabel } from "../../features/games/label";
 
 type Props = {
   game: Game;
