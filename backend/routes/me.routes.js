@@ -97,7 +97,7 @@ router.delete(
 router.get(
   '/insights',
   asyncHandler(async (req, res) => {
-    const windowSize = validateWindow(req.query.window); // 없으면 기본 10 리턴하도록 validators에서 처리
+    const windowSize = validateWindow(req.query.window);
     const data = await insightsService.getInsightsForUser(req.user.userId, windowSize);
     res.json(data);
   })

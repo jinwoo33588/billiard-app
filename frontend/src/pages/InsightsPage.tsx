@@ -10,11 +10,16 @@ import TeamGameList from "../features/insights/components/TeamGameList";
 export default function InsightsPage() {
   const [windowSize, setWindowSize] = useState(60);
   const { data, loading, error, refetch } = useMyInsights(windowSize);
+  
 
   const all = data?.all;
   const team = data?.team;
 
   const teamGames = useMemo(() => (team?.games || []).slice(), [team?.games]);
+
+  if (loading) return <Text size="sm" c="dimmed">로딩중…</Text>;
+if (error) return <Text size="sm" c="red">에러: {String(error)}</Text>;
+if (!data) return <Text size="sm" c="dimmed">데이터가 없어요.</Text>;
 
   return (
     <Container size="sm" px="sm" py="sm">

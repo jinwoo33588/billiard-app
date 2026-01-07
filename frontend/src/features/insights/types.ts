@@ -1,3 +1,4 @@
+// frontend/src/features/insights/types.ts
 export type InsightAll = {
   status: string;
   recommendation?: any;
