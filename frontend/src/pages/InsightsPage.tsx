@@ -4,7 +4,8 @@ import { useMyInsights } from "../features/insights/hooks";
 import { InsightsHeader } from "../features/insights/components/InsightsHeader";
 import FormCard from "../features/insights/components/FormCard";
 import TeamSummaryCard from "../features/insights/components/TeamSummaryCard";
-import TeamGameList from "../features/insights/components/TeamGamelist";
+import TeamGameList from "../features/insights/components/TeamGameList";
+
 
 export default function InsightsPage() {
   const [windowSize, setWindowSize] = useState(60);
