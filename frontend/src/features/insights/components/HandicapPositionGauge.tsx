@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { Badge, Card, Divider, Group, Progress, SimpleGrid, Stack, Text } from "@mantine/core";
 import { HANDICAP_BENCHMARKS, type HandicapBenchmark } from "../benchmarks";
 import { estimateHandicapByAvg } from "../utilsHandicap";
-import { calcFormScore, formGrade, estimateHandicapByScore } from "../utilsformscore";
+import { calcFormScore, formGrade, estimateHandicapByScore } from "../utilsFormScore";
 
 function clamp01(x: number) {
   return Math.max(0, Math.min(1, x));

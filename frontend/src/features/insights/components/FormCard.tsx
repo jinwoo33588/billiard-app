@@ -3,7 +3,7 @@ import { Badge, Card, Divider, Group, Progress, SimpleGrid, Stack, Text } from "
 import type { InsightAll } from "../types";
 import { clamp01, fmt, skillScore, statusMeta } from "../utils";
 import HandicapPositionGauge from "./HandicapPositionGauge";
-import { calcFormScore, formGrade } from "../utilsformscore";
+import { calcFormScore, formGrade } from "../utilsFormScore";
 
 export default function FormCard({ all }: { all: InsightAll }) {
   const meta = statusMeta(all.status);
