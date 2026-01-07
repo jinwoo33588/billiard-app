@@ -16,8 +16,8 @@ import {
 } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons-react";
 
-import Statistics from "../components/StatsOverview";
-import GameList from "../components/GameList";
+import Statistics from "../features/stats/components/StatsOverview";
+import GameList from "../features/games/components/GameList";
 import { useUserProfile } from "../features/users/useUserProfile";
 
 export default function UserProfilePage() {

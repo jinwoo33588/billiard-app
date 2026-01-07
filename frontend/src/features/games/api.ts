@@ -1,7 +1,7 @@
 //frontend/src/features/games/api.ts
 
-import axiosInstance from "../../api/axiosInstance";
-import { EP } from "../../api/endpoints";
+import axiosInstance from "../../shared/api/axiosInstance";
+import { EP } from "../../shared/api/endpoints";
 import type { Game } from "./types";
 
 export async function listMyGamesApi(params?: { limit?: number }) {

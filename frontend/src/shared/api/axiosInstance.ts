@@ -15,7 +15,8 @@ const baseURL =
   });
 
 axiosInstance.interceptors.request.use((config) => {
-  console.log("[API]", config.method?.toUpperCase(), config.url, config.params ?? "");
+  const stack = new Error().stack;
+  console.log("[API]", config.method?.toUpperCase(), config.url, config.params ?? "", "\nSTACK:\n", stack);
   const token = localStorage.getItem("token");
   if (token) {
     config.headers = config.headers ?? {};

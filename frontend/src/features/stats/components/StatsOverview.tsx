@@ -1,4 +1,4 @@
-// src/components/StatsOverview.tsx
+// /Users/gimjin-u/my-billiard-app/frontend/src/features/stats/components/StatsOverview.tsx
 import React from "react";
 import {
   Card,
@@ -13,7 +13,7 @@ import {
   Loader,
 } from "@mantine/core";
 
-import { useMyStats } from "../features/stats/useMyStats";
+import { useMyStats } from "../useMyStats";
 
 function winRateColor(winRateNum: number) {
   return winRateNum >= 66 ? "green" : winRateNum >= 60 ? "blue" : winRateNum >= 30 ? "orange" : "red";
@@ -190,42 +190,19 @@ export default function StatsOverview() {
   }
 
   return (
-    <Card
-      p="sm"
-      radius="md"
-      withBorder
-      style={{
-        background: "rgba(228, 240, 255, 0.12)",
-        borderColor: "rgba(0,0,0,0.06)",
-      }}
-    >
-      <Group justify="space-between" align="center" mb={6} wrap="nowrap">
-        <Title order={4} style={{ lineHeight: 1.1 }}>
-          종합 통계
-        </Title>
-        <Badge radius="xl" variant="light" style={{ border: "1px solid rgba(0,0,0,0.06)" }}>
-          전체 · 이번달
-        </Badge>
-      </Group>
-
-      <Text size="xs" c="dimmed" mb="sm">
-        이제 계산은 백엔드에서 하고, 프론트는 표시만 합니다.
-      </Text>
-
-      <Stack gap="sm">
-        <StatsBlock
-          label="전체"
-          subtitle="모든 기록 기준"
-          stats={all}
-          accent="var(--mantine-color-blue-6)"
-        />
-        <StatsBlock
-          label="이번 달"
-          subtitle={`${monthLabel} 기준 (0판이어도 표시)`}
-          stats={month}
-          accent="var(--mantine-color-teal-6)"
-        />
-      </Stack>
-    </Card>
+    <Stack gap="sm">
+      <StatsBlock
+        label="전체"
+        subtitle="모든 기록 기준"
+        stats={all}
+        accent="var(--mantine-color-blue-6)"
+      />
+      <StatsBlock
+        label="이번 달"
+        subtitle={`${monthLabel} 기준 (0판이어도 표시)`}
+        stats={month}
+        accent="var(--mantine-color-teal-6)"
+      />
+    </Stack>
   );
 }

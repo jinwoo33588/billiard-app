@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import Register from "../components/auth/Register";
-import Login from "../components/auth/Login";
+import Register from "../features/auth/components/Register";
+import Login from "../features/auth/components/Login";
 import { Title, Stack, Center } from "@mantine/core";
 
 export default function AuthPage() {

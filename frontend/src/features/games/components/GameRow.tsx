@@ -1,8 +1,8 @@
 import React from "react";
 import { Card, Group, Text, Badge, ActionIcon, Menu } from "@mantine/core";
 import { IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react";
-import type { Game } from "../../features/games/types";
-import { resultColor, resultLabel, gameTypeLabel } from "../../features/games/label";
+import type { Game } from "../types";
+import { resultColor, resultLabel, gameTypeLabel } from "../label";
 
 type Props = {
   game: Game;
@@ -23,7 +23,7 @@ function formatShortDate(dateStr: string) {
 export default function GameRow({ game, showActions = false, onEdit, onDelete, onClick }: Props) {
   const avg = game.inning > 0 ? (game.score / game.inning).toFixed(3) : "-";
 
-  const W = { result: 44, inning: 36, avg: 72, score: 36, actions: 34 };
+  const W = { result: 36, inning: 32, avg: 64, score: 32, actions: 34 };
 
   return (
     <Card withBorder radius="md" p="sm" style={{ cursor: onClick ? "pointer" : "default" }} onClick={() => onClick?.(game)}>

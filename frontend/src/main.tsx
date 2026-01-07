@@ -7,6 +7,7 @@ import "@mantine/dates/styles.css";
 import App from "./App";
 import "./index.css";
 import { AuthProvider } from "./features/auth/AuthProvider";
+import { GamesProvider } from "./features/games/GamesProvider";
 import { redirectIfPreviewHost } from "./app/bootstrap";
 
 const theme = createTheme({
@@ -32,8 +33,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <MantineProvider theme={theme}>
       <BrowserRouter>
         <AuthProvider>
+        <GamesProvider>
           <App />
+          </GamesProvider>
         </AuthProvider>
+        
       </BrowserRouter>
     </MantineProvider>
   </React.StrictMode>

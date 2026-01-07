@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 
-import type { Game } from "../features/games/types";
+import type { Game } from "../types";
 
 export type GameUpsertValues = {
   score: number | "";

@@ -13,8 +13,8 @@ import {
 import { IconSelector, IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import { useMediaQuery } from "@mantine/hooks";
 
-import type { Game } from "../../features/games/types";
-import { resultLabel, gameTypeLabel } from "../../features/games/label";
+import type { Game } from "../../types";
+import { resultLabel, gameTypeLabel } from "../../label";
 
 type ThProps = {
   children: React.ReactNode;
@@ -127,7 +127,7 @@ export default function ArchiveRecords({
         <Stack>
           {sortedData.length > 0 ? (
             sortedData.map((game) => (
-              <Card key={game._id} withBorder p="sm" radius="md">
+              <Card key={game._id} withBorder p="sm" radius="md"  style={{ overflow: "hidden", maxWidth: "100%" }}>
                 <Group justify="space-between" align="flex-start">
                   <div>
                     <Text fw={600}>{new Date(game.gameDate).toLocaleDateString("ko-KR")}</Text>

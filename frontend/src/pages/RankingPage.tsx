@@ -2,14 +2,14 @@ import React from "react";
 import { Center, Container, Loader, Stack } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 
-import { EP } from "../api/endpoints";
+import { EP } from "../shared/api/endpoints";
 import { useAuth } from "../features/auth/useAuth";
 import { useRankings } from "../features/rankings/useRankings";
 
-import RankingHeader from "../components/rankings/RankingHeader";
-import RankingMyCard from "../components/rankings/RankingMyCard";
-import RankingSortBar from "../components/rankings/RankingSortBar";
-import RankingList from "../components/rankings/RankingList";
+import RankingHeader from "../features/rankings/components/RankingHeader";
+import RankingMyCard from "../features/rankings/components/RankingMyCard";
+import RankingSortBar from "../features/rankings/components/RankingSortBar";
+import RankingList from "../features/rankings/components/RankingList";
 
 export default function RankingPage() {
   const { user } = useAuth();

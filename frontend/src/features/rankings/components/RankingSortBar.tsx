@@ -1,7 +1,7 @@
 import React from "react";
 import { ActionIcon, Group, SegmentedControl } from "@mantine/core";
 import { IconArrowDown, IconArrowUp } from "@tabler/icons-react";
-import type { RankingRow } from "../../features/rankings/types";
+import type { RankingRow } from "../types";
 
 type SortBy = keyof Pick<RankingRow, "average" | "winRate" | "handicap">;
 

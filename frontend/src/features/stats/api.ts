@@ -1,6 +1,6 @@
 // src/features/stats/api.ts
-import axiosInstance from "../../api/axiosInstance";
-import { EP } from "../../api/endpoints";
+import axiosInstance from "../../shared/api/axiosInstance";
+import { EP } from "../../shared/api/endpoints";
 import type { BuildStatsResponse, StatsSelector, MonthlyStatsResponse } from "./types";
 import { selectorToQuery } from "./query";
 

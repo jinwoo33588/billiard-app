@@ -1,5 +1,5 @@
-import axiosInstance from "../../api/axiosInstance";
-import { EP } from "../../api/endpoints";
+import axiosInstance from "../../shared/api/axiosInstance";
+import { EP } from "../../shared/api/endpoints";
 import type { LoginResponse, User } from "./types";
 
 export async function loginApi(email: string, password: string) {

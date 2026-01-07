@@ -1,7 +1,7 @@
 import React from "react";
 import { useForm } from "@mantine/form";
 import { TextInput, PasswordInput, Button, Card, Stack, Text, Anchor } from "@mantine/core";
-import { useAuth } from "../../features/auth/useAuth";
+import { useAuth } from "../useAuth";
 
 interface LoginProps {
   onToggleForm: () => void;

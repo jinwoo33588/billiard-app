@@ -1,6 +1,6 @@
 // src/features/users/api.ts
-import axiosInstance from "../../api/axiosInstance";
-import { EP } from "../../api/endpoints";
+import axiosInstance from "../../shared/api/axiosInstance";
+import { EP } from "../../shared/api/endpoints";
 import type { PublicUserProfileResponse, PublicUserGamesResponse } from "./types";
 
 export async function getUserProfileApi(userId: string) {

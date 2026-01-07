@@ -1,7 +1,7 @@
 import React from "react";
 import { Badge, Button, Card, Group, Stack, Text } from "@mantine/core";
 import { IconTarget } from "@tabler/icons-react";
-import type { RankingRow } from "../../features/rankings/types";
+import type { RankingRow } from "../types";
 
 type Props = {
   me: RankingRow | null;

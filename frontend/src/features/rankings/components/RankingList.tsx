@@ -1,6 +1,6 @@
 import React from "react";
 import { Badge, Card, Group, Stack, Text, Title, UnstyledButton } from "@mantine/core";
-import type { RankingRow } from "../../features/rankings/types";
+import type { RankingRow } from "../types";
 
 type Props = {
   items: RankingRow[];

@@ -1,5 +1,5 @@
-import axiosInstance from "../../api/axiosInstance";
-import { EP } from "../../api/endpoints";
+import axiosInstance from "../../shared/api/axiosInstance";
+import { EP } from "../../shared/api/endpoints";
 import type { RankingRow } from "./types";
 
 export type GetRankingsParams =

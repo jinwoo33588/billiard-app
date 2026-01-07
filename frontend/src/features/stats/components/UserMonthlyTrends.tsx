@@ -8,7 +8,6 @@ import {
   Text,
   Title,
   Badge,
-  Center,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import {
@@ -48,10 +47,8 @@ export default function UserMonthlyTrends({ rows, title = "월별 변화 추이"
   const [view, setView] = useState<ViewMode>("chart");
   const [metric, setMetric] = useState<Metric>("average");
 
-  // ✅ 백엔드 결과 그대로 사용
   const viewData = rows ?? [];
 
-  // ✅ 0경기 월(average/winRate null)은 “그래프용 의미있는 점”으로 치지 않음
   const numericCount = useMemo(() => {
     let c = 0;
     for (const r of viewData) if (typeof r[metric] === "number") c++;
@@ -60,7 +57,6 @@ export default function UserMonthlyTrends({ rows, title = "월별 변화 추이"
 
   const hasEnough = numericCount >= 2;
 
-  // ✅ Y축 범위 고정(디자인 일관성)
   const yDomain: [number, number] = metric === "winRate" ? [0, 100] : [0.2, 1.2];
 
   const metricLabel = metric === "average" ? "에버리지" : "승률(%)";
@@ -87,12 +83,24 @@ export default function UserMonthlyTrends({ rows, title = "월별 변화 추이"
   };
 
   return (
-    <Card p={isMobile ? "sm" : "lg"} radius="md" withBorder>
+    <Card
+      p={isMobile ? "sm" : "lg"}
+      radius="md"
+      withBorder
+      style={{ overflow: "hidden" }} // ✅ 가로 오버플로우 방지
+    >
       <Stack gap={isMobile ? "xs" : "md"}>
-        <Group justify="space-between" align="flex-start" wrap="nowrap">
-          <div>
+        {/* ✅ 모바일: 헤더 줄바꿈 허용 + SegmentedControl fullWidth */}
+        <Group
+          justify="space-between"
+          align="flex-start"
+          wrap={isMobile ? "wrap" : "nowrap"}
+          gap={isMobile ? "xs" : "md"}
+        >
+          <div style={{ minWidth: 0 }}>
             <Title order={4}>{title}</Title>
-            <Group gap={8} mt={2}>
+
+            <Group gap={8} mt={2} wrap="wrap">
               <Text c="dimmed" size="sm">
                 {metric === "average" ? "월별 에버리지" : "월별 승률"}
               </Text>
@@ -105,19 +113,24 @@ export default function UserMonthlyTrends({ rows, title = "월별 변화 추이"
                     : Number(lastPoint.value).toFixed(3)}
                 </Badge>
               )}
+
+              
             </Group>
           </div>
 
-          <SegmentedControl
-            value={metric}
-            onChange={(v) => setMetric(v as Metric)}
-            data={[
-              { value: "average", label: "에버" },
-              { value: "winRate", label: "승률" },
-            ]}
-            size="sm"
-            radius="xl"
-          />
+          <div style={{ flexShrink: 0, width: isMobile ? "100%" : "auto" }}>
+            <SegmentedControl
+              value={metric}
+              onChange={(v) => setMetric(v as Metric)}
+              data={[
+                { value: "average", label: "에버" },
+                { value: "winRate", label: "승률" },
+              ]}
+              size="sm"
+              radius="xl"
+              fullWidth={isMobile} // ✅ 모바일 꽉 차게
+            />
+          </div>
         </Group>
 
         <SegmentedControl
@@ -141,56 +154,64 @@ export default function UserMonthlyTrends({ rows, title = "월별 변화 추이"
               그래프는 최소 2개월 이상의 기록이 있어야 표시됩니다. (표에서 확인 가능)
             </Text>
           ) : (
-            <ResponsiveContainer width="100%" height={isMobile ? 240 : 320}>
-              <AreaChart data={viewData} margin={{ top: 18, right: 8, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="2 6" vertical horizontal={false} />
+            // ✅ 차트 래퍼 안전망 (minWidth/overflow)
+            <div style={{ width: "100%", minWidth: 0, overflow: "hidden" }}>
+              <ResponsiveContainer width="100%" height={isMobile ? 240 : 320}>
+                <AreaChart data={viewData} margin={{ top: 18, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="2 6" vertical horizontal={false} />
 
-                <XAxis
-                  dataKey="label"
-                  interval="preserveStartEnd"
-                  minTickGap={isMobile ? 26 : 18}
-                  angle={isMobile ? -35 : 0}
-                  textAnchor={isMobile ? "end" : "middle"}
-                  height={isMobile ? 52 : 30}
-                  tickMargin={10}
-                  tick={{ fontSize: isMobile ? 11 : 12 }}
-                />
+                  <XAxis
+                    dataKey="label"
+                    interval="preserveStartEnd"
+                    minTickGap={isMobile ? 26 : 18}
+                    angle={isMobile ? -35 : 0}
+                    textAnchor={isMobile ? "end" : "middle"}
+                    height={isMobile ? 52 : 30}
+                    tickMargin={10}
+                    tick={{ fontSize: isMobile ? 11 : 12 }}
+                  />
 
-                {/* ✅ 축 눈금 최소화(모바일) */}
-                <YAxis domain={yDomain as any} tick={false} axisLine={false} />
+                  <YAxis domain={yDomain as any} tick={false} axisLine={false} />
 
-                <defs>
-                  <linearGradient id="trendFillUMT" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={strokeColor} stopOpacity={0.18} />
-                    <stop offset="100%" stopColor={strokeColor} stopOpacity={0.0} />
-                  </linearGradient>
-                </defs>
+                  <defs>
+                    <linearGradient id="trendFillUMT" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={strokeColor} stopOpacity={0.18} />
+                      <stop offset="100%" stopColor={strokeColor} stopOpacity={0.0} />
+                    </linearGradient>
+                  </defs>
 
-                <Tooltip
-                  contentStyle={{ borderRadius: 12 }}
-                  formatter={(value: any) => {
-                    if (value === null || value === undefined) return ["-", metricLabel];
-                    if (metric === "winRate") return [`${Number(value).toFixed(1)}%`, metricLabel];
-                    return [Number(value).toFixed(3), metricLabel];
-                  }}
-                />
+                  <Tooltip
+                    contentStyle={{ borderRadius: 12 }}
+                    formatter={(value: any) => {
+                      if (value === null || value === undefined) return ["-", metricLabel];
+                      if (metric === "winRate") return [`${Number(value).toFixed(1)}%`, metricLabel];
+                      return [Number(value).toFixed(3), metricLabel];
+                    }}
+                  />
 
-                {!isMobile && <Legend />}
+                  {!isMobile && <Legend />}
 
-                <Area dataKey={metric} type="monotone" fill="url(#trendFillUMT)" stroke="none" connectNulls />
+                  <Area
+                    dataKey={metric}
+                    type="monotone"
+                    fill="url(#trendFillUMT)"
+                    stroke="none"
+                    connectNulls
+                  />
 
-                <Line
-                  dataKey={metric}
-                  type="monotone"
-                  stroke={strokeColor}
-                  strokeWidth={3}
-                  dot={{ r: 5, fill: "white", stroke: strokeColor, strokeWidth: 2 }}
-                  activeDot={{ r: 9, fill: "white", stroke: strokeColor, strokeWidth: 4 }}
-                  connectNulls
-                  label={renderPointLabel}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+                  <Line
+                    dataKey={metric}
+                    type="monotone"
+                    stroke={strokeColor}
+                    strokeWidth={3}
+                    dot={{ r: 5, fill: "white", stroke: strokeColor, strokeWidth: 2 }}
+                    activeDot={{ r: 9, fill: "white", stroke: strokeColor, strokeWidth: 4 }}
+                    connectNulls
+                    label={renderPointLabel}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           )
         ) : isMobile ? (
           <Table striped highlightOnHover withTableBorder horizontalSpacing="xs" verticalSpacing="xs">

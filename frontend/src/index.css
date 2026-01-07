@@ -4,6 +4,7 @@ html, body, #root {
   width: 100%;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
 }
 
 body {
@@ -13,3 +14,78 @@ body {
 
 /* #root에 적용했던 display:flex 관련 코드를 모두 제거합니다. */
 /* 이제 레이아웃은 App.tsx와 각 페이지의 Container가 전적으로 담당합니다. */
+
+.fabBtn{
+  transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
+  will-change: transform;
+}
+
+/* 눌렀을 때 살짝 들어갔다가 */
+.fabBtn:active{
+  transform: translateX(-50%) translateY(2px) scale(0.94);
+  filter: brightness(0.98);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.30);
+}
+
+/* 키보드 포커스(접근성) */
+.fabBtn:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.16), 0 10px 24px rgba(0,0,0,0.35);
+}
+@keyframes fabPop {
+  0%   { transform: translateX(-50%) translateY(0) scale(1); }
+  35%  { transform: translateX(-50%) translateY(-4px) scale(1.06); }
+  65%  { transform: translateX(-50%) translateY(1px) scale(0.98); }
+  100% { transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+.fabPop{
+  animation: fabPop 260ms cubic-bezier(.2,.9,.2,1);
+}
+
+
+
+/* 맨 위로 FAB */
+.scrollTopBtn {
+  background: var(--mantine-color-dark-6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+
+  transition:
+    opacity 180ms ease,
+    transform 220ms cubic-bezier(.2,.9,.2,1),
+    box-shadow 140ms ease;
+}
+
+/* 등장 애니메이션 */
+.scrollTopBtn {
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+}
+
+.scrollTopBtn {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* 눌림 느낌 */
+.scrollTopBtn:active {
+  transform: scale(0.92);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+}
+
+/* 포커스 접근성 */
+.scrollTopBtn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,0.25),
+    0 10px 24px rgba(0,0,0,0.35);
+}
+
+/* motion 줄이기 설정 */
+@media (prefers-reduced-motion: reduce) {
+  .scrollTopBtn {
+    transition: none;
+  }
+}

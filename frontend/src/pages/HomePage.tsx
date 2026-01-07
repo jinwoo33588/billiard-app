@@ -1,27 +1,31 @@
 import React from "react";
-import StatsOverview from "../components/StatsOverview";
-import GameList from "../components/GameList";
-import GameUpsertModal from "../components/GameUpsertModal";
-import { toIso } from "../utils/date"
+import StatsOverview from "../features/stats/components/StatsOverview";
+import GameList from "../features/games/components/GameList";
+import GameUpsertModal from "../features/games/components/GameUpsertModal";
+import { toIso } from "../shared/utils/date"
 
-import { Stack, Title, Group, Button, Text, Container } from "@mantine/core";
+import { Stack, Title, Group, Button, Text, Container, Badge , Divider, Card} from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 
 import { useAuth } from "../features/auth/useAuth";
-import { useMyGames } from "../features/games/useMyGames";
+// import { useMyGames } from "../features/games/useMyGames";
 import { createMyGameApi } from "../features/games/api";
 
 import { useMyInsights } from "../features/insights/hooks";
 import { InsightBadgeRow } from "../features/insights/components/InsightBadges";
 
+import { useGamesCache } from "../features/games/GamesProvider";
+
 export default function HomePage() {
   const { user } = useAuth();
-  const { games, refresh } = useMyGames({ limit: 10 });
+  const { recentGames, loadingRecent, refreshRecent } = useGamesCache();
+
+  if (!user) return null;
 
   const [opened, { open, close }] = useDisclosure(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-  const { data: insights } = useMyInsights(10);
+  // const { data: insights } = useMyInsights(10);
 
   if (!user) return null;
 
@@ -29,32 +33,43 @@ export default function HomePage() {
     <>
       <Container>
         <Stack gap={isMobile ? "sm" : "lg"}>
-          <Group justify="space-between" align="center" wrap="nowrap">
-            <Group gap={8} wrap="nowrap">
-              <Title order={isMobile ? 3 : 2}>{user.nickname}님의 기록</Title>
-              <Text c="dimmed" size={isMobile ? "sm" : "md"}>
-                ({user.handicap}점)
-              </Text>
-            </Group>
-
-            <Button size={isMobile ? "sm" : "md"} onClick={open}>
-              새 경기 기록
-            </Button>
-          </Group>
-
-          {/* {insights?.all && insights?.teamIndicators && (
-            <InsightBadgeRow all={insights.all} team={insights.teamIndicators} />
-          )} */}
-
+        <Group justify="space-between" align="center">
+              <div>
+            <Title order={4}>종합 통계</Title>
+            <Text size="xs" c="dimmed">
+              전체 기록과 이번 달 성적
+            </Text>
+          </div>
+          <Badge radius="xl" variant="light">
+            전체 · 이번달
+          </Badge>
+        </Group>
           <StatsOverview />
 
+          <Divider my={isMobile ? "md" : "lg"} />
+          <Group justify="space-between" align="center">
+            <div>
+              <Title order={4}>최근 경기</Title>
+              <Text size="xs" c="dimmed">최신 기록부터 보여줘요</Text>
+            </div>
 
-          <GameList games={games} onListChange={refresh} showActions />
+            <Text size="xs" c="dimmed">
+              {recentGames.length}개
+            </Text>
+          </Group>
 
-          
+          <GameList
+        games={recentGames}
+        onListChange={refreshRecent}
+        showActions
+        // ✅ Home은 “최근 10개” 컨셉이면 더보기 버튼은 빼도 됨
+        // onLoadMore / hasMore / loadingMore 제거
+      />
         </Stack>
       </Container>
 
+
+{/* 
       <GameUpsertModal
         opened={opened}
         mode="create"
@@ -70,7 +85,7 @@ export default function HomePage() {
           });
           refresh();
         }}
-      />
+      /> */}
     </>
   );
 }
