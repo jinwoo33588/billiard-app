@@ -1,3 +1,4 @@
+// frontend/src/features/games/components/GameUpsertModal.tsx
 import React, { useEffect, useMemo } from "react";
 import { useForm } from "@mantine/form";
 import {
@@ -19,9 +20,9 @@ import type { Game } from "../types";
 export type GameUpsertValues = {
   score: number | "";
   inning: number | "";
-  result: Game["result"] | "";   // ✅ 결과 없음 허용
+  result: Game["result"] | ""; // ✅ 결과 없음 허용
   gameType: Game["gameType"];
-  gameDate: Date | null;
+  gameDate: string; // ✅ string(YYYY-MM-DD)로 통일
   memo: string;
 };
 
@@ -34,6 +35,10 @@ type Props = {
   onClose: () => void;
   onSubmit: (values: GameUpsertValues) => Promise<void> | void;
 };
+
+function todayYmd() {
+  return new Date().toISOString().slice(0, 10);
+}
 
 export default function GameUpsertModal({
   opened,
@@ -49,7 +54,7 @@ export default function GameUpsertModal({
       inning: "",
       result: "UNKNOWN",
       gameType: "2v2v2",
-      gameDate: new Date(),
+      gameDate: todayYmd(),
       memo: "",
     },
     validate: {
@@ -75,19 +80,26 @@ export default function GameUpsertModal({
       form.setValues({
         score: (initial as any).score ?? "",
         inning: (initial as any).inning ?? "",
-        result: ((initial as any).result ?? "") as any,
+        result: ((initial as any).result ?? "UNKNOWN") as any,
         gameType: ((initial as any).gameType ?? "2v2v2") as any,
-        gameDate: initial.gameDate ? new Date(initial.gameDate) : new Date(),
+
+        // ✅ 핵심: string으로 통일 (ISO면 앞 10자)
+        gameDate: initial.gameDate
+          ? String(initial.gameDate).slice(0, 10)
+          : todayYmd(),
+
         memo: initial.memo ?? "",
       });
+      form.resetDirty();
+      form.clearErrors();
     } else {
-      // ✅ create 기본값(오늘/2v2v2/결과없음)
+      // ✅ create 기본값
       form.setValues({
         score: "",
         inning: "",
         result: "UNKNOWN",
         gameType: "2v2v2",
-        gameDate: new Date(),
+        gameDate: todayYmd(),
         memo: "",
       });
       form.resetDirty();
@@ -119,7 +131,28 @@ export default function GameUpsertModal({
       <Box component="form" onSubmit={form.onSubmit(handleSubmit)}>
         <Grid>
           <Grid.Col span={12}>
-            <DatePickerInput label="경기 날짜" required {...form.getInputProps("gameDate")} />
+          <DatePickerInput
+  label="경기 날짜"
+  required
+  value={form.values.gameDate ? new Date(form.values.gameDate) : null}
+  onChange={(d) => {
+    // ✅ d는 Date | string | null 일 수 있음
+    if (!d) {
+      form.setFieldValue("gameDate", "");
+      return;
+    }
+
+    if (d instanceof Date) {
+      form.setFieldValue("gameDate", d.toISOString().slice(0, 10));
+      return;
+    }
+
+    // string인 경우 (YYYY-MM-DD)
+    form.setFieldValue("gameDate", String(d).slice(0, 10));
+  }}
+  error={form.errors.gameDate}
+  valueFormat="YYYY-MM-DD"
+/>
           </Grid.Col>
 
           <Grid.Col span={6}>
@@ -158,7 +191,7 @@ export default function GameUpsertModal({
             </Group>
           </Grid.Col>
 
-          {/* ✅ 결과: 3버튼 (크기는 기존 영역처럼 span 6) */}
+          {/* ✅ 결과 버튼 */}
           <Grid.Col span={6}>
             <Text size="sm" fw={500} mb={6}>
               결과

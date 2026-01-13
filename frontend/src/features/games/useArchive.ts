@@ -88,33 +88,47 @@ export function useArchive(gamesForPills: Game[]) {
 
   const pillVariant = (active: boolean) => (active ? "filled" : "light");
 
-  // ✅ stats selector 생성 (그대로)
-  const statsSelector: StatsSelector = useMemo(() => {
-    if (filterMode === "all" && !dateRange[0] && !dateRange[1]) {
-      return { type: "all" };
-    }
+// ✅ stats selector 생성 (안전 버전)
+const statsSelector: StatsSelector = useMemo(() => {
+  // 1️⃣ 아무 필터도 없으면 전체
+  if (filterMode === "all" && !dateRange[0] && !dateRange[1]) {
+    return { type: "all" };
+  }
 
-    if (filterMode === "yearMonth" && selectedYear !== null) {
-      if (selectedMonth0 === null) {
-        const from = new Date(selectedYear, 0, 1).toISOString();
-        const toD = new Date(selectedYear, 11, 31);
-        toD.setHours(23, 59, 59, 999);
-        const to = toD.toISOString();
-        return { type: "range", from, to };
-      }
-      return { type: "yearMonth", year: selectedYear, month: selectedMonth0 + 1 };
-    }
-
-    const [s, e] = dateRange;
-    const from = s ? new Date(s).toISOString() : undefined;
-    let to: string | undefined = undefined;
-    if (e) {
-      const toD = new Date(e);
+  // 2️⃣ 연/월 pill 모드
+  if (filterMode === "yearMonth" && selectedYear !== null) {
+    // 연 전체
+    if (selectedMonth0 === null) {
+      const from = new Date(selectedYear, 0, 1).toISOString();
+      const toD = new Date(selectedYear, 11, 31);
       toD.setHours(23, 59, 59, 999);
-      to = toD.toISOString();
+      const to = toD.toISOString();
+
+      return { type: "range", from, to };
     }
-    return { type: "range", ...(from ? { from } : {}), ...(to ? { to } : {}) };
-  }, [filterMode, dateRange, selectedYear, selectedMonth0]);
+
+    // 특정 월
+    return {
+      type: "yearMonth",
+      year: selectedYear,
+      month: selectedMonth0 + 1,
+    };
+  }
+
+  // 3️⃣ 커스텀 날짜 선택
+  const [s, e] = dateRange;
+  if (s && e) {
+    const from = new Date(s).toISOString();
+    const toD = new Date(e);
+    toD.setHours(23, 59, 59, 999);
+    const to = toD.toISOString();
+
+    return { type: "range", from, to };
+  }
+
+  // 4️⃣ 애매한 상태는 전체로
+  return { type: "all" };
+}, [filterMode, dateRange, selectedYear, selectedMonth0]);
 
   // ✅ 목록 필터링 (아카이브 리스트 표시용)
   const filteredGames = useMemo(() => {

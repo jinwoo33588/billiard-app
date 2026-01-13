@@ -1,79 +1,97 @@
+// frontend/src/pages/InsightsPage.tsx
 import React, { useMemo, useState } from "react";
-import { Card, Container, Group, Loader, Stack, Tabs, Text } from "@mantine/core";
+import { Button, Group, Loader, Stack, Text } from "@mantine/core";
 import { useMyInsights } from "../features/insights/hooks";
-import { InsightsHeader } from "../features/insights/components/InsightsHeader";
-import FormCard from "../features/insights/components/FormCard";
-import TeamSummaryCard from "../features/insights/components/TeamSummaryCard";
-import TeamGameList from "../features/insights/components/TeamGameList";
+import InsightsHeader, {
+  WindowPreset,
+} from "../features/insights/components/InsightsHeader";
+import FormSummaryCard from "../features/insights/components/FormSummaryCard";
+import TeamInsightsSection from "../features/insights/components/TeamInsightsSection";
 
+import { useHandicapBenchmarks } from "../features/meta/useHandicapBenchmarks"; // 경로 맞춰
+import HandicapBandTrackFromInsights from "../features/insights/components/HandicapBandTrackFromInsights";
+import TeamOutcomeCard from "../features/insights/components/TeamOutcomeCard";
+import FormScoreCard from "../features/insights/components/FormScoreCard";
+
+function guessThisMonthWindowFallback() {
+  return 60; // 임시 근사치
+}
 
 export default function InsightsPage() {
-  const [windowSize, setWindowSize] = useState(60);
-  const { data, loading, error, refetch } = useMyInsights(windowSize);
-  
 
-  const all = data?.all;
-  const team = data?.team;
+  // inside InsightsPage
+const { rows: benchRows, loading: benchLoading } = useHandicapBenchmarks();
 
-  const teamGames = useMemo(() => (team?.games || []).slice(), [team?.games]);
 
-  if (loading) return <Text size="sm" c="dimmed">로딩중…</Text>;
-if (error) return <Text size="sm" c="red">에러: {String(error)}</Text>;
-if (!data) return <Text size="sm" c="dimmed">데이터가 없어요.</Text>;
+  const [preset, setPreset] = useState<WindowPreset>("30");
+
+  const windowN = useMemo(() => {
+    if (preset === "10") return 10;
+    if (preset === "30") return 30;
+    if (preset === "THIS_MONTH") return guessThisMonthWindowFallback();
+    return 2000; // ALL
+  }, [preset]);
+
+  const { data, loading, error, refetch } = useMyInsights(windowN);
+
+  if (loading) {
+    return (
+      <Stack p="sm" align="center" justify="center" style={{ minHeight: 240 }}>
+        <Loader />
+        <Text size="sm" c="dimmed">
+          불러오는 중…
+        </Text>
+      </Stack>
+    );
+  }
+
+  if (error) {
+    return (
+      <Stack p="sm" gap="sm">
+        <Text c="red" fw={700}>
+          {error}
+        </Text>
+        <Button onClick={refetch}>다시 시도</Button>
+      </Stack>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Stack p="sm" gap="sm">
+        <Text c="dimmed">데이터가 없습니다.</Text>
+        <Button onClick={refetch}>새로고침</Button>
+      </Stack>
+    );
+  }
 
   return (
-    <Container size="sm" px="sm" py="sm">
-      <Stack gap="sm">
-        <InsightsHeader windowSize={windowSize} setWindowSize={setWindowSize} />
+    <Stack p="sm" gap="sm">
+      {/* ✅ Header + window selector */}
+      <InsightsHeader
+        preset={preset}
+        onChangePreset={setPreset}
+        windowN={data.window}
+        updatedAt={data.updatedAt}
+      />
 
-        {loading && (
-          <Card withBorder radius="md" p="md">
-            <Group>
-              <Loader size="sm" />
-              <Text size="sm" c="dimmed">불러오는 중…</Text>
-            </Group>
-          </Card>
-        )}
+      <FormSummaryCard all={data.all} />
 
-        {error && !loading && (
-          <Card withBorder radius="md" p="md" onClick={refetch} style={{ cursor: "pointer" }}>
-            <Text fw={800}>에러</Text>
-            <Text size="sm" c="dimmed">{error}</Text>
-            <Text size="xs" c="dimmed" mt={6}>탭하면 다시 시도</Text>
-          </Card>
-        )}
+      <FormScoreCard all={data.all} rows={benchRows} showSim />
 
-        {!loading && data && all && team && (
-          <Tabs defaultValue="all" variant="pills" radius="xl">
-            <Tabs.List grow>
-              <Tabs.Tab value="all">전체</Tabs.Tab>
-              <Tabs.Tab value="form">폼</Tabs.Tab>
-              <Tabs.Tab value="team">팀전</Tabs.Tab>
-            </Tabs.List>
+      {!benchLoading && (
+  <HandicapBandTrackFromInsights all={data.all} rows={benchRows} />
+)}
 
-            <Tabs.Panel value="all" pt="sm">
-              <Stack gap="sm">
-                <FormCard all={all} />
-                <TeamSummaryCard team={team} />
-                <TeamGameList games={teamGames} />
-              </Stack>
-            </Tabs.Panel>
+<TeamOutcomeCard games={data.team.games} />
 
-            <Tabs.Panel value="form" pt="sm">
-              <Stack gap="sm">
-                <FormCard all={all} />
-              </Stack>
-            </Tabs.Panel>
+      <TeamInsightsSection team={data.team} />
 
-            <Tabs.Panel value="team" pt="sm">
-              <Stack gap="sm">
-                <TeamSummaryCard team={team} />
-                <TeamGameList games={teamGames} />
-              </Stack>
-            </Tabs.Panel>
-          </Tabs>
-        )}
-      </Stack>
-    </Container>
+      <Group justify="center" mt="xs">
+        <Button variant="light" onClick={refetch}>
+          새로고침
+        </Button>
+      </Group>
+    </Stack>
   );
 }

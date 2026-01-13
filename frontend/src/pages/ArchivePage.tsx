@@ -17,8 +17,7 @@ import UserMonthlyTrends from "../features/stats/components/UserMonthlyTrends";
 
 // import { useMyGames } from "../features/games/useMyGames";
 import { useArchive } from "../features/games/useArchive";
-import { useMyStats } from "../features/stats/useMyStats";
-import { useMyMonthlyStats } from "../features/stats/useMyMonthlyStats";
+import { useStats, useStatsMonthly } from "../features/stats";
 import { useGamesCache } from "../features/games/GamesProvider";
 
 import ArchiveFilters from "../features/games/components/archive/ArchiveFilters";
@@ -43,20 +42,17 @@ export default function ArchivePage() {
 
   const a = useArchive(allGames);
 
-  // ✅ 선택 기간 통계: 기존 유지 (현재월 기본)
-  const { data: statsRes, loading: statsLoading, errorMsg } = useMyStats({
-    selector: a.statsSelector,
-  });
+// a.statsSelector가 {type, ...} 형태라고 가정하고 그대로 전달
+// (range의 from/to가 Date면 toIso 같은 걸로 문자열로 바꿔야 함)
+const statsQ = useStats(a.statsSelector as any);
+const statsRes = statsQ.data;
+const statsLoading = statsQ.loading;
+const errorMsg = statsQ.error ? String(statsQ.error?.message ?? statsQ.error) : null;
 
-  // ✅ 월별 변화추이: 항상 전체(all)
-  const monthlySelector = { type: "all" } as const;
-  const {
-    data: monthlyRes,
-    loading: monthlyLoading,
-    errorMsg: monthlyError,
-  } = useMyMonthlyStats({
-    selector: monthlySelector,
-  });
+const monthlyQ = useStatsMonthly(undefined, true);
+const monthlyRes = monthlyQ.data;
+const monthlyLoading = monthlyQ.loading;
+const monthlyError = monthlyQ.error ? String(monthlyQ.error?.message ?? monthlyQ.error) : null;
 
   // ✅ Upsert modal
   const [opened, { open, close }] = useDisclosure(false);

@@ -1,29 +1,35 @@
-import { useEffect, useState } from "react";
+// frontend/src/features/insights/hooks.ts
+import { useCallback, useEffect, useState } from "react";
+import { getMyInsightsApi } from "./api";
 import type { InsightsResponse } from "./types";
-import { fetchMyInsights } from "./api";
 
 export function useMyInsights(windowSize: number) {
   const [data, setData] = useState<InsightsResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string>("");
 
-  const refetch = async () => {
+  const fetch = useCallback(async () => {
     try {
       setLoading(true);
-      setError(null);
-      const d = await fetchMyInsights(windowSize);
+      setError("");
+      const d = (await getMyInsightsApi(windowSize)) as InsightsResponse;
       setData(d);
     } catch (e: any) {
-      setError(e?.response?.data?.message || e?.message || "인사이트 불러오기 실패");
+      setError(e?.response?.data?.message ?? e?.message ?? "Failed to load insights");
+      setData(null);
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [windowSize]);
 
-  return { data, loading, error, refetch };
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
+  return {
+    data,
+    loading,
+    error,
+    refetch: fetch,
+  };
 }

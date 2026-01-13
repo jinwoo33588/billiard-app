@@ -1,3 +1,5 @@
+// frontend/src/features/games/GamesProvider.tsx
+
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { Game } from "./types";
 import { listMyGamesApi } from "./api";
@@ -18,7 +20,7 @@ type GamesCacheValue = {
 const GamesCacheContext = createContext<GamesCacheValue | null>(null);
 
 // ✅ 너 데이터 규모에 맞게 조절 (처음엔 3000~5000 추천)
-const RECENT_LIMIT = 10;
+const RECENT_LIMIT = 60;
 const ALL_LIMIT = 5000;
 
 export function GamesProvider({ children }: { children: React.ReactNode }) {

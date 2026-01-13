@@ -8,13 +8,10 @@ import { Stack, Title, Group, Button, Text, Container, Badge , Divider, Card} fr
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 
 import { useAuth } from "../features/auth/useAuth";
-// import { useMyGames } from "../features/games/useMyGames";
-import { createMyGameApi } from "../features/games/api";
+import { useGamesCache } from "../features/games/GamesProvider";
 
 import { useMyInsights } from "../features/insights/hooks";
-import { InsightBadgeRow } from "../features/insights/components/InsightBadges";
-
-import { useGamesCache } from "../features/games/GamesProvider";
+import type { TeamGameRow } from "../features/insights/types";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -25,7 +22,18 @@ export default function HomePage() {
   const [opened, { open, close }] = useDisclosure(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-  // const { data: insights } = useMyInsights(10);
+
+
+  const windowSize = 60; // 홈은 최근 경기니까 60 or 30 추천
+const { data: insights, loading: insightsLoading } = useMyInsights(windowSize);
+
+const teamMap = React.useMemo(() => {
+  const m = new Map<string, TeamGameRow>();
+  (insights?.team?.games ?? []).forEach((r) => m.set(String(r.gameId), r));
+  return m;
+}, [insights]);
+
+const expected = insights?.team?.benchmark?.expected ?? 0;
 
   if (!user) return null;
 
@@ -64,6 +72,12 @@ export default function HomePage() {
         showActions
         // ✅ Home은 “최근 10개” 컨셉이면 더보기 버튼은 빼도 됨
         // onLoadMore / hasMore / loadingMore 제거
+        enableLocalPagination
+  initialLimit={10}
+
+        teamMap={teamMap}
+  expected={expected}
+  insightsLoading={insightsLoading}
       />
         </Stack>
       </Container>

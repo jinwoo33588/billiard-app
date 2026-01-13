@@ -1,4 +1,5 @@
-import { HANDICAP_BENCHMARKS } from "./benchmarks";
+// frontend/src/features/insights/utils/formScore.ts
+import type { HandicapBenchmark } from "../meta/types";
 
 export function clamp(n: number, a: number, b: number) {
   return Math.max(a, Math.min(b, n));
@@ -7,11 +8,11 @@ export function clamp(n: number, a: number, b: number) {
 export function calcFormScore({
   recentAvg,
   expectedAvg,
-  winRate,
+  winRate, // 0~100
 }: {
   recentAvg: number;
   expectedAvg: number;
-  winRate: number; // 0~100
+  winRate: number;
 }) {
   const expected = expectedAvg > 0 ? expectedAvg : 1;
 
@@ -22,7 +23,7 @@ export function calcFormScore({
 
   const total = avgScore + winScore;
 
-  // Progress 표시용 (70~110 → 0~100)
+  // 보기 좋게 70~110 => 0~100
   const progress = clamp(((total - 70) / 40) * 100, 0, 100);
 
   return { avgScore, winScore, total, progress };
@@ -39,23 +40,25 @@ export function formGrade(total: number) {
 }
 
 /**
- * ✅ 점수(total)가 90~95(핸디 평균 구간)에 가장 가까워지는 핸디를 추정
- * - recentAvg는 고정, winRate도 고정
- * - expectedAvg만 핸디별로 바뀌므로 "점수 기준 핸디"가 나옴
+ * (옵션) total이 target에 가장 가까워지는 핸디를 추정
  */
-export function estimateHandicapByScore({
+export function estimateHandicapByFormScore({
   recentAvg,
   winRate,
-  target = 92.5, // 90~95 중앙값
+  rows,
+  target = 92.5,
 }: {
   recentAvg: number;
   winRate: number;
+  rows: HandicapBenchmark[] | null;
   target?: number;
 }) {
-  let best = HANDICAP_BENCHMARKS[0];
+  if (!rows?.length) return null;
+
+  let best = rows[0];
   let bestDist = Infinity;
 
-  for (const b of HANDICAP_BENCHMARKS) {
+  for (const b of rows) {
     const { total } = calcFormScore({
       recentAvg,
       expectedAvg: b.expected,
@@ -67,5 +70,6 @@ export function estimateHandicapByScore({
       bestDist = d;
     }
   }
-  return best; // {handicap, expected, min, max}
+
+  return { suggested: best, target, bestDist };
 }

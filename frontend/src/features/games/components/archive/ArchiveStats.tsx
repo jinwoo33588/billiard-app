@@ -1,9 +1,9 @@
 import React from "react";
 import { Card, SimpleGrid, Text, Title, Stack, Loader, Center } from "@mantine/core";
-import type { FullStats } from "../../features/stats";
+import type { Stats } from "../../../stats";
 
 type Props = {
-  stats?: FullStats | null;
+  stats?: Stats | null;
   loading?: boolean;
 };
 

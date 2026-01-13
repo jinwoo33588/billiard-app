@@ -7,8 +7,9 @@ const authMiddleware = require('../middleware/auth');
 const usersService = require('../services/users/users.service');
 const gamesService = require('../services/games/games.service');
 const insightsService = require('../services/insights/insights.service');
-const statsService = require('../services/stats/stats.service'); 
-const monthlyStatsService = require('../services/stats/stats.monthly');
+
+const statsRead = require('../services/stats/stats.read');
+const statsWrite = require('../services/stats/stats.write');
 
 const {
   isObjectId,
@@ -24,7 +25,7 @@ const {
 
 const router = express.Router();
 
-router.use(authMiddleware);
+router.use(authMiddleware);         // 여기서부터 아래는 전부 req.user 보장
 
 // ✅ 내 프로필
 router.get(
@@ -57,7 +58,10 @@ router.post(
   '/games',
   asyncHandler(async (req, res) => {
     const payload = validateGameCreate(req.body);
-    const game = await gamesService.createGame(req.user.userId, payload);
+
+    // ⛳️ DB insert + stats 집계 업데이트 (트랜잭션)
+    const game = await statsWrite.createGameAndUpdateStats(req.user.userId, payload);
+
     res.status(201).json({ message: '경기가 성공적으로 기록되었습니다.', game });
   })
 );
@@ -72,8 +76,16 @@ router.put(
       e.status = 400;
       throw e;
     }
+
     const payload = validateGameUpdate(req.body);
-    const game = await gamesService.updateMyGame(req.user.userId, gameId, payload);
+
+    const game = await statsWrite.updateGameAndUpdateStats(req.user.userId, gameId, payload);
+    if (!game) {
+      const e = new Error('해당 기록을 찾을 수 없거나 수정할 권한이 없습니다.');
+      e.status = 404;
+      throw e;
+    }
+
     res.json({ message: '경기가 성공적으로 수정되었습니다.', game });
   })
 );
@@ -88,120 +100,71 @@ router.delete(
       e.status = 400;
       throw e;
     }
-    await gamesService.deleteMyGame(req.user.userId, gameId);
+
+    const old = await statsWrite.deleteGameAndUpdateStats(req.user.userId, gameId);
+    if (!old) {
+      const e = new Error('해당 기록을 찾을 수 없거나 삭제할 권한이 없습니다.');
+      e.status = 404;
+      throw e;
+    }
+
     res.json({ message: '경기가 성공적으로 삭제되었습니다.' });
   })
 );
 
 // ✅ 내 인사이트
-router.get(
-  '/insights',
-  asyncHandler(async (req, res) => {
-    const windowSize = validateWindow(req.query.window);
-    const data = await insightsService.getInsightsForUser(req.user.userId, windowSize);
-    res.json(data);
-  })
-);
+router.get('/insights', asyncHandler(async (req, res) => {
+  const windowSize = validateWindow(req.query.window);
+  const data = await insightsService.getInsightsForUser(req.user.userId, windowSize);
+  res.json(data);
+}));
 
 router.get(
   '/stats',
   asyncHandler(async (req, res) => {
     const { type = 'all' } = req.query;
 
-    // -----------------------
-    // 1️⃣ selector 구성
-    // -----------------------
-    let selector;
-
-    switch (type) {
-      case 'lastN':
-        selector = {
-          type: 'lastN',
-          n: clamp(toInt(req.query.n, 10), 1, 2000),
-        };
-        break;
-
-      case 'range':
-        selector = {
-          type: 'range',
-          from: toDate(req.query.from),
-          to: toDate(req.query.to),
-        };
-        break;
-
-      case 'thisMonth':
-        selector = {
-          type: 'thisMonth',
-          now: req.query.now ? toDate(req.query.now) : undefined,
-        };
-        break;
-
-      case 'yearMonth':
-        selector = {
-          type: 'yearMonth',
-          year: toInt(req.query.year),
-          month: toInt(req.query.month),
-        };
-        break;
-
-      case 'all':
-      default:
-        selector = { type: 'all' };
-        break;
+    if (type === 'all') {
+      const debug = req.query.debug === "1";
+      const data = await statsRead.getAllStats(req.user.userId);
+      return res.json(data);
     }
 
-    // -----------------------
-    // 2️⃣ pick 처리
-    // pick=counts&pick=avg 형태
-    // -----------------------
-    let pick = req.query.pick;
-    if (typeof pick === 'string') pick = [pick];
-    if (!Array.isArray(pick)) pick = undefined;
+    if (type === 'range') {
+      const from = toDate(req.query.from);
+      const to = toDate(req.query.to);
+      const data = await statsRead.getRangeStats(req.user.userId, from, to);
+      return res.json(data);
+    }
 
-    // -----------------------
-    // 3️⃣ stats 서비스 호출
-    // -----------------------
-    const data = await statsService.buildStatsForUser(req.user.userId, {
-      selector,
-      pick,
-    });
-
-    res.json(data);
+    if (type === 'thisMonth') {
+      const now = req.query.now ? toDate(req.query.now) : new Date();
+      return res.json(await statsRead.getThisMonthStats(req.user.userId, now));
+    }
+  
+    if (type === 'yearMonth') {
+      return res.json(await statsRead.getYearMonthStats(req.user.userId, req.query.year, req.query.month));
+    }
+  
+    if (type === 'lastN') {
+      const n = clamp(toInt(req.query.n, 10), 1, 2000);
+      const data = await statsRead.getLastNStats(req.user.userId, n);
+      return res.json(data);
+    }
+  
+    const e = new Error(`현재 미리집계(stats) 방식에서는 type=${type}를 지원하지 않습니다. (all/range만 지원)`);
+    e.status = 400;
+    throw e;
   })
 );
-
-
 
 router.get(
   '/stats/monthly',
   asyncHandler(async (req, res) => {
-    const { type = 'all' } = req.query;
+    // 옵션: fromMonthKey=2025-01&toMonthKey=2026-01
+    const { fromMonthKey, toMonthKey } = req.query;
 
-    // selector 파싱 로직은 /stats랑 동일
-    let selector;
-    switch (type) {
-      case 'lastN':
-        selector = { type: 'lastN', n: clamp(toInt(req.query.n), 1, 2000) };
-        break;
-      case 'range':
-        selector = { type: 'range', from: toDate(req.query.from), to: toDate(req.query.to) };
-        break;
-      case 'thisMonth':
-        selector = { type: 'thisMonth', now: req.query.now ? toDate(req.query.now) : undefined };
-        break;
-      case 'yearMonth':
-        selector = { type: 'yearMonth', year: toInt(req.query.year), month: toInt(req.query.month) };
-        break;
-      case 'all':
-      default:
-        selector = { type: 'all' };
-        break;
-    }
-
-    const data = await monthlyStatsService.buildMonthlyStatsForUser(
-      req.user.userId,
-      { selector }
-    );
+    const data = await statsRead.getMonthlySeries(req.user.userId, fromMonthKey, toMonthKey);
 
     res.json(data);
   })

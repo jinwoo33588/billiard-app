@@ -1,57 +1,70 @@
 // frontend/src/features/insights/types.ts
+
+export type Benchmark = {
+  handicap: number;
+  expected: number;
+  min?: number;
+  max?: number;
+};
+
+export type FormStats = {
+  recentAvg: number;
+  delta: number;
+  winRate: number;
+  volatility: number;
+  sampleN: number;
+};
+
 export type InsightAll = {
-  status: string;
-  recommendation?: any;
-  benchmark?: { handicap: number; expected: number; min?: number; max?: number };
-  stats: null | {
-    totalGames: number;
-    wins: number;
-    draws: number;
-    losses: number;
-    recentAvg: number;
-    winRate: number;
-    volatility: number;
-    delta: number;
-  };
+  benchmark: Benchmark;
+  stats: FormStats | null;
   reasons?: string[];
+};
+
+export type GpsWeights = {
+  eff: number;
+  vol: number;
+  k: number;
 };
 
 export type TeamGameRow = {
   gameId: string;
   date: string | null;
-  result: "WIN" | "LOSE";
   gameType: string;
+  result: string;
 
   score: number;
   inning: number;
 
   avg: number;
   eff: number;
-  expectedScore: number;
   vol: number;
 
   effScore: number;
   volScore: number;
   gps: number;
 
-  label: "BUS" | "LUCK_BAD" | "CARRY" | "SELF_ISSUE" | "NEUTRAL";
+  weights: GpsWeights;
 };
 
-export type TeamIndicators = {
+export type TeamMeta = {
+  minInning: number;
+  decidedOnly: boolean;
+  excluded: number;
+};
+
+export type TeamInsights = {
   sampleN: number;
   benchmark: { handicap: number; expected: number };
-  cuts: null | {
-    eff: { p05: number; p95: number };
-    vol: { p05: number; p95: number };
-  };
-  counts: { LUCK_BAD: number; BUS: number; SELF_ISSUE: number; CARRY: number; NEUTRAL: number };
-  rates: { luckBadRate: number; busRate: number; selfIssueRate: number; carryRate: number; neutralRate: number };
-  headline: string;
-  note?: string;
+  meta: TeamMeta;
   games: TeamGameRow[];
+  note?: string;
+  // summary?: any  // 지금은 주석 처리한 상태라 없음
 };
 
 export type InsightsResponse = {
+  window: number;
   all: InsightAll;
-  team: TeamIndicators;
+  team: TeamInsights;
+  updatedAt: string;
 };

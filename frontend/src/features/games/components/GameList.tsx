@@ -1,3 +1,4 @@
+// frontend/src/features/games/components/GameList.tsx
 import React, { useMemo, useState, useEffect } from "react";
 import { Text, Group, Stack, Divider, Button } from "@mantine/core";
 
@@ -6,6 +7,12 @@ import GameUpsertModal, { GameUpsertValues } from "./GameUpsertModal";
 
 import type { Game } from "../types";
 import { deleteMyGameApi, updateMyGameApi } from "../api";
+
+// ✅ insights 연결용
+import type { TeamGameRow } from "../../insights/types";
+import type { OutcomeCategory } from "../../insights/utils/teamOutcome";
+import { classifyTeamOutcome } from "../../insights/utils/teamOutcome";
+import type { GameRowDetailData } from "./GameRowDetail";
 
 interface GameListProps {
   games: Game[];
@@ -20,6 +27,11 @@ interface GameListProps {
   /** ✅ “프론트 더보기(슬라이스)”를 계속 쓰고 싶으면 옵션 */
   initialLimit?: number;
   enableLocalPagination?: boolean;
+
+  /** ✅ Insights(팀전 gps) 매핑 */
+  teamMap?: Map<string, TeamGameRow>;
+  expected?: number; // benchmark.expected (기대 에버)
+  insightsLoading?: boolean;
 }
 
 export default function GameList({
@@ -33,11 +45,20 @@ export default function GameList({
 
   initialLimit = 10,
   enableLocalPagination = false,
+
+  teamMap,
+  expected = 0,
+  insightsLoading = false,
 }: GameListProps) {
   const [editingGame, setEditingGame] = useState<Game | null>(null);
 
+  // ✅ 펼침(상세) 상태: 한 번에 한 개만
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
   // ✅ 로컬 슬라이스 방식(옵션)
-  const [visibleCount, setVisibleCount] = useState(enableLocalPagination ? initialLimit : games.length);
+  const [visibleCount, setVisibleCount] = useState(
+    enableLocalPagination ? initialLimit : games.length
+  );
 
   useEffect(() => {
     if (!enableLocalPagination) {
@@ -54,7 +75,8 @@ export default function GameList({
 
   const canShowMoreLocal = enableLocalPagination && visibleCount < games.length;
 
-  const handleShowMoreLocal = () => setVisibleCount((prev) => Math.min(prev + initialLimit, games.length));
+  const handleShowMoreLocal = () =>
+    setVisibleCount((prev) => Math.min(prev + initialLimit, games.length));
   const handleCollapseLocal = () => setVisibleCount(Math.min(initialLimit, games.length));
 
   const handleDelete = async (gameId: string) => {
@@ -71,7 +93,10 @@ export default function GameList({
       inning: Number(values.inning),
       result: values.result === "" ? undefined : values.result,
       gameType: values.gameType,
-      gameDate: values.gameDate ? values.gameDate.toISOString() : editingGame.gameDate,
+
+      // ✅ 핵심: string 그대로 보냄 ("YYYY-MM-DD")
+      gameDate: values.gameDate || String(editingGame.gameDate).slice(0, 10),
+
       memo: values.memo,
     });
 
@@ -87,15 +112,52 @@ export default function GameList({
         <Text>기록된 경기가 없습니다.</Text>
       ) : (
         <Stack gap="xs">
-          {visibleGames.map((game) => (
-            <GameRow
-              key={game._id}
-              game={game}
-              showActions={showActions}
-              onEdit={() => setEditingGame(game)}
-              onDelete={handleDelete}
-            />
-          ))}
+          {visibleGames.map((game) => {
+            const row = teamMap?.get(String(game._id));
+
+            // ✅ outcome 태그(팀전 row가 있을 때만)
+            const outcome: OutcomeCategory | null = row
+              ? classifyTeamOutcome({
+                  gps: row.gps,
+                  result: row.result,
+                  goodCut: 55,
+                  badCut: 45,
+                })
+              : null;
+
+            // ✅ 상세(detail): gps / expectedScore / memo
+            const detail: GameRowDetailData = {
+              gps: row?.gps,
+              expectedScore: row
+                ? (Number(expected) || 0) * (Number(row.inning) || 0)
+                : undefined,
+              memo: (game as any).memo ?? "",
+            };
+
+            const isExpanded = expandedId === String(game._id);
+
+            return (
+              <GameRow
+                key={game._id}
+                game={game}
+                showActions={showActions}
+                onEdit={() => setEditingGame(game)}
+                onDelete={handleDelete}
+                expanded={isExpanded}
+                onToggleExpand={() =>
+                  setExpandedId((prev) => (prev === String(game._id) ? null : String(game._id)))
+                }
+                outcome={outcome}
+                detail={detail}
+              />
+            );
+          })}
+
+          {insightsLoading && (
+            <Text size="xs" c="dimmed" style={{ paddingLeft: 4 }}>
+              팀전 GPS 분석 불러오는 중…
+            </Text>
+          )}
 
           {/* ✅ 서버 더보기 버튼 */}
           {onLoadMore && typeof hasMore === "boolean" && (

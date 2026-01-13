@@ -1,3 +1,5 @@
+// /Users/gimjin-u/my-billiard-app/backend/utils/validators.js
+
 const mongoose = require('mongoose');
 
 const GAME_RESULTS = ['WIN', 'DRAW', 'LOSE', 'UNKNOWN'];

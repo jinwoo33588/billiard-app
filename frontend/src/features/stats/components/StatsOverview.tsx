@@ -13,7 +13,7 @@ import {
   Loader,
 } from "@mantine/core";
 
-import { useMyStats } from "../useMyStats";
+import { useStats } from "../hooks/useStats";
 
 function winRateColor(winRateNum: number) {
   return winRateNum >= 66 ? "green" : winRateNum >= 60 ? "blue" : winRateNum >= 30 ? "orange" : "red";
@@ -147,11 +147,9 @@ function StatsBlock({
 }
 
 export default function StatsOverview() {
-  // ✅ 전체 통계
-  const allQ = useMyStats({ selector: { type: "all" } });
 
-  // ✅ 이번달 통계 (백엔드 selector 사용)
-  const monthQ = useMyStats({ selector: { type: "thisMonth" } });
+  const allQ = useStats({ type: "all" });
+  const monthQ = useStats({ type: "thisMonth" });
 
   const now = new Date();
   const monthLabel = formatYYMM(now);
@@ -166,12 +164,12 @@ export default function StatsOverview() {
     );
   }
 
-  if (allQ.errorMsg || monthQ.errorMsg) {
+  if (allQ.error || monthQ.error) {
     return (
       <Card withBorder radius="md" p="sm">
         <Text c="red" fw={700}>통계를 불러오지 못했습니다.</Text>
         <Text size="sm" c="dimmed">
-          {allQ.errorMsg || monthQ.errorMsg}
+        {String(allQ.error?.message || monthQ.error?.message || "")}
         </Text>
       </Card>
     );

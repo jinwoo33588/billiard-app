@@ -1,46 +1,53 @@
-// src/features/stats/types.ts
+export type StatsType = "all" | "range" | "thisMonth" | "yearMonth" | "lastN";
 
-export type StatsSelector =
-  | { type: "all" }
-  | { type: "lastN"; n: number }
-  | { type: "range"; from?: string; to?: string }
-  | { type: "thisMonth"; now?: string }
-  | { type: "yearMonth"; year: number; month: number };
-
-export type FullStats = {
+export type Stats = {
   totalGames: number;
   wins: number;
   draws: number;
   losses: number;
+
   totalScore: number;
   totalInnings: number;
-  winRate: number; // 0~100
-  average: number; // totalScore/totalInnings
-  volatility: number;
+
+  winRate: number;      // 0~100
+  average: number;      // score/inning
+  volatility: number;   // stddev(avg)
+
   bestAverage: number;
   bestScore: number;
 };
 
-export type BuildStatsResponse = {
+export type StatsSelector =
+  | { type: "all" }
+  | { type: "range"; from: string; to: string } // YYYY-MM-DD or ISO
+  | { type: "thisMonth"; now?: string }         // optional ISO
+  | { type: "yearMonth"; year: number; month: number } // month: 1~12
+  | { type: "lastN"; n: number };
+
+export type StatsResponse = {
   selector: StatsSelector;
-  sampleN: number;
-  updatedAt: string;
-  stats: FullStats; // ✅ flat
+  updatedAt: string; // ISO
+  stats: Stats;
+
+  // optional fields from backend (있으면 받음)
+  sampleN?: number;
+  sampleDays?: number;
+  monthKey?: string;
 };
 
 export type MonthlyRow = {
-  monthKey: string; // "2025-10"
-  label: string; // "2025.10"
+  monthKey: string; // "YYYY-MM"
+  label: string;    // "YYYY.MM"
   games: number;
   wins: number;
   draws: number;
   losses: number;
-  winRate: number | null; // 0~100
-  average: number | null; // totalScore/totalInnings
+  winRate: number | null;
+  average: number | null;
 };
 
-export type MonthlyStatsResponse = {
-  selector: StatsSelector;
+export type MonthlySeriesResponse = {
+  selector: { type: "monthly" } | { type: string };
   updatedAt: string;
   rows: MonthlyRow[];
 };
