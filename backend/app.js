@@ -9,6 +9,7 @@ const meRoutes = require('./routes/me.routes');
 const usersRoutes = require('./routes/users.routes');
 const rankingsRoutes = require('./routes/rankings.routes');
 const statsRoutes = require("./routes/stats.routes");
+const metaRoutes = require("./routes/meta.routes");
 
 const app = express();
 
@@ -31,7 +32,7 @@ app.use("/api/stats", statsRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/rankings', rankingsRoutes);
 // backend/app.js (또는 routes index)
-app.use("/api/meta", require("./routes/meta.routes"));
+app.use("/api/meta", metaRoutes);
 
 // error handler (맨 마지막)
 app.use(errorHandler);

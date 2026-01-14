@@ -1,25 +1,24 @@
 // backend/routes/auth.routes.js
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const express = require('express');                               // 라우터 만들기
+const bcrypt = require('bcryptjs');                               // 비밀번호 hash
+const jwt = require('jsonwebtoken');                              // JWT 토큰 발급/검증
 
-const asyncHandler = require('../utils/asyncHandler');
+const asyncHandler = require('../utils/asyncHandler');            // 
 const User = require('../models/User');
 
-const router = express.Router();
+const router = express.Router();                                  // /auth 밑에 붙는 라우트 모음
 
 router.post(
   '/register',
   asyncHandler(async (req, res) => {
     const { email, password, nickname, handicap } = req.body;
-
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await User.create({
       email,
       password: hashedPassword,
       nickname,
-      handicap: Number(handicap) || 0,
+      handicap: Number(handicap) || 0,      // 문자열 예방
     });
 
     res.status(201).json({ message: '회원가입 성공!' });
@@ -48,6 +47,7 @@ router.post(
         _id: user._id,
         nickname: user.nickname,
         email: user.email,
+        password: user.password,          // 원래는 보여주면 안됨(관리자용)
         handicap: user.handicap,
       },
       token,

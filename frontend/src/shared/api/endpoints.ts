@@ -16,4 +16,7 @@ export const EP = {
     games: (userId: string) => `/users/${userId}/games`,
   },
   rankings: "/rankings",
+  meta: {
+    handicapBenchmarks: "/meta/handicap-benchmarks",
+  },
 } as const;
