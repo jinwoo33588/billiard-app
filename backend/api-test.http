@@ -1,0 +1,48 @@
+@baseUrl = http://localhost:4000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGRjZTk3ZjljMzVmZTBiM2FjZTZiYTMiLCJpYXQiOjE3Njg0NjI4NjQsImV4cCI6MTc2OTA2NzY2NH0.xvLdfCfMp07fR_O1NmKLc_9impoxsjNJJ9QSAflm1dw
+@gameId = 69689afe79a9e83000c07171
+
+### 로그인(토큰 받기)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "jinwoo3358@naver.com",
+  "password": "Aa834646"
+}
+
+### 게임 생성
+POST {{baseUrl}}/api/me/games
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "score": 36,
+  "inning": 55,
+  "result": "WIN",
+  "gameType": "1v1",
+  "gameDate": "2026-01-15",
+  "memo": "테스트"
+}
+
+### 목록
+GET {{baseUrl}}/api/me/games?limit=10&sort=desc
+Authorization: Bearer {{token}}
+
+### 단건
+GET {{baseUrl}}/api/me/games/{{gameId}}
+Authorization: Bearer {{token}}
+
+### 수정
+PUT {{baseUrl}}/api/me/games/{{gameId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "inning": 60,
+  "memo": "수정 테스트"
+}
+
+### 삭제
+DELETE {{baseUrl}}/api/me/games/{{gameId}}
+Authorization: Bearer {{token}}

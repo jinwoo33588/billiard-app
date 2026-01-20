@@ -11,6 +11,11 @@ export async function listMyGamesApi(params?: { limit?: number }) {
   return res.data;
 }
 
+export async function getMyGameApi(gameId: string) {
+  const res = await axiosInstance.get<Game>(EP.me.game(gameId));
+  return res.data;
+}
+
 export async function createMyGameApi(payload: Partial<Game>) {
   const res = await axiosInstance.post<Game>(EP.me.games, payload);
   return res.data;

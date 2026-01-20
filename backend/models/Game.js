@@ -1,7 +1,7 @@
+// backend/models/Game.js
 const mongoose = require('mongoose');
 
-const GAME_RESULTS = ['WIN', 'DRAW', 'LOSE', 'UNKNOWN'];
-const GAME_TYPES = ['UNKNOWN', '1v1', '2v2', '2v2v2', '3v3', '3v3v3'];
+const { GAME_RESULTS, GAME_TYPES } = require('../constants/game.enums');
 
 const gameSchema = new mongoose.Schema(
   {

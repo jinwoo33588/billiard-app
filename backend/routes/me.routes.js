@@ -6,166 +6,186 @@ const authMiddleware = require('../middleware/auth');
 
 const usersService = require('../services/users/users.service');
 const gamesService = require('../services/games/games.service');
-const insightsService = require('../services/insights/insights.service');
-
-const statsRead = require('../services/stats/stats.read');
-const statsWrite = require('../services/stats/stats.write');
+const reportsService = require('../services/reports/reports.service');
 
 const {
-  isObjectId,
-  validateWindow,
-  validateGameCreate,
-  validateGameUpdate,
-  validateUpdateMe,
-  validateStatsQuery, 
-  clamp, 
-  toInt, 
-  toDate,
+  parseGameListQuery,
+  parseGameCreateBody,
+  parseGameUpdateBody,
+} = require('../services/games/games.validators');
+
+const {
+  parseOptionalInt,
+  parseOptionalDateOnlyKst,
+  parseOptionalMonthKeyKst,
+  validateFromTo,
 } = require('../utils/validators');
 
 const router = express.Router();
+router.use(authMiddleware);
 
-router.use(authMiddleware);         // 여기서부터 아래는 전부 req.user 보장
-
-// ✅ 내 프로필
+// ----------------------
+// Profile
+// ----------------------
 router.get(
   '/',
   asyncHandler(async (req, res) => {
-    const data = await usersService.getMe(req.user.userId);
-    res.json(data);
+    const user = await usersService.getMe(req.user.userId);
+    res.json(user);
   })
 );
 
 router.put(
   '/',
   asyncHandler(async (req, res) => {
-    const payload = validateUpdateMe(req.body);
-    const data = await usersService.updateMe(req.user.userId, payload);
-    res.json(data);
+    const payload = {
+      nickname: req.body.nickname,
+      handicap: req.body.handicap,
+    };
+    const user = await usersService.updateMe(req.user.userId, payload);
+    res.json(user);
   })
 );
 
-// ✅ 내 게임 목록
-router.get('/games', asyncHandler(async (req, res) => {
-  const limit = req.query.limit ? Number(req.query.limit) : undefined;
+// ----------------------
+// Games
+// ----------------------
 
-  const games = await gamesService.listMyGames(req.user.userId, { limit });
-  res.json(games);
-}));
+// 내 게임 목록
+router.get(
+  '/games',
+  asyncHandler(async (req, res) => {
+    const opts = parseGameListQuery(req.query);
+    const games = await gamesService.listMyGames(req.user.userId, opts);
+    res.json(games);
+  })
+);
 
-// ✅ 내 게임 추가
+// 내 게임 생성
 router.post(
   '/games',
   asyncHandler(async (req, res) => {
-    const payload = validateGameCreate(req.body);
-
-    // ⛳️ DB insert + stats 집계 업데이트 (트랜잭션)
-    const game = await statsWrite.createGameAndUpdateStats(req.user.userId, payload);
-
-    res.status(201).json({ message: '경기가 성공적으로 기록되었습니다.', game });
+    const doc = parseGameCreateBody(req.body);
+    const game = await gamesService.createMyGame(req.user.userId, doc);
+    res.status(201).json(game);
   })
 );
 
-// ✅ 내 게임 수정
+// 내 게임 한개 조회
+router.get(
+  '/games/:id',
+  asyncHandler(async (req, res) => {
+    const includeGps = req.query.includeGps === '1';
+    const game = await gamesService.getMyGame(req.user.userId, req.params.id, { includeGps });
+    res.json(game);
+  })
+);
+
+// 내 게임 수정
 router.put(
-  '/games/:gameId',
+  '/games/:id',
   asyncHandler(async (req, res) => {
-    const { gameId } = req.params;
-    if (!isObjectId(gameId)) {
-      const e = new Error('gameId가 올바르지 않습니다.');
-      e.status = 400;
-      throw e;
-    }
-
-    const payload = validateGameUpdate(req.body);
-
-    const game = await statsWrite.updateGameAndUpdateStats(req.user.userId, gameId, payload);
-    if (!game) {
-      const e = new Error('해당 기록을 찾을 수 없거나 수정할 권한이 없습니다.');
-      e.status = 404;
-      throw e;
-    }
-
-    res.json({ message: '경기가 성공적으로 수정되었습니다.', game });
+    const upd = parseGameUpdateBody(req.body);
+    const game = await gamesService.updateMyGame(req.user.userId, req.params.id, upd);
+    res.json(game);
   })
 );
 
-// ✅ 내 게임 삭제
+// 내 게임 삭제
 router.delete(
-  '/games/:gameId',
+  '/games/:id',
   asyncHandler(async (req, res) => {
-    const { gameId } = req.params;
-    if (!isObjectId(gameId)) {
-      const e = new Error('gameId가 올바르지 않습니다.');
-      e.status = 400;
-      throw e;
-    }
-
-    const old = await statsWrite.deleteGameAndUpdateStats(req.user.userId, gameId);
-    if (!old) {
-      const e = new Error('해당 기록을 찾을 수 없거나 삭제할 권한이 없습니다.');
-      e.status = 404;
-      throw e;
-    }
-
-    res.json({ message: '경기가 성공적으로 삭제되었습니다.' });
+    await gamesService.deleteMyGame(req.user.userId, req.params.id);
+    res.status(204).send();
   })
 );
 
-// ✅ 내 인사이트
-router.get('/insights', asyncHandler(async (req, res) => {
-  const windowSize = validateWindow(req.query.window);
-  const data = await insightsService.getInsightsForUser(req.user.userId, windowSize);
+// ----------------------
+// Reports (파생)
+// ----------------------
+
+/**
+ * 대시보드 리포트
+ * GET /me/reports/dashboard?recent=10
+ */
+router.get('/reports/dashboard', asyncHandler(async (req, res) => {
+  const recent = req.query.recent ? Number(req.query.recent) : 10;
+  const months = req.query.months ? Number(req.query.months) : 6;
+  const includeRecentGames = req.query.includeRecentGames === '1';
+  const includeGps = req.query.includeGps === '1';
+
+  const data = await reportsService.getDashboardReport(req.user.userId, {
+    recent,
+    months,
+    includeRecentGames,
+    includeGps,
+  });
   res.json(data);
 }));
 
+
+/**
+ * 기간 리포트
+ * GET /me/reports/range?from=YYYY-MM-DD&to=YYYY-MM-DD
+ */
 router.get(
-  '/stats',
+  '/reports/range',
   asyncHandler(async (req, res) => {
-    const { type = 'all' } = req.query;
+    const from = parseOptionalDateOnlyKst(req.query.from, 'from', { endOfDay: false });
+    const to = parseOptionalDateOnlyKst(req.query.to, 'to', { endOfDay: true });
 
-    if (type === 'all') {
-      const debug = req.query.debug === "1";
-      const data = await statsRead.getAllStats(req.user.userId);
-      return res.json(data);
-    }
-
-    if (type === 'range') {
-      const from = toDate(req.query.from);
-      const to = toDate(req.query.to);
-      const data = await statsRead.getRangeStats(req.user.userId, from, to);
-      return res.json(data);
+    if (!from || !to) {
+      const e = new Error('from/to가 필요합니다. 예: /me/reports/range?from=2026-01-01&to=2026-01-14');
+      e.status = 400;
+      throw e;
     }
 
-    if (type === 'thisMonth') {
-      const now = req.query.now ? toDate(req.query.now) : new Date();
-      return res.json(await statsRead.getThisMonthStats(req.user.userId, now));
-    }
-  
-    if (type === 'yearMonth') {
-      return res.json(await statsRead.getYearMonthStats(req.user.userId, req.query.year, req.query.month));
-    }
-  
-    if (type === 'lastN') {
-      const n = clamp(toInt(req.query.n, 10), 1, 2000);
-      const data = await statsRead.getLastNStats(req.user.userId, n);
-      return res.json(data);
-    }
-  
-    const e = new Error(`현재 미리집계(stats) 방식에서는 type=${type}를 지원하지 않습니다. (all/range만 지원)`);
-    e.status = 400;
-    throw e;
+    validateFromTo(from, to);
+
+    const data = await reportsService.getRangeReport(req.user.userId, { from, to });
+    res.json(data);
   })
 );
 
+/**
+ * 이번 달 리포트
+ * GET /me/reports/monthly/current
+ */
 router.get(
-  '/stats/monthly',
+  '/reports/monthly/current',
   asyncHandler(async (req, res) => {
-    // 옵션: fromMonthKey=2025-01&toMonthKey=2026-01
-    const { fromMonthKey, toMonthKey } = req.query;
+    const data = await reportsService.getCurrentMonthReport(req.user.userId);
+    res.json(data);
+  })
+);
 
-    const data = await statsRead.getMonthlySeries(req.user.userId, fromMonthKey, toMonthKey);
+/**
+ * 월별 타임라인 (옵션)
+ * GET /me/reports/monthly/timeline?from=YYYY-MM&to=YYYY-MM
+ *
+ * - from/to 없이 호출하면 service에서 기본 범위(예: 최근 24개월 등)로 처리하도록 설계 가능
+ */
+router.get(
+  '/reports/monthly/timeline',
+  asyncHandler(async (req, res) => {
+    const fromYM = parseOptionalMonthKeyKst(req.query.from, 'from');
+    const toYM = parseOptionalMonthKeyKst(req.query.to, 'to');
 
+    // 여기서는 month-key 형태만 검증하고, 범위/기본값 처리(예: 최근 24개월)는 service에서 담당
+    const data = await reportsService.getMonthlyTimeline(req.user.userId, { fromYM, toYM });
+    res.json(data);
+  })
+);
+
+/**
+ * 단건 게임 평가
+ * GET /me/reports/games/:gameId/evaluation?explain=1
+ */
+router.get(
+  '/reports/games/:gameId/evaluation',
+  asyncHandler(async (req, res) => {
+    const explain = req.query.explain === '1';
+    const data = await reportsService.getGameEvaluation(req.user.userId, req.params.gameId, { explain });
     res.json(data);
   })
 );

@@ -1,5 +1,5 @@
 // frontend/src/features/insights/utils/formScore.ts
-import type { HandicapBenchmark } from "../meta/types";
+import type { HandicapBenchmark } from "../../meta/types";
 
 export function clamp(n: number, a: number, b: number) {
   return Math.max(a, Math.min(b, n));

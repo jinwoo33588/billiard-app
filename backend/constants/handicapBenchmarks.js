@@ -24,20 +24,13 @@ const MIN_H = SORTED_HANDICAPS[0];
 const MAX_H = SORTED_HANDICAPS[SORTED_HANDICAPS.length - 1];
 
 function getBenchmark(handicap) {
-  const h = Math.round(Number(handicap) || 0);
+  const h = Number(handicap);
+  if (!Number.isInteger(h)) return null;
 
-  // ✅ clamp to existing table range
   if (h <= MIN_H) return BENCHMARK_MAP.get(MIN_H);
   if (h >= MAX_H) return BENCHMARK_MAP.get(MAX_H);
 
-  if (BENCHMARK_MAP.has(h)) return BENCHMARK_MAP.get(h);
-
-  // ✅ gap 대비: 가까운 값 탐색
-  for (let d = 1; d <= 30; d++) {
-    if (BENCHMARK_MAP.has(h - d)) return BENCHMARK_MAP.get(h - d);
-    if (BENCHMARK_MAP.has(h + d)) return BENCHMARK_MAP.get(h + d);
-  }
-  return BENCHMARK_MAP.get(25);
+  return BENCHMARK_MAP.get(h) || null;
 }
 
 module.exports = { HANDICAP_BENCHMARKS, getBenchmark };

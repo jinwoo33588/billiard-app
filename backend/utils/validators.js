@@ -1,298 +1,178 @@
-// /Users/gimjin-u/my-billiard-app/backend/utils/validators.js
+// backend/utils/validators.js
 
-const mongoose = require('mongoose');
-
-const GAME_RESULTS = ['WIN', 'DRAW', 'LOSE', 'UNKNOWN'];
-const GAME_TYPES = ['UNKNOWN', '1v1', '2v2', '2v2v2', '3v3', '3v3v3'];
-
-function isObjectId(value) {
-  return mongoose.Types.ObjectId.isValid(String(value));
+function httpError(status, message) {
+  const e = new Error(message);
+  e.status = status;
+  throw e;
 }
 
-function toInt(value, def = 0) {
+function badRequest(message) {
+  httpError(400, message);
+}
+
+function isBlank(v) {
+  return v === undefined || v === null || v === '';
+}
+
+/** 정수(optional). 없으면 undefined. 숫자/정수 아니면 400 */
+function parseOptionalInt(value, fieldName) {
+  if (isBlank(value)) return undefined;
+
   const n = Number(value);
-  return Number.isFinite(n) ? Math.trunc(n) : def;
+  if (!Number.isFinite(n) || !Number.isInteger(n)) {
+    badRequest(`${fieldName}는 정수여야 합니다.`);
+  }
+  return n;
 }
 
-function toNumber(value, def = 0) {
+/** 숫자(required). 숫자 아니면 400. min 있으면 min 미만이면 400 */
+function parseRequiredNumber(value, fieldName, { min } = {}) {
+  if (isBlank(value)) badRequest(`${fieldName}는 필수입니다.`);
+
   const n = Number(value);
-  return Number.isFinite(n) ? n : def;
+  if (!Number.isFinite(n)) badRequest(`${fieldName}는 숫자여야 합니다.`);
+  if (min !== undefined && n < min) badRequest(`${fieldName}는 ${min} 이상이어야 합니다.`);
+  return n;
 }
 
-function clamp(n, min, max) {
-  return Math.max(min, Math.min(max, n));
+/** 문자열(optional). 없으면 undefined. trim/maxLen 적용 */
+function parseOptionalString(value, fieldName, { trim = true, maxLen } = {}) {
+  if (isBlank(value)) return undefined;
+
+  let s = String(value);
+  if (trim) s = s.trim();
+
+  if (maxLen !== undefined && s.length > maxLen) {
+    badRequest(`${fieldName}는 최대 ${maxLen}자입니다.`);
+  }
+  return s;
 }
 
-function toDate(value) {
-  if (value === null || value === undefined || value === '') return null;
+/** enum(optional). 없으면 defaultValue. allowed에 없으면 400 */
+function parseEnum(value, fieldName, allowed, defaultValue) {
+  if (isBlank(value)) return defaultValue;
 
-  // 숫자면 timestamp 가능성 처리(초 → 밀리초)
-  if (typeof value === 'number') {
-    const ms = value < 10_000_000_000 ? value * 1000 : value;
-    const d = new Date(ms);
-    return Number.isNaN(d.getTime()) ? null : d;
+  const v = String(value);
+  if (!allowed.includes(v)) {
+    badRequest(`${fieldName} 값이 올바르지 않습니다.`);
   }
-
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
-
-function normalizeResult(v) {
-  if (!v) return 'UNKNOWN';
-  const s = String(v).trim();
-
-  // 한글 흡수
-  if (s === '승') return 'WIN';
-  if (s === '무') return 'DRAW';
-  if (s === '패') return 'LOSE';
-
-  const u = s.toUpperCase();
-  if (u === 'W') return 'WIN';
-  if (u === 'D') return 'DRAW';
-  if (u === 'L') return 'LOSE';
-
-  if (GAME_RESULTS.includes(u)) return u;
-  return 'UNKNOWN';
-}
-
-function normalizeGameType(v) {
-  if (!v) return 'UNKNOWN';
-  const s = String(v).trim();
-
-  // vs, VS, V 등 모두 'v'로 통일 + 공백 제거
-  const normalized = s
-    .replace(/\s+/g, '')
-    .replace(/vs/gi, 'v')
-    .replace(/V/g, 'v');
-
-  if (GAME_TYPES.includes(normalized)) return normalized;
-  return 'UNKNOWN';
-}
-
-function requireFields(obj, fields) {
-  for (const f of fields) {
-    if (obj[f] === undefined || obj[f] === null || obj[f] === '') {
-      const e = new Error(`필수 값 누락: ${f}`);
-      e.status = 400;
-      throw e;
-    }
-  }
-}
-
-function validateWindow(window) {
-  const w = clamp(toInt(window, 10), 1, 50);
-  return w;
-}
-
-function validateGameCreate(body) {
-  requireFields(body, ['score', 'inning', 'gameDate']);
-
-  const score = toNumber(body.score, NaN);
-  const inning = toNumber(body.inning, NaN);
-  const gameDate = toDate(body.gameDate);
-
-  if (!Number.isFinite(score) || score < 0) {
-    const e = new Error('score는 0 이상의 숫자여야 합니다.');
-    e.status = 400;
-    throw e;
-  }
-
-  if (!Number.isFinite(inning) || inning < 1) {
-    const e = new Error('inning은 1 이상의 숫자여야 합니다.');
-    e.status = 400;
-    throw e;
-  }
-
-  if (!gameDate) {
-    const e = new Error('gameDate가 올바르지 않습니다.');
-    e.status = 400;
-    throw e;
-  }
-
-  return {
-    score,
-    inning,
-    result: normalizeResult(body.result),
-    gameType: normalizeGameType(body.gameType),
-    gameDate,
-    memo: body.memo ? String(body.memo) : '',
-  };
-}
-
-function validateGameUpdate(body) {
-  // 부분 업데이트도 가능하게(원하면 필수로 바꿔도 됨)
-  const out = {};
-  if (body.score !== undefined) {
-    const score = toNumber(body.score, NaN);
-    if (!Number.isFinite(score) || score < 0) {
-      const e = new Error('score는 0 이상의 숫자여야 합니다.');
-      e.status = 400;
-      throw e;
-    }
-    out.score = score;
-  }
-
-  if (body.inning !== undefined) {
-    const inning = toNumber(body.inning, NaN);
-    if (!Number.isFinite(inning) || inning < 1) {
-      const e = new Error('inning은 1 이상의 숫자여야 합니다.');
-      e.status = 400;
-      throw e;
-    }
-    out.inning = inning;
-  }
-
-  if (body.result !== undefined) out.result = normalizeResult(body.result);
-  if (body.gameType !== undefined) out.gameType = normalizeGameType(body.gameType);
-
-  if (body.gameDate !== undefined) {
-    const gameDate = toDate(body.gameDate);
-    if (!gameDate) {
-      const e = new Error('gameDate가 올바르지 않습니다.');
-      e.status = 400;
-      throw e;
-    }
-    out.gameDate = gameDate;
-  }
-
-  if (body.memo !== undefined) out.memo = String(body.memo).trim();
-
-  if (Object.keys(out).length === 0) {
-    const e = new Error('수정할 필드가 없습니다.');
-    e.status = 400;
-    throw e;
-  }
-
-  return out;
-}
-
-function validateUpdateMe(body) {
-  const out = {};
-  if (body.nickname !== undefined) out.nickname = String(body.nickname).trim();
-  if (body.handicap !== undefined) out.handicap = toNumber(body.handicap, 0);
-
-  if (out.nickname !== undefined && out.nickname.length < 1) {
-    const e = new Error('nickname이 올바르지 않습니다.');
-    e.status = 400;
-    throw e;
-  }
-
-  if (out.handicap !== undefined && !Number.isFinite(out.handicap)) {
-    const e = new Error('handicap이 올바르지 않습니다.');
-    e.status = 400;
-    throw e;
-  }
-
-  if (Object.keys(out).length === 0) {
-    const e = new Error('수정할 필드가 없습니다.');
-    e.status = 400;
-    throw e;
-  }
-
-  return out;
-}
-
-function validateRankingQuery(query) {
-  const year = query.year !== undefined ? toInt(query.year, NaN) : NaN;
-  const month = query.month !== undefined ? toInt(query.month, NaN) : NaN;
-
-  const hasMonthFilter =
-    Number.isInteger(year) &&
-    Number.isInteger(month) &&
-    month >= 1 &&
-    month <= 12;
-
-  return { hasMonthFilter, year, month };
+  return v;
 }
 
 /**
- * ✅ /api/me/stats 용 쿼리 검증/파싱
- *
- * 지원:
- * - selector=all
- * - selector=lastN&n=20
- * - selector=thisMonth&now=ISO(optional)
- * - selector=yearMonth&year=2026&month=1
- * - selector=range&from=ISO&to=ISO
- *
- * pick:
- * - pick=counts,avg,winRate   (없으면 null => FULL 반환)
+ * KST 기준 date-only("YYYY-MM-DD")를 Date로 변환.
+ * - endOfDay=false : 00:00:00.000 +09:00
+ * - endOfDay=true  : 23:59:59.999 +09:00
  */
-function validateStatsQuery(query) {
-  const selector = String(query.selector || 'all').trim();
+function parseOptionalDateOnlyKst(value, fieldName, { endOfDay = false } = {}) {
+  if (isBlank(value)) return undefined;
 
-  // pick=counts,avg,winRate
-  const pick =
-    query.pick === undefined || query.pick === null || String(query.pick).trim() === ''
-      ? null
-      : String(query.pick)
-          .split(',')
-          .map((x) => x.trim())
-          .filter(Boolean);
-
-  if (selector === 'lastN') {
-    const n = clamp(toInt(query.n, 20), 1, 200);
-    return { pick, selector: { type: 'lastN', n } };
+  const s = String(value);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    badRequest(`${fieldName} 형식이 올바르지 않습니다. (YYYY-MM-DD)`);
   }
 
-  if (selector === 'thisMonth') {
-    const now = query.now ? toDate(query.now) : null;
-    return {
-      pick,
-      selector: {
-        type: 'thisMonth',
-        ...(now ? { now: now.toISOString() } : {}),
-      },
-    };
+  const time = endOfDay ? '23:59:59.999' : '00:00:00.000';
+  const d = new Date(`${s}T${time}+09:00`);
+
+  if (Number.isNaN(d.getTime())) {
+    badRequest(`${fieldName}가 올바르지 않습니다.`);
   }
-
-  if (selector === 'yearMonth') {
-    const year = toInt(query.year, NaN);
-    const month = toInt(query.month, NaN);
-
-    if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12) {
-      const e = new Error('yearMonth는 year(YYYY), month(1~12)가 필요합니다.');
-      e.status = 400;
-      throw e;
-    }
-
-    return { pick, selector: { type: 'yearMonth', year, month } };
-  }
-
-  if (selector === 'range') {
-    const from = toDate(query.from);
-    const to = toDate(query.to);
-
-    if (!from || !to) {
-      const e = new Error('range는 from/to(ISO date)가 필요합니다.');
-      e.status = 400;
-      throw e;
-    }
-    if (from.getTime() > to.getTime()) {
-      const e = new Error('range는 from <= to 이어야 합니다.');
-      e.status = 400;
-      throw e;
-    }
-
-    return { pick, selector: { type: 'range', from: from.toISOString(), to: to.toISOString() } };
-  }
-
-  // 기본 all
-  return { pick, selector: { type: 'all' } };
+  return d;
 }
 
+/**
+ * body에서 날짜(required) 파싱.
+ * - "YYYY-MM-DD"면 KST 00:00으로 고정
+ * - 그 외는 Date 생성자(ISO 등) 허용
+ */
+function parseRequiredDate(value, fieldName) {
+  if (isBlank(value)) badRequest(`${fieldName}는 필수입니다.`);
+
+  const s = String(value);
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const d = new Date(`${s}T00:00:00.000+09:00`);
+    if (Number.isNaN(d.getTime())) badRequest(`${fieldName}가 올바르지 않습니다.`);
+    return d;
+  }
+
+  const d = new Date(s);
+  if (Number.isNaN(d.getTime())) badRequest(`${fieldName}가 올바르지 않습니다.`);
+  return d;
+}
+
+/** sort 파라미터(optional): asc/desc만 허용. 없으면 undefined */
+function parseOptionalSort(value, fieldName = 'sort') {
+  if (isBlank(value)) return undefined;
+  if (value === 'asc' || value === 'desc') return value;
+  badRequest(`${fieldName}는 'asc' 또는 'desc'만 허용됩니다.`);
+}
+
+/** from/to 관계 검증(둘 다 있을 때) */
+function validateFromTo(from, to, { fromName = 'from', toName = 'to' } = {}) {
+  if (from && to && from.getTime() > to.getTime()) {
+    badRequest(`${fromName}은(는) ${toName}보다 이후일 수 없습니다.`);
+  }
+}
+
+//-------------------------------------------------------------------------------------------------------------
+
+/** YYYY-MM (KST) -> { year, month0 } */
+function parseOptionalMonthKeyKst(value, fieldName) {
+  if (isBlank(value)) return undefined;
+
+  const s = String(value);
+  if (!/^\d{4}-\d{2}$/.test(s)) {
+    badRequest(`${fieldName} 형식이 올바르지 않습니다. (YYYY-MM)`);
+  }
+
+  const [yy, mm] = s.split('-');
+  const year = Number(yy);
+  const month = Number(mm); // 1~12
+
+  if (!Number.isFinite(year) || !Number.isFinite(month) || month < 1 || month > 12) {
+    badRequest(`${fieldName} 값이 올바르지 않습니다.`);
+  }
+
+  return { year, month0: month - 1 };
+}
+
+/** (KST) year/month0 -> { from, to } */
+function monthRangeFromYearMonthKst(year, month0) {
+  if (!Number.isFinite(year) || !Number.isFinite(month0) || month0 < 0 || month0 > 11) {
+    badRequest(`year/month 값이 올바르지 않습니다.`);
+  }
+
+  const m = String(month0 + 1).padStart(2, '0');
+  const from = new Date(`${year}-${m}-01T00:00:00.000+09:00`);
+
+  // 다음달 1일 00:00 - 1ms = 해당월 말일 23:59:59.999
+  const nextMonth0 = month0 === 11 ? 0 : month0 + 1;
+  const nextYear = month0 === 11 ? year + 1 : year;
+  const nm = String(nextMonth0 + 1).padStart(2, '0');
+  const nextFrom = new Date(`${nextYear}-${nm}-01T00:00:00.000+09:00`);
+  const to = new Date(nextFrom.getTime() - 1);
+
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+    badRequest(`month range 생성에 실패했습니다.`);
+  }
+
+  return { from, to };
+}
+
+
 module.exports = {
-  isObjectId,
-  validateWindow,
-  validateGameCreate,
-  validateGameUpdate,
-  validateUpdateMe,
-  validateRankingQuery,
-  validateStatsQuery, // ✅ 추가
-  normalizeResult,
-  normalizeGameType,
-  clamp,
-  toInt,
-  toNumber,
-  toDate,
+  httpError,
+  badRequest,
+  parseOptionalInt,
+  parseRequiredNumber,
+  parseOptionalString,
+  parseEnum,
+  parseOptionalDateOnlyKst,
+  parseRequiredDate,
+  parseOptionalSort,
+  validateFromTo,
+  parseOptionalMonthKeyKst,
+  monthRangeFromYearMonthKst,
 };

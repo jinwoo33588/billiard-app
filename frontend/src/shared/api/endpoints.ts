@@ -7,6 +7,7 @@ export const EP = {
   me: {
     root: "/me",
     games: "/me/games",
+    game: (gameId: string) => `/me/games/${gameId}`,
     insights: "/me/insights",
     stats: "/me/stats",
     statsMonthly: "/me/stats/monthly",
