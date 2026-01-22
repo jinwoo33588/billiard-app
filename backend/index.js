@@ -1,15 +1,10 @@
-
 require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-
-const app = express();
-app.use(cors({ origin: true, credentials: true }));
-app.use(express.json());
-
-app.get("/api/health", (req, res) => {
-  res.json({ ok: true, at: new Date().toISOString() });
-});
+const app = require("./app");
+const { connectDB } = require("./config/db");
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`[backend] listening on :${PORT}`));
+
+(async () => {
+  await connectDB();
+  app.listen(PORT, () => console.log(`[backend] listening on :${PORT}`));
+})();
