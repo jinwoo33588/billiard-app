@@ -1,5 +1,5 @@
 // frontend/src/features/games/utils/ratingBadge.ts
-import type { Game } from "../../features/games/types";
+import type { Game } from "../types";
 
 export type RatingBadgeKey = "CARRY" | "BUS" | "UNLUCKY" | "MY_ISSUE" | "NORMAL";
 

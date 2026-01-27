@@ -10,6 +10,7 @@ import InsightsPage from "../pages/InsightsPage";
 import RankingPage from "../pages/RankingPage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
+import UserProfilePage from "../pages/UserProfilePage";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/games" element={<GamesPage />} />
           <Route path="/insights" element={<InsightsPage />} />
           <Route path="/ranking" element={<RankingPage />} />
+          <Route path="/users/:id" element={<UserProfilePage />} />
         </Route>
       </Route>
     </Routes>

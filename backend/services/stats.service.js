@@ -90,6 +90,9 @@ function buildGroupPipeline(match) {
  * @param {{ mode: 'range'|'limit'|'all', range?:{from,to}, limit?:number }} opt
  */
 async function getMyStats(userId, opt) {
+  console.log("[getMyStats] userId:", userId, "typeof:", typeof userId, "isObjectId:", userId?._bsontype);
+  console.log("[getMyStats] stack=", new Error().stack.split("\n").slice(0, 6).join("\n"));
+
   const mode = opt?.mode || "all";
   const range = opt?.range || { from: null, to: null };
   const limit = opt?.limit ?? null;

@@ -6,6 +6,15 @@ import GameListWithEdit from "../features/games/components/GameListWithEdit";
 import type { Game } from "../features/games/types";
 import GamePeriodFilter from "../features/games/components/GamePeriodFilter";
 
+function startOfThisMonth() {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+function endOfThisMonth() {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0);
+}
+
 function getYmdParts(iso: string) {
   // iso: "2026-01-15T..." or "2026-01-15"
   const y = Number(iso.slice(0, 4));
@@ -25,8 +34,15 @@ function yearMonthToRange(selectedYear: number, selectedMonth0: number | null) {
 }
 
 export default function GamesPage() {
-  const [dateRange, setDateRange] = useState<DatesRangeValue<Date>>([null, null]);
-  const [filterMode, setFilterMode] = useState<"all" | "custom" | "yearMonth">("all");
+  // ✅ 기본값: 이번달 range
+  const [dateRange, setDateRange] = useState<DatesRangeValue<Date>>([
+    startOfThisMonth(),
+    endOfThisMonth(),
+  ]);
+  // ✅ 기본값: custom(기간필터가 적용된 상태)
+  const [filterMode, setFilterMode] = useState<"all" | "custom" | "yearMonth">("custom");
+
+  // year/month pill은 선택 안 한 상태로 둬도 됨(기간필터가 우선이니까)
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedMonth0, setSelectedMonth0] = useState<number | null>(null);
 
@@ -42,7 +58,7 @@ export default function GamesPage() {
   }, [filterMode, dateRange, selectedYear, selectedMonth0]);
 
   // ✅ 1) pill 옵션(연/월/카운트)용: 항상 전체 범위
-  const meta = useGames({ limit: 200 }); // or 500 등
+  const meta = useGames({ limit: 500 });
 
   // ✅ 2) 실제 리스트용: 필터 적용
   const filtered = useGames({ limit: 200, from: query.from, to: query.to });

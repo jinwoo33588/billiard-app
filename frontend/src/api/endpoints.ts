@@ -4,4 +4,6 @@ export const EP = {
   me: "/api/me",
   games: "/api/me/games",
   insights:"/api/me/insights",
+  ranking: "/api/ranking",
+  users:"/api/users",
 } as const;
