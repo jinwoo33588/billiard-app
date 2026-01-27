@@ -1,8 +1,15 @@
+// frontend/src/features/games/games.api.ts
 import axiosInstance from "../../api/axiosInstance";
 import { EP } from "../../api/endpoints";
 import type { Game, CreateGamePayload, UpdateGamePayload } from "./types";
 
-export async function listMyGamesApi(params?: { limit?: number }): Promise<Game[]> {
+export type ListMyGamesParams = {
+  limit?: number;
+  from?: string; // YYYY-MM-DD
+  to?: string;   // YYYY-MM-DD
+};
+
+export async function listMyGamesApi(params?: ListMyGamesParams): Promise<Game[]> {
   const res = await axiosInstance.get<Game[]>(EP.games, { params });
   return res.data;
 }
@@ -18,7 +25,7 @@ export async function createMyGameApi(payload: CreateGamePayload): Promise<Game>
 }
 
 export async function updateMyGameApi(id: string, patch: UpdateGamePayload): Promise<Game> {
-  const res = await axiosInstance.put<Game>(`${EP.games}/${id}`, patch);
+  const res = await axiosInstance.patch<Game>(`${EP.games}/${id}`, patch);
   return res.data;
 }
 

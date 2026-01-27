@@ -1,7 +1,14 @@
+// GameList.tsx
 import React from "react";
 import type { Game } from "../types";
 import GameCard from "./GameCard";
 import { fmtYYMMDD_DOW, fmtMonthLabel } from "../../../shared/utils/date";
+
+type Props = {
+  games: Game[];
+  onEdit?: (game: Game) => void;
+  onDelete?: (gameId: string) => void;
+};
 
 type DaySection = { dayKey: string; games: Game[] };
 type MonthSection = { monthKey: string; days: DaySection[] };
@@ -10,19 +17,17 @@ function groupGamesByMonthThenDay(games: Game[]): MonthSection[] {
   const monthMap = new Map<string, Game[]>();
 
   for (const g of games) {
-    const mk = fmtMonthLabel(g.gameDate);
+    const mk = fmtMonthLabel(g.gameDate); // ✅ 지금은 라벨을 키로 쓰고 있음(일단 유지)
     const arr = monthMap.get(mk);
     if (arr) arr.push(g);
     else monthMap.set(mk, [g]);
   }
 
-  // 월 최신순
   const monthKeys = Array.from(monthMap.keys()).sort((a, b) => (a < b ? 1 : -1));
 
   return monthKeys.map((mk) => {
     const monthGames = monthMap.get(mk)!;
 
-    // 월 내부: 일자별 그룹
     const dayMap = new Map<string, Game[]>();
     for (const g of monthGames) {
       const dk = fmtYYMMDD_DOW(g.gameDate);
@@ -31,7 +36,6 @@ function groupGamesByMonthThenDay(games: Game[]): MonthSection[] {
       else dayMap.set(dk, [g]);
     }
 
-    // 일 최신순
     const dayKeys = Array.from(dayMap.keys()).sort((a, b) => (a < b ? 1 : -1));
     const days = dayKeys.map((dk) => ({ dayKey: dk, games: dayMap.get(dk)! }));
 
@@ -39,31 +43,29 @@ function groupGamesByMonthThenDay(games: Game[]): MonthSection[] {
   });
 }
 
-export default function GameList({ games }: { games: Game[] }) {
+export default function GameList({ games, onEdit, onDelete }: Props) {
   const monthSections = groupGamesByMonthThenDay(games);
 
   return (
     <div style={{ display: "grid", gap: 18 }}>
       {monthSections.map((m) => (
         <div key={m.monthKey}>
-          {/* ✅ 월 헤더 */}
           <div
-              style={{
-                position: "sticky",
-                top: 0,                 // 스크롤 컨테이너의 상단에 붙음
-                zIndex: 10,             // 카드들 위로
-                background: "var(--mantine-color-body)", // 아래가 비치지 않게
-                padding: "10px 2px 8px",
-                margin: "0 0 8px",
-                borderBottom: "1px solid var(--mantine-color-gray-3)",
-                fontWeight: 950,
-                fontSize: 16,
-              }}
-            >            
+            style={{
+              position: "sticky",
+              top: 0,
+              zIndex: 10,
+              background: "var(--mantine-color-body)",
+              padding: "10px 2px 8px",
+              margin: "0 0 8px",
+              borderBottom: "1px solid var(--mantine-color-gray-3)",
+              fontWeight: 950,
+              fontSize: 16,
+            }}
+          >
             {fmtMonthLabel(m.monthKey)}
           </div>
 
-          {/* ✅ 월 안의 날짜 섹션들 */}
           <div style={{ display: "grid", gap: 14 }}>
             {m.days.map((d) => (
               <div key={d.dayKey}>
@@ -73,7 +75,13 @@ export default function GameList({ games }: { games: Game[] }) {
 
                 <div style={{ display: "grid", gap: 10 }}>
                   {d.games.map((g) => (
-                    <GameCard key={g.id} game={g} showActions />
+                    <GameCard
+                      key={g.id}
+                      game={g}
+                      showActions
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                    />
                   ))}
                 </div>
               </div>

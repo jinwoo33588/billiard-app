@@ -101,8 +101,13 @@ export default function GameCard({ game, showActions = true, onEdit, onDelete }:
                 </Menu.Target>
 
                 <Menu.Dropdown onClick={(e) => e.stopPropagation()}>
-                  <Menu.Item leftSection={<IconPencil size={14} />} onClick={() => onEdit?.(game)}>
-                    수정
+                <Menu.Item
+  leftSection={<IconPencil size={14} />}
+  onClick={() => {
+    console.log("[GameCard] edit clicked", game.id, !!onEdit); // ✅ true여야 정상
+    onEdit?.(game);
+  }}
+>                    수정
                   </Menu.Item>
                   <Menu.Item
                     color="red"

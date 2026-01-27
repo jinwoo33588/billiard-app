@@ -21,19 +21,4 @@ function validateUpdateMe(body) {
   return patch;
 }
 
-function isYmd(s) {
-  // 2026-01-22 형태만 허용
-  return typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s);
-}
-
-function validateStatsQuery(req, res, next) {
-  const { from, to } = req.query;
-
-  if (from && !isYmd(from)) return next(require("../utils/httpError")(400, "invalid from (YYYY-MM-DD)"));
-  if (to && !isYmd(to)) return next(require("../utils/httpError")(400, "invalid to (YYYY-MM-DD)"));
-
-  next();
-}
-
-
-module.exports = { validateUpdateMe, validateStatsQuery };
+module.exports = { validateUpdateMe };

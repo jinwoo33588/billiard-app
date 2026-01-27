@@ -6,18 +6,20 @@
 
 const gamesService = require("../services/games.service");
 const httpError = require("../utils/httpError");
-const { validateCreateGame, validateGameId, validateUpdateGame } = require("../validators/games.validator");
+const {
+  validateCreateGame,
+  validateGameId,
+  validateUpdateGame,
+  validateListMyGamesQuery, // ✅ 추가
+} = require("../validators/games.validator");
 
 async function listMyGames(req, res) {
-  // GET /api/games?limit=20
-  const limitRaw = req.query.limit;
-  const limit = limitRaw ? Number(limitRaw) : undefined;
+  // ✅ 쿼리 검증/파싱을 validator에 위임
+  // - { limit, from, to } 형태로 받는 걸 추천
+  const { limit, from, to } = validateListMyGamesQuery(req.query);
+  console.log("[listMyGames query]", { from, to, limit, raw: req.query });
 
-  if (limitRaw !== undefined && !Number.isFinite(limit)) {
-    throw httpError(400, "limit must be a number");
-  }
-
-  const docs = await gamesService.listMyGames(req.user.userId, { limit });
+  const docs = await gamesService.listMyGames(req.user.userId, { limit, from, to });
   res.json(docs.map((d) => d.toPublic()));
 }
 

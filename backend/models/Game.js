@@ -57,6 +57,8 @@ const gameSchema = new mongoose.Schema(
 );
 
 gameSchema.methods.toPublic = function () {
+  const extra = this.$locals?.extra ?? null;
+
   return {
     id: this._id.toString(),
     userId: this.userId.toString(),
@@ -68,6 +70,8 @@ gameSchema.methods.toPublic = function () {
     memo: this.memo ?? "",
     createdAt: this.createdAt?.toISOString(),
     updatedAt: this.updatedAt?.toISOString(),
+
+    ...(extra ? extra : {}),
   };
 };
 

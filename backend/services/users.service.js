@@ -17,4 +17,11 @@ async function updateMyProfile(userId, patch) {
   return user;
 }
 
-module.exports = { getUserById, updateMyProfile };
+async function getMyHandicap(userId) {
+  const u = await User.findById(userId).select("handicap");
+  if (!u) throw new HttpError(404, "user not found");
+  const h = Number(u.handicap);
+  return Number.isFinite(h) ? h : 0; // 기본값 정책
+}
+
+module.exports = { getUserById, updateMyProfile, getMyHandicap };

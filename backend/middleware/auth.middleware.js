@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose"); // ✅ 추가
 const { HttpError } = require("../utils/httpError");
 
 function authMiddleware(req, res, next) {
@@ -9,7 +10,15 @@ function authMiddleware(req, res, next) {
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    req.user = { userId: payload.userId };
+
+    // ✅ payload.userId가 ObjectId 문자열이어야 함
+    if (!mongoose.isValidObjectId(payload.userId)) {
+      throw new HttpError(401, "Invalid token");
+    }
+
+    // ✅ 여기서 표준화: 이후엔 req.user.userId는 항상 ObjectId
+    req.user = { userId: new mongoose.Types.ObjectId(payload.userId) };
+
     next();
   } catch {
     throw new HttpError(401, "Invalid token");

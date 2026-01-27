@@ -1,0 +1,105 @@
+/* ===== Flatpickr tone only: clean white + strong typography + subtle borders ===== */
+
+.flatpickr-calendar {
+  background: #ffffff;
+  color: #111;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.14);
+  overflow: hidden;
+}
+
+.flatpickr-months {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.flatpickr-current-month {
+  font-weight: 900;
+  letter-spacing: -0.2px;
+}
+
+.flatpickr-prev-month,
+.flatpickr-next-month {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.flatpickr-prev-month:hover,
+.flatpickr-next-month:hover {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.flatpickr-weekdays {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.flatpickr-weekday {
+  color: rgba(0, 0, 0, 0.55);
+  font-weight: 800;
+  letter-spacing: -0.1px;
+}
+
+.flatpickr-day {
+  border-radius: 10px; /* 셀 모양만 살짝 정리 */
+  font-weight: 800;
+  color: rgba(0, 0, 0, 0.86);
+}
+
+.flatpickr-day:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* today: 과한 강조 없이 링으로만 */
+.flatpickr-day.today {
+  border-color: rgba(0, 0, 0, 0.22);
+}
+
+/* selected: 과한 컬러 대신 깔끔한 다크 톤 */
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+  background: rgba(0, 0, 0, 0.88);
+  border-color: rgba(0, 0, 0, 0.88);
+  color: #fff;
+}
+
+/* range middle: 은은하게 */
+.flatpickr-day.inRange {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.02);
+}
+
+/* 비활성: 깔끔하게 흐리기 */
+.flatpickr-day.disabled,
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay {
+  color: rgba(0, 0, 0, 0.25);
+}
+
+/* 시간 선택(혹시 쓰면) */
+.flatpickr-time {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+.flatpickr-time input,
+.flatpickr-time .flatpickr-am-pm {
+  font-weight: 800;
+  color: rgba(0, 0, 0, 0.86);
+}
+
+/* 선택(파란색 덮어쓰기) */
+.flatpickr-calendar .flatpickr-day.selected,
+.flatpickr-calendar .flatpickr-day.startRange,
+.flatpickr-calendar .flatpickr-day.endRange,
+.flatpickr-calendar .flatpickr-day.selected:hover,
+.flatpickr-calendar .flatpickr-day.startRange:hover,
+.flatpickr-calendar .flatpickr-day.endRange:hover {
+  background: rgba(0, 0, 0, 0.88) !important;
+  border-color: rgba(0, 0, 0, 0.88) !important;
+  color: #fff !important;
+}
+
+/* range 중간(있으면 파란색 잔상 제거) */
+.flatpickr-calendar .flatpickr-day.inRange,
+.flatpickr-calendar .flatpickr-day.inRange:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
+  border-color: rgba(0, 0, 0, 0.02) !important;
+}

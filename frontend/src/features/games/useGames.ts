@@ -1,3 +1,4 @@
+// frontend/src/features/games/useGames.ts
 import { useCallback, useEffect, useState } from "react";
 import type { Game } from "./types";
 import { listMyGamesApi } from "./games.api";
@@ -14,7 +15,7 @@ export function emitGamesChanged() {
   window.dispatchEvent(new Event(GAMES_CHANGED_EVENT));
 }
 
-export function useGames(options?: { limit?: number }) {
+export function useGames(options?: { limit?: number; from?: string; to?: string }) {
   const [state, setState] = useState<State>({ loading: true, error: null, games: [] });
   const [tick, setTick] = useState(0);
 
@@ -33,7 +34,7 @@ export function useGames(options?: { limit?: number }) {
     (async () => {
       try {
         setState((s) => ({ ...s, loading: true, error: null }));
-        const games = await listMyGamesApi({ limit: options?.limit });
+        const games = await listMyGamesApi(options);
         if (!mounted) return;
         setState({ loading: false, error: null, games });
       } catch (e: any) {
@@ -45,7 +46,7 @@ export function useGames(options?: { limit?: number }) {
     return () => {
       mounted = false;
     };
-  }, [options?.limit, tick]);
+  }, [options?.limit, options?.from, options?.to, tick]);
 
   return { ...state, reload };
 }

@@ -1,33 +1,98 @@
 /**
  * games.service.js
- * - DB(Game 모델)에 접근해서 "내 게임 목록"을 가져온다.
- * - 라우터는 HTTP 처리, 서비스는 DB 조회 로직만 담당한다.
+ * - ✅ controller는 그대로(toPublic 호출 유지)
+ * - service는 Game Document를 반환하고,
+ * - handicap/rating은 doc.$locals.extra에 붙인다 (DB 저장 X)
  */
 
 const Game = require("../models/Game");
-const httpError = require("../utils/httpError");
+const User = require("../models/User");
+const httpErrorMod = require("../utils/httpError");
+const { buildDateRange } = require("../utils/date");
 
-// 	“내 userId”로만 Game을 찾고, 최신순으로 정렬해서 반환.limit 있으면 N개만
-async function listMyGames(userId, { limit } = {}) {
-  const q = Game.find({ userId }).sort({ gameDate: -1, updatedAt: -1 });
+const { lookupHandicapBenchmark } = require("./insights/handicap.lookup");
+const { rateGame } = require("./ratings/rating.scoring");
 
-  // limit이 있으면 제한 (숫자가 아니면 무시하거나 라우터에서 검증)
-  if (typeof limit === "number" && Number.isFinite(limit) && limit > 0) {
-    q.limit(limit);
-  }
+/** httpError 모듈 형태가 프로젝트마다 달라서(함수/클래스) 안전하게 래핑 */
+function httpError(status, message) {
+  if (typeof httpErrorMod === "function") return httpErrorMod(status, message);
+  if (httpErrorMod?.HttpError) return new httpErrorMod.HttpError(status, message);
+  const e = new Error(message);
+  e.status = status;
+  return e;
+}
 
-  return await q;
+/** user handicap 1회 조회 */
+async function getUserHandicap(userId) {
+  const u = await User.findById(userId).select("handicap");
+  if (!u) throw httpError(404, "user not found");
+
+  const h = Number(u.handicap);
+  return Number.isFinite(h) ? h : 0;
+}
+
+/** doc에 extra(=handicap/rating 등) 붙이기 */
+function attachExtraToDoc(doc, handicap) {
+  if (!doc) return doc;
+
+  const bm = lookupHandicapBenchmark(handicap);
+
+  const scored = rateGame({
+    score: doc.score,
+    inning: doc.inning,
+    expected: bm.expected,
+    handicap,
+  });
+
+  // ✅ DB 저장 X, 응답용 임시 필드
+  doc.$locals = doc.$locals || {};
+  doc.$locals.extra = {
+    handicapUsed: handicap,
+    expectedAvg: bm.expected,
+
+    rating: scored.rating,
+    // effRating: scored.effRating,
+    // volRating: scored.volRating,
+
+    // 원하면 제거 가능 (프론트 디버깅/설명용)
+    avg: scored.avg,
+    // eff: scored.eff,
+    // vol: scored.vol,
+  };
+
+  return doc;
+}
+
+async function listMyGames(userId, { limit, from, to } = {}) {
+  const find = { userId };
+
+  const range = buildDateRange(from, to);
+  if (range) find.gameDate = range;
+
+  const q = Game.find(find).sort({ gameDate: -1, updatedAt: -1 });
+  if (typeof limit === "number" && limit > 0) q.limit(limit);
+
+  const docs = await q;
+
+  // ✅ handicap/benchmark는 1번만
+  const handicap = await getUserHandicap(userId);
+
+  // ✅ docs는 Document 그대로 유지
+  return docs.map((d) => attachExtraToDoc(d, handicap));
 }
 
 async function createMyGame(userId, payload) {
   const doc = await Game.create({ ...payload, userId });
-  return doc;
+  const handicap = await getUserHandicap(userId);
+  return attachExtraToDoc(doc, handicap);
 }
 
 async function getMyGame(userId, gameId) {
   const doc = await Game.findOne({ _id: gameId, userId });
   if (!doc) throw httpError(404, "game not found");
-  return doc;
+
+  const handicap = await getUserHandicap(userId);
+  return attachExtraToDoc(doc, handicap);
 }
 
 async function updateMyGame(userId, gameId, patch) {
@@ -37,7 +102,9 @@ async function updateMyGame(userId, gameId, patch) {
     { new: true }
   );
   if (!doc) throw httpError(404, "game not found");
-  return doc;
+
+  const handicap = await getUserHandicap(userId);
+  return attachExtraToDoc(doc, handicap);
 }
 
 async function deleteMyGame(userId, gameId) {

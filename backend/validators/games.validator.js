@@ -5,6 +5,8 @@
  */
 const mongoose = require("mongoose");
 const httpError = require("../utils/httpError");
+const { isYmd } = require("../utils/date");
+const { parseLimit } = require("../utils/parse");
 
 const GAME_RESULTS = ["WIN", "DRAW", "LOSE", "UNKNOWN"];
 const GAME_TYPES = ["UNKNOWN", "1v1", "2v2", "2v2v2", "3v3", "3v3v3"];
@@ -126,11 +128,30 @@ function validateUpdateGame(body) {
   return patch;
 }
 
+function validateListMyGamesQuery(query) {
+  const { from, to, limit } = query;
+
+  if (from && !isYmd(from)) throw httpError(400, "invalid from (YYYY-MM-DD)");
+  if (to && !isYmd(to)) throw httpError(400, "invalid to (YYYY-MM-DD)");
+
+  const lim = parseLimit(limit, { min: 1, max: 500 });
+  if (limit !== undefined && lim === null) {
+    throw httpError(400, "invalid limit (1~200)");
+  }
+
+  return {
+    from: from || undefined,
+    to: to || undefined,
+    limit: lim, // undefined 또는 number
+  };
+}
+
 
 module.exports = {
   validateCreateGame,
   validateGameId,
   validateUpdateGame,
+  validateListMyGamesQuery,
   GAME_RESULTS,
   GAME_TYPES,
 };
