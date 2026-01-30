@@ -3,6 +3,7 @@ export const EP = {
   login: "/api/auth/login",
   me: "/api/me",
   games: "/api/me/games",
+  stats: "/api/me/stats",
   insights:"/api/me/insights",
   ranking: "/api/ranking",
   users:"/api/users",

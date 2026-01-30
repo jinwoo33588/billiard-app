@@ -7,6 +7,7 @@
  */
 
 import axiosInstance from "../../api/axiosInstance";
+import { EP } from "../../api/endpoints";
 import type { StatsSummary } from "./types";
 
 export type GetMyStatsParams = {
@@ -18,8 +19,7 @@ export type GetMyStatsParams = {
 };
 
 export async function getMyStats(params?: GetMyStatsParams): Promise<StatsSummary> {
-  // ✅ baseURL에 /api가 포함된 기준
-  const res = await axiosInstance.get<StatsSummary>("api/me/stats", {
+  const res = await axiosInstance.get<StatsSummary>(EP.stats, {
     params,
   });
   return res.data;

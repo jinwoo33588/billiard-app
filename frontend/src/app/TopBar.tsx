@@ -1,5 +1,7 @@
 import { Container, Group, Title, Badge, ActionIcon, Menu, Text } from "@mantine/core";
 import { IconUser, IconLogout, IconPencil } from "@tabler/icons-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../features/auth/useAuth";
 
 type UserLike = {
   nickname?: string | null;
@@ -11,6 +13,8 @@ export default function TopBar({
 }:{
   user: UserLike | null;
 }){
+  const nav = useNavigate();
+  const { logout } = useAuth();
 
   return(
     <Container fluid px="sm" h="100%">
@@ -41,7 +45,14 @@ export default function TopBar({
 
                 <Menu.Divider />
 
-                <Menu.Item color="red" leftSection={<IconLogout size={16} />} >
+                <Menu.Item
+                  color="red"
+                  leftSection={<IconLogout size={16} />}
+                  onClick={() => {
+                    logout();
+                    nav("/login");
+                  }}
+                >
                   로그아웃
                 </Menu.Item>
 
