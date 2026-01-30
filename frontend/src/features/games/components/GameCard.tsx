@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card, Text, Badge, ActionIcon, Menu } from "@mantine/core";
 import { IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react";
 import type { Game } from "../types";
@@ -198,7 +199,7 @@ function GameCardBase({
   );
 }
 
-const GameCard = React.memo(GameCardBase);
+const GameCard = memo(GameCardBase);
 GameCard.displayName = "GameCard";
 export default GameCard;
 
