@@ -1,4 +1,3 @@
-import React from "react";
 import { Badge, Group, Text } from "@mantine/core";
 import { useNavigate } from "react-router-dom"; // ✅ 추가
 import type { RankingItem } from "../types";

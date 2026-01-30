@@ -1,4 +1,3 @@
-import React from "react";
 import { SegmentedControl, Text } from "@mantine/core";
 import type { RankingMode } from "../types";
 

@@ -1,15 +1,10 @@
-import React from "react";
 import {
   Card,
-  Title,
   Text,
   Group,
   Badge,
   Divider,
-  Stack,
   SimpleGrid,
-  Center,
-  Loader,
 } from "@mantine/core";
 
 function glassBadgeStyle(color: string) {

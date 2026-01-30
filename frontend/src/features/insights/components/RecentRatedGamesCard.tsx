@@ -1,5 +1,4 @@
 // frontend/src/features/insights/components/RecentRatedGamesCard.tsx
-import React from "react";
 import { Group, Text, Divider, Badge } from "@mantine/core";
 import InsightCardShell from "./InsightCardShell";
 import type { Game } from "../../games/types";

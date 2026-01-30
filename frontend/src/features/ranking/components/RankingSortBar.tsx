@@ -1,4 +1,3 @@
-import React from "react";
 import { ActionIcon, Group, SegmentedControl } from "@mantine/core";
 import { IconSortAscending, IconSortDescending } from "@tabler/icons-react";
 import type { RankingSortDirection, RankingSortMetric } from "../types";

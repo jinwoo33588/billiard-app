@@ -1,19 +1,12 @@
 // frontend/src/features/insights/components/RecentStatsCard.tsx
-import React from "react";
-import { Group, Text, Badge, Divider, SimpleGrid } from "@mantine/core";
+import { Group, Badge, Divider, SimpleGrid } from "@mantine/core";
 import type { StatsSummary } from "../types";
 import InsightCardShell from "./InsightCardShell";
 import Metric from "../../../shared/components/Metric";
 import Pill from "../../../shared/components/Pill";
 import { fmt3 } from "../../../shared/utils/number";
 
-export default function RecentStatsCard({
-  title = "최근 요약",
-  stats,
-}: {
-  title?: string;
-  stats: StatsSummary;
-}) {
+export default function RecentStatsCard({ stats }: { stats: StatsSummary }) {
   const winRatePct = Math.round((stats.winRate ?? 0) * 100);
 
   return (

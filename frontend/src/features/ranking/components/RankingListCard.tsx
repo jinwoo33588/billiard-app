@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Group, Text, Divider, Button } from "@mantine/core";
 import InsightCardShell from "../../insights/components/InsightCardShell";
 import type { RankingResponse } from "../types";

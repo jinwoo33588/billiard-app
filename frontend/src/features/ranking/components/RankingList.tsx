@@ -1,4 +1,3 @@
-import React from "react";
 import { Text } from "@mantine/core";
 import InsightCardShell from "../../insights/components/InsightCardShell";
 import type { RankingItem } from "../types";

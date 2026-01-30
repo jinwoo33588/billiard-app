@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Group, Text, Badge, Button, Modal, Divider, Table } from "@mantine/core";
 import InsightCardShell from "./InsightCardShell";
 import { fmt1, fmt3, fmtPct } from "../../../shared/utils/number";
