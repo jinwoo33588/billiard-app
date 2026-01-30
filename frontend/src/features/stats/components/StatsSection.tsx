@@ -1,5 +1,4 @@
 // frontend/src/features/stats/components/StatsBlock.tsx
-import React from "react";
 import {
   Card,
   Text,

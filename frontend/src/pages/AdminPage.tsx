@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Badge, Card, Group, Loader, Stack, Table, Text, TextInput, Tabs, SegmentedControl, Select } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
 import Metric from "../shared/components/Metric";

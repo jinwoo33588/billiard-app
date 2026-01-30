@@ -1,5 +1,4 @@
 // frontend/src/features/users/components/UserStatsStack.tsx
-import React from "react";
 import { Card, Group, Text, Badge, Divider, SimpleGrid } from "@mantine/core";
 import type { StatsSummary } from "../types";
 import { fmt3, fmtPct } from "../../../shared/utils/number";

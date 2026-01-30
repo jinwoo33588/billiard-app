@@ -1,4 +1,3 @@
-import React from "react";
 import { Group, Text } from "@mantine/core";
 
 export default function Metric({

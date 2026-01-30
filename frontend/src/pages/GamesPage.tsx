@@ -1,9 +1,8 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { DatesRangeValue } from "@mantine/dates";
 import { useGames } from "../features/games/useGames";
 
 import GameListWithEdit from "../features/games/components/GameListWithEdit";
-import type { Game } from "../features/games/types";
 import GamePeriodFilter from "../features/games/components/GamePeriodFilter";
 import GameCalendarCard from "../features/games/components/GameCalendarCard";
 

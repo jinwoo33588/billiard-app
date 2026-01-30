@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Text } from "@mantine/core";
 import RankingHeader from "../features/ranking/components/RankingHeader";
 import RankingList from "../features/ranking/components/RankingList";
@@ -29,7 +29,7 @@ export default function RankingPage() {
   const [sortDirection, setSortDirection] = useState<RankingSortDirection>("desc");
 
   const apiMetric: RankingMetric = metric === "handicap" ? "avg" : metric;
-  const { loading, error, data, reload } = useRanking({ mode, metric: apiMetric, limit: 50 });
+  const { loading, error, data } = useRanking({ mode, metric: apiMetric, limit: 50 });
 
   const sortedItems = useMemo(() => {
     if (!data?.items?.length) return [];

@@ -1,5 +1,4 @@
 // frontend/src/features/stats/components/StatsTabHeader.tsx
-import React from "react";
 import { Group, SegmentedControl } from "@mantine/core";
 
 export type StatsTab = "all" | "thisMonth" | "recent";

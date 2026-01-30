@@ -1,4 +1,3 @@
-import React from "react";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/themes/material_blue.css"; // 테마는 원하면 변경 가능
 import { TextInput } from "@mantine/core";

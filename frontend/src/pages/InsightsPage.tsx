@@ -1,12 +1,9 @@
 // frontend/src/pages/InsightsPage.tsx
-import React from "react";
 import { Stack } from "@mantine/core";
 import { useInsights } from "../features/insights/useInsights";
 import { useGames } from "../features/games/useGames";
 
 import HandicapScoreCard from "../features/insights/components/HandicapScoreCard";
-import RecentStatsCard from "../features/insights/components/RecentStatsCard";
-import RecentRatedGamesCard from "../features/insights/components/RecentRatedGamesCard";
 import FormTrendCard from "../features/insights/components/FormTrendCard";
 import StreakCard from "../features/insights/components/StreakCard";
 import RatingBadgeDonutCard from "../features/insights/components/RatingBadgeDonutCard";
@@ -16,7 +13,6 @@ import BestWorstGameCard from "../features/insights/components/BestWorstGameCard
 export default function InsightsPage() {
   const iq = useInsights({ mode: "limit", limit: 30 });
   const gq = useGames({ limit: 30 });
-  const recentGames = gq.games.slice(0, 10);
 
   if (iq.loading) return <div style={{ padding: 12 }}>Loading...</div>;
   if (iq.error || !iq.data) return <div style={{ padding: 12 }}>Error: {iq.error}</div>;
