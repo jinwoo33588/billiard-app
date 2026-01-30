@@ -1,5 +1,5 @@
 // GameList.tsx
-import React, { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { Game } from "../types";
 import GameCard from "./GameCard";
 import { fmtYYMMDD_DOW, fmtMonthLabel } from "../../../shared/utils/date";

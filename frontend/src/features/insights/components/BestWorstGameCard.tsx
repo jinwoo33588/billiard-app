@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Badge, Divider, Group, Text } from "@mantine/core";
 import type { Game } from "../../games/types";
 import { badgeFromRatingAndResult } from "../../games/utils/ratingBadge";

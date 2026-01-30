@@ -1,5 +1,4 @@
-import React from "react";
-import { Card, Group, Text, Badge, ActionIcon, Menu } from "@mantine/core";
+import { Card, Text, Badge, ActionIcon, Menu } from "@mantine/core";
 import { IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react";
 import type { Game } from "../types";
 import { getGameResultLabel, getGameResultTone, getGameTypeLabel } from "../../../shared/utils/gameLabels";

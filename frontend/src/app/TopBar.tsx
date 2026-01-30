@@ -1,6 +1,5 @@
-import React from "react";
 import { Container, Group, Title, Badge, ActionIcon, Menu, Text } from "@mantine/core";
-import { IconUser, IconLogout, IconPencil, IconPlus } from "@tabler/icons-react";
+import { IconUser, IconLogout, IconPencil } from "@tabler/icons-react";
 
 type UserLike = {
   nickname?: string | null;

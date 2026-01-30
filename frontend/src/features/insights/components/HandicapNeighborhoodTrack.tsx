@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Group, Text, Badge } from "@mantine/core";
 
 function clamp(n: number, a: number, b: number) {

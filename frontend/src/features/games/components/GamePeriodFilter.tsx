@@ -1,4 +1,3 @@
-import React from "react";
 import { Card, Stack, Group, Button, Badge, Text } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import type { DatesRangeValue } from "@mantine/dates";
@@ -49,9 +48,13 @@ export default function GamePeriodFilter({
           value={dateRange}
           locale="ko"
           valueFormat="YYYY년 M월 D일"
-          onChange={(value) => {
-            setDateRange(value);
-            setFilterMode(value[0] || value[1] ? "custom" : "all");
+          onChange={(value: DatesRangeValue<Date | string>) => {
+            const next: DatesRangeValue<Date> = [
+              value[0] ? new Date(value[0]) : null,
+              value[1] ? new Date(value[1]) : null,
+            ];
+            setDateRange(next);
+            setFilterMode(next[0] || next[1] ? "custom" : "all");
             setSelectedYear(null);
             setSelectedMonth0(null);
           }}
