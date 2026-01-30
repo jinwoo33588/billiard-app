@@ -18,8 +18,8 @@ export type GetMyStatsParams = {
 };
 
 export async function getMyStats(params?: GetMyStatsParams): Promise<StatsSummary> {
-  // ✅ /api/me/stats 가 기준
-  const res = await axiosInstance.get<StatsSummary>("/api/me/stats", {
+  // ✅ baseURL에 /api가 포함된 기준
+  const res = await axiosInstance.get<StatsSummary>("/me/stats", {
     params,
   });
   return res.data;
