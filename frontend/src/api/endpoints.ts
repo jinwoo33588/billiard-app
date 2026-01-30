@@ -6,4 +6,5 @@ export const EP = {
   insights:"/api/me/insights",
   ranking: "/api/ranking",
   users:"/api/users",
+  admin: "/api/admin",
 } as const;

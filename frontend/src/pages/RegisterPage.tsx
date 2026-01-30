@@ -23,7 +23,7 @@ export default function RegisterPage() {
         nickname,
         handicap: Number(handicap),
       });
-      nav("/me");
+      nav("/");
     } catch (e: any) {
       const msg = e?.response?.data?.message ?? "Register failed";
       setErr(msg);

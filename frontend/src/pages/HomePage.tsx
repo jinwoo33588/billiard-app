@@ -1,18 +1,23 @@
 import React, { useMemo, useState } from "react";
-import { Stack, Group, Text, Badge, Tooltip } from "@mantine/core";
+import { Stack, Group, Text, Badge, Tooltip, Button } from "@mantine/core";
 import { useHomeDashboard } from "../features/home/useHomeDashboard";
+import { useGames } from "../features/games/useGames";
 import StatsSection from "../features/stats/components/StatsSection";
 import GameListWithEdit from "../features/games/components/GameListWithEdit";
 import StatsTabHeader from "../features/stats/components/StatsTabHeader";
 import type { StatsTab } from "../features/stats/components/StatsTabHeader";
 import { badgeFromMeanRating, badgeFromWinRate } from "../shared/utils/formBadges";
+import GameCalendarCard from "../features/games/components/GameCalendarCard";
+import { dayKeyLocal } from "../shared/utils/date";
 
 export default function HomePage() {
   const [tab, setTab] = useState<StatsTab>("thisMonth");
   const [recentN, setRecentN] = useState(10);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const { loading, error, meta, statsAll, statsThisMonth, statsRecent, recentGames } =
     useHomeDashboard({ recentN });
+  const monthGames = useGames({ limit: 500, from: meta.fromThisMonth, to: meta.toToday });
 
   // ✅ 최근 N판 rating 평균
   const meanRating = useMemo(() => {
@@ -50,6 +55,11 @@ export default function HomePage() {
         loading={loading}
       />
     );
+
+  const listSource = monthGames.games;
+  const filteredList = selectedDate
+    ? listSource.filter((g) => dayKeyLocal(g.gameDate) === selectedDate)
+    : listSource;
 
   return (
     <Stack gap="md" style={{ padding: 12 }}>
@@ -96,11 +106,32 @@ export default function HomePage() {
 
       {statsByTab}
 
+      {!monthGames.loading && !monthGames.error ? (
+        <GameCalendarCard
+          title="승패 캘린더"
+          games={monthGames.games}
+          initialDate={meta.fromThisMonth}
+          compact
+          showList={false}
+          lockMonth
+          autoSelect={false}
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+        />
+      ) : null}
+
       <div>
-        <Text fw={900} mb={8}>
-          최근 게임
-        </Text>
-        <GameListWithEdit games={recentGames} />
+        <Group justify="space-between" align="center" mb={8}>
+          <Text fw={900}>
+            {selectedDate ? `${selectedDate} 게임` : "이번달 게임"}
+          </Text>
+          {selectedDate ? (
+            <Button size="xs" variant="light" onClick={() => setSelectedDate(null)}>
+              날짜 선택 취소
+            </Button>
+          ) : null}
+        </Group>
+        <GameListWithEdit games={filteredList} />
       </div>
 
       {error ? <div style={{ whiteSpace: "pre-wrap" }}>{error}</div> : null}

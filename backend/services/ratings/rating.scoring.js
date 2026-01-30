@@ -1,148 +1,111 @@
-// backend/services/ratings/rating.scoring.js
 const { clamp, round, num } = require("../../utils/num");
 
 /**
- * Per-game Rating (0~100)
- * - effRating: eff(avg - expected)를 "중앙 둔감 / 꼬리 민감"으로 0~100 변환
- * - volRating: vol((score - handicap)/sqrt(inning))을 "중앙 둔감 / 꼬리 민감"으로 0~100 변환
- * - rating: eff/vol 중 더 잘 나온 쪽에 softmax로 가중치
+ * Per-game Rating (0~100 or raw)
+ * - avg를 handicap 기대밴드(min~max) 기준으로 base 점수화
+ * - handicap 초과 득점은 상쇄 보너스
+ * - avg가 적정(>=min)이면 score<handicap이어도 penalty=0
  */
 
-/** ====== 튜닝 상수(파일 내부 고정) ====== */
-const R_EFF = 0.15;
-const P_EFF = 2.4;
+const DEFAULT_PARAMS = {
+  baseDeltaUp: 0.3, // expected +0.3 -> +50점
+  baseDeltaDown: 0.2, // expected -0.2 -> -50점 (하락 더 빠르게)
+  Bmax: 60,
+  M: 2,
+  Pmax: 18,
+  S: 10,
+};
 
-const R_VOL = 2.0;
-const P_VOL = 2.4;
+function clamp01(x) {
+  return clamp(x, 0, 1);
+}
 
-const SOFTMAX_K = 0.05;
+function safeDivisor(x) {
+  return Math.max(1e-9, num(x, 0));
+}
 
-/** ---------- raw feature builders ---------- */
 function calcAvg(score, inning) {
   const s = num(score, 0);
   const inn = Math.max(1, num(inning, 1));
   return s / inn;
 }
 
-function calcEff(avg, expected) {
-  return num(avg, 0) - num(expected, 0);
+function calcBaseFromBand(avg, min, max, params, expected) {
+  const mn = num(min, 0);
+  const mx = num(max, mn);
+  const exp = Number.isFinite(num(expected, NaN)) ? num(expected, NaN) : (mn + mx) / 2;
+  const deltaUp = safeDivisor(params.baseDeltaUp);
+  const deltaDown = safeDivisor(params.baseDeltaDown);
+  const delta = avg >= exp ? deltaUp : deltaDown;
+  const slope = 50 / delta;
+  return 50 + slope * (avg - exp);
 }
 
-function calcVol(score, handicap, inning) {
-  const volRaw = num(score, 0) - num(handicap, 0);
-  const inn = Math.max(1, num(inning, 1));
-  return volRaw / Math.sqrt(inn);
+function calcBonus(score, handicap, base, params) {
+  const margin = num(score, 0) - num(handicap, 0);
+  const marginPlus = Math.max(0, margin);
+
+  const M = safeDivisor(params.M);
+  const bonusRaw = num(params.Bmax, 0) * (1 - Math.exp(-marginPlus / M));
+
+  const factor = 0.2 + 0.8 * clamp01((85 - base) / 35);
+  const bonus = factor * bonusRaw;
+
+  return { margin, marginPlus, bonusRaw, factor, bonus };
 }
 
-/** ---------- 0~100 scoring (central-insensitive, tail-sensitive) ---------- */
-function effRatingScore(eff) {
-  const e = num(eff, 0);
-  const sgn = e > 0 ? 1 : e < 0 ? -1 : 0;
+function calcPenalty(score, handicap, avg, min, max, params) {
+  const mn = num(min, 0);
+  const mx = num(max, mn);
+  const bandWidth = Math.max(mx - mn, 1e-9);
 
-  const R = Math.max(1e-9, R_EFF);
-  const x = Math.abs(e) / R;
-  const f = Math.min(1, Math.pow(x, P_EFF));
+  const short = Math.max(0, num(handicap, 0) - num(score, 0));
+  const below = clamp01((mn - avg) / bandWidth);
 
-  const score = 50 + 50 * sgn * f;
-  return clamp(score, 0, 100);
+  // ✅ 감점 제거: penalty는 항상 0
+  const penalty = 0;
+
+  return { short, below, penalty };
 }
 
-function volRatingScore(vol) {
-  const v = num(vol, 0);
-  const sgn = v > 0 ? 1 : v < 0 ? -1 : 0;
+function rateGame({ score, inning, handicap, band, params }) {
+  const p = { ...DEFAULT_PARAMS, ...(params || {}) };
 
-  const R = Math.max(1e-9, R_VOL);
-  const x = Math.abs(v) / R;
-  const f = Math.min(1, Math.pow(x, P_VOL));
-
-  const score = 50 + 50 * sgn * f;
-  return clamp(score, 0, 100);
-}
-
-/** ---------- softmax weighting ---------- */
-function softmaxWeights2(aScore, bScore) {
-  const s1 = SOFTMAX_K * num(aScore, 0);
-  const s2 = SOFTMAX_K * num(bScore, 0);
-
-  const m = Math.max(s1, s2);
-  const ea = Math.exp(s1 - m);
-  const eb = Math.exp(s2 - m);
-  const sum = ea + eb;
-
-  if (!Number.isFinite(sum) || sum <= 0) {
-    return { wA: 0.5, wB: 0.5 };
-  }
-  return { wA: ea / sum, wB: eb / sum };
-}
-
-/**
- * rating 계산 (eff, vol 입력 버전)
- * - eff/vol 중 "더 잘 나온 쪽"에 가중치가 더 가도록 softmax
- */
-function ratingScore(eff, vol) {
-  const es = effRatingScore(eff); // 0~100
-  const vs = volRatingScore(vol); // 0~100
-
-  const { wA: wEff, wB: wVol } = softmaxWeights2(es, vs);
-  const rating = num(es, 0) * wEff + num(vs, 0) * wVol;
-
-  return {
-    rating: round(rating, 1),
-    effRating: round(es, 1),
-    volRating: round(vs, 1),
-    weights: {
-      eff: round(wEff, 3),
-      vol: round(wVol, 3),
-      k: SOFTMAX_K,
-    },
-  };
-}
-
-/**
- * rateGame (한 판 조립)
- * - 입력: { score, inning, expected, handicap }
- * - 출력: avg/eff/vol + rating 패키지
- */
-function rateGame({ score, inning, expected, handicap }) {
   const avg = calcAvg(score, inning);
-  const eff = calcEff(avg, expected);
-  const vol = calcVol(score, handicap, inning);
+  const min = num(band?.min, 0);
+  const max = num(band?.max, min);
 
-  const pack = ratingScore(eff, vol);
+  const base = calcBaseFromBand(avg, min, max, p, band?.expected);
+  const { margin, marginPlus, bonusRaw, factor, bonus } = calcBonus(score, handicap, base, p);
+  const { short, below, penalty } = calcPenalty(score, handicap, avg, min, max, p);
+
+  const ratingRaw = base + bonus - penalty;
+  const ratingClamped = clamp(ratingRaw, 0, 100);
+  const rating = ratingRaw;
 
   return {
     avg: round(avg, 3),
-    eff: round(eff, 3),
-    vol: round(vol, 3),
-
-    ...pack,
-
-    scoringParams: {
-      R_EFF,
-      P_EFF,
-      R_VOL,
-      P_VOL,
-      SOFTMAX_K,
-    },
+    base: round(base, 1),
+    margin: round(margin, 1),
+    bonusRaw: round(bonusRaw, 1),
+    factor: round(factor, 3),
+    bonus: round(bonus, 1),
+    short: round(short, 1),
+    below: round(below, 3),
+    penalty: round(penalty, 1),
+    ratingRaw: round(ratingRaw, 1),
+    ratingClamped: round(ratingClamped, 1),
+    rating: round(rating, 1),
+    scoringParams: p,
   };
 }
 
 module.exports = {
-  R_EFF,
-  P_EFF,
-  R_VOL,
-  P_VOL,
-  SOFTMAX_K,
-
+  DEFAULT_PARAMS,
+  clamp01,
   calcAvg,
-  calcEff,
-  calcVol,
-
-  effRatingScore,
-  volRatingScore,
-
-  softmaxWeights2,
-  ratingScore,
-
+  calcBaseFromBand,
+  calcBonus,
+  calcPenalty,
   rateGame,
 };

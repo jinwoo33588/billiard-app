@@ -12,15 +12,15 @@ const HANDICAP_BENCHMARKS = [
   { handicap: 19, expected: 0.335, min: 0.320, max: 0.340 },
   { handicap: 20, expected: 0.355, min: 0.340, max: 0.370 },
   { handicap: 21, expected: 0.390, min: 0.370, max: 0.405 },
-  { handicap: 22, expected: 0.420, min: 0.405, max: 0.440 },
-  { handicap: 23, expected: 0.460, min: 0.440, max: 0.480 },
-  { handicap: 24, expected: 0.500, min: 0.480, max: 0.520 },
-  { handicap: 25, expected: 0.540, min: 0.520, max: 0.575 },
-  { handicap: 26, expected: 0.590, min: 0.575, max: 0.615 },
-  { handicap: 27, expected: 0.640, min: 0.615, max: 0.670 },
-  { handicap: 28, expected: 0.700, min: 0.670, max: 0.720 },
-  { handicap: 29, expected: 0.740, min: 0.720, max: 0.760 },
-  { handicap: 30, expected: 0.780, min: 0.760, max: 0.800 },
+  { handicap: 22, expected: 0.420, min: 0.405, max: 0.440 }, // 52이닝
+  { handicap: 23, expected: 0.460, min: 0.440, max: 0.480 }, // 50이닝
+  { handicap: 24, expected: 0.500, min: 0.480, max: 0.520 }, // 48이닝
+  { handicap: 25, expected: 0.540, min: 0.520, max: 0.575 }, // 46이닝
+  { handicap: 26, expected: 0.590, min: 0.575, max: 0.615 }, // 44이닝
+  { handicap: 27, expected: 0.640, min: 0.615, max: 0.670 }, // 42이닝
+  { handicap: 28, expected: 0.700, min: 0.670, max: 0.720 }, // 40이닝
+  { handicap: 29, expected: 0.740, min: 0.720, max: 0.760 }, // 39이닝
+  { handicap: 30, expected: 0.780, min: 0.760, max: 0.800 }, // 38이닝
   { handicap: 31, expected: 0.830, min: 0.800, max: 0.860 },
   { handicap: 32, expected: 0.890, min: 0.860, max: 0.925 },
   { handicap: 33, expected: 0.960, min: 0.925, max: 0.980 },

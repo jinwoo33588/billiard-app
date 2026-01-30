@@ -3,10 +3,9 @@ import React from "react";
 import { Group, Text, Badge, Divider, SimpleGrid } from "@mantine/core";
 import type { StatsSummary } from "../types";
 import InsightCardShell from "./InsightCardShell";
-
-function fmt3(n: number) {
-  return Number.isFinite(n) ? n.toFixed(3) : "-";
-}
+import Metric from "../../../shared/components/Metric";
+import Pill from "../../../shared/components/Pill";
+import { fmt3 } from "../../../shared/utils/number";
 
 export default function RecentStatsCard({
   title = "최근 요약",
@@ -44,9 +43,9 @@ export default function RecentStatsCard({
 
     {/* 승/무/패 pill을 승률 아래에 작게 */}
     <Group justify="center" gap={6} mt={8} wrap="wrap">
-      <Pill label="승" value={stats.wins} tone="green" size="xs" />
-      <Pill label="무" value={stats.draws} tone="gray" size="xs" />
-      <Pill label="패" value={stats.loses} tone="red" size="xs" />
+      <Pill label="승" value={stats.wins} color="var(--mantine-color-green-7)" size="xs" />
+      <Pill label="무" value={stats.draws} color="var(--mantine-color-gray-7)" size="xs" />
+      <Pill label="패" value={stats.loses} color="var(--mantine-color-red-7)" size="xs" />
     </Group>
   </div>
 
@@ -57,95 +56,10 @@ export default function RecentStatsCard({
       <Divider my="sm" style={{ borderColor: "rgba(0,0,0,0.08)" }} />
 
       <Group gap={8} wrap="wrap">
-        <Pill label="승" value={stats.wins} tone="green" />
-        <Pill label="무" value={stats.draws} tone="gray" />
-        <Pill label="패" value={stats.loses} tone="red" />
+        <Pill label="승" value={stats.wins} color="var(--mantine-color-green-7)" />
+        <Pill label="무" value={stats.draws} color="var(--mantine-color-gray-7)" />
+        <Pill label="패" value={stats.loses} color="var(--mantine-color-red-7)" />
       </Group>
     </InsightCardShell>
-  );
-}
-
-function Metric({
-  label,
-  value,
-  suffix,
-  strong,
-}: {
-  label: string;
-  value: string;
-  suffix?: string;
-  strong?: boolean;
-}) {
-  return (
-    <div style={{ display: "grid", gap: 6 }}>
-      <Text size="xs" c="dimmed" fw={900} style={{ lineHeight: 1 }}>
-        {label}
-      </Text>
-
-      <Group gap={6} align="baseline" wrap="nowrap">
-        <Text
-          fw={strong ? 950 : 900}
-          style={{
-            fontSize: strong ? 22 : 18,
-            letterSpacing: -0.3,
-            lineHeight: 1.05,
-            fontVariantNumeric: "tabular-nums",
-          }}
-        >
-          {value}
-        </Text>
-        {suffix ? (
-          <Text size="sm" c="dimmed" fw={800}>
-            {suffix}
-          </Text>
-        ) : null}
-      </Group>
-    </div>
-  );
-}
-
-function Pill({
-  label,
-  value,
-  tone,
-  size="sm",
-}: {
-  label: string;
-  value: number;
-  tone: "green" | "gray" | "red";
-  size?: "xs"|"sm";
-}) {
-  const color =
-    tone === "green"
-      ? "var(--mantine-color-green-7)"
-      : tone === "red"
-      ? "var(--mantine-color-red-7)"
-      : "var(--mantine-color-gray-7)";
-
-      const px = size === "xs" ? 8 : 10;
-  const fz = size === "xs" ? 11 : 12;
-  return (
-    <div
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 8,
-        padding: px,
-        borderRadius: 999,
-        border: "1px solid rgba(0,0,0,0.08)",
-        background: "rgba(255,255,255,0.9)",
-      }}
-    >
-      <Text size="xs" c="dimmed" fw={900}>
-        {label}
-      </Text>
-      <Text
-        size="sm"
-        fw={950}
-        style={{ color, fontVariantNumeric: "tabular-nums", lineHeight: 1 }}
-      >
-        {value}
-      </Text>
-    </div>
   );
 }

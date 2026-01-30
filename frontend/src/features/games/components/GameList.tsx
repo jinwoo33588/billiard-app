@@ -1,5 +1,5 @@
 // GameList.tsx
-import React from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import type { Game } from "../types";
 import GameCard from "./GameCard";
 import { fmtYYMMDD_DOW, fmtMonthLabel } from "../../../shared/utils/date";
@@ -8,6 +8,7 @@ type Props = {
   games: Game[];
   onEdit?: (game: Game) => void;
   onDelete?: (gameId: string) => void;
+  showActions?: boolean;
 };
 
 type DaySection = { dayKey: string; games: Game[] };
@@ -43,8 +44,14 @@ function groupGamesByMonthThenDay(games: Game[]): MonthSection[] {
   });
 }
 
-export default function GameList({ games, onEdit, onDelete }: Props) {
-  const monthSections = groupGamesByMonthThenDay(games);
+export default function GameList({ games, onEdit, onDelete, showActions = true }: Props) {
+  const [openGameId, setOpenGameId] = useState<string | null>(null);
+
+  const monthSections = useMemo(() => groupGamesByMonthThenDay(games), [games]);
+
+  const toggleGame = useCallback((gameId: string) => {
+    setOpenGameId((prev) => (prev === gameId ? null : gameId));
+  }, []);
 
   return (
     <div style={{ display: "grid", gap: 18 }}>
@@ -78,9 +85,11 @@ export default function GameList({ games, onEdit, onDelete }: Props) {
                     <GameCard
                       key={g.id}
                       game={g}
-                      showActions
+                      showActions={showActions}
                       onEdit={onEdit}
                       onDelete={onDelete}
+                      opened={openGameId === g.id}
+                      onToggle={toggleGame}
                     />
                   ))}
                 </div>

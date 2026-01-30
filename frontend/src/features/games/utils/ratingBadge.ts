@@ -28,14 +28,14 @@ export function badgeFromRatingAndResult(rating: number | null | undefined, resu
   // - 저평점 패배: 내이슈
   // - 무/기타: 보통(또는 rating 기준으로만 분기해도 됨)
   if (result === "WIN") {
-    if (r >= 65) return { key: "CARRY", label: "캐리", color: "green" };
-    if (r <= 45) return { key: "BUS", label: "버스", color: "gray" };
+    if (r >= 60) return { key: "CARRY", label: "캐리", color: "green" };
+    if (r <= 40) return { key: "BUS", label: "버스", color: "gray" };
     return { key: "NORMAL", label: "보통", color: "blue" };
   }
 
   if (result === "LOSE") {
     if (r >= 60) return { key: "UNLUCKY", label: "억울", color: "yellow" };
-    if (r <= 45) return { key: "MY_ISSUE", label: "내이슈", color: "red" };
+    if (r <= 40) return { key: "MY_ISSUE", label: "내이슈", color: "red" };
     return { key: "NORMAL", label: "보통", color: "blue" };
   }
 

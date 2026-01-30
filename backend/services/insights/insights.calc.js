@@ -21,65 +21,29 @@ function lerp(a, b, t) {
 }
 
 /**
- * ✅ avg 점수 (0~90 기준선, 필요 시 95까지 약간 가산)
- * - avg == expected -> 90점
- * - avg == min -> 85점
- * - avg == max -> 95점
- * - 그 밖은 구간별 선형 + clamp
+ * ✅ avg 점수 (max 기준 선형 환산)
+ * - avg == max -> 90점
+ * - avgScore = 90 * (avg / max)
+ * - clamp 없음
  */
 function calcAvgScore(avg, bench) {
-  const { expected, min, max } = bench;
-
+  const { max } = bench;
   if (!Number.isFinite(avg) || avg <= 0) return 0;
 
-  // 분모가 0이 되는 경우 방어
-  const leftDen = Math.max(expected - min, 1e-9);
-  const rightDen = Math.max(max - expected, 1e-9);
-
-  if (avg <= expected) {
-    // min -> 85, expected -> 90
-    const t = clamp((avg - min) / leftDen, 0, 1);
-    return lerp(85, 90, t);
-  }
-
-  // expected -> 90, max -> 95
-  const t = clamp((avg - expected) / rightDen, 0, 1);
-  return lerp(90, 95, t);
+  const base = 90;
+  return base * (avg / Math.max(max, 1e-9));
 }
 
 /**
  * ✅ 승률 점수 (0~10)
- * 요구사항: winRateNoDraw=0.63이 "적정"이 되도록 너무 높은 점수 주지 않기.
- *
- * 설계:
- * - target(0.63)에서 2.5점 (=> avg=expected(90)일 때 총점 92.5 = 적정 중앙)
- * - floor(0.45) 이하면 0점
- * - ceil(0.80) 이상이면 10점
- * - 구간별 선형
+ * - winScore = 10 * winRate
+ * - 평균(66.6%)은 6.66점
+ * - 10점 상한 적용
  */
-function calcWinScore(winRate, opt = {}) {
-  const {
-    target = 0.63,
-    scoreAtTarget = 2.5,
-    floor = 0.45,
-    ceil = 0.8,
-  } = opt;
-
+function calcWinScore(winRate) {
   const wr = Number(winRate);
-  if (!Number.isFinite(wr)) return 0;
-
-  if (wr <= floor) return 0;
-  if (wr >= ceil) return 10;
-
-  if (wr <= target) {
-    // floor -> 0점, target -> scoreAtTarget
-    const t = (wr - floor) / Math.max(target - floor, 1e-9);
-    return lerp(0, scoreAtTarget, clamp(t, 0, 1));
-  }
-
-  // target -> scoreAtTarget, ceil -> 10점
-  const t = (wr - target) / Math.max(ceil - target, 1e-9);
-  return lerp(scoreAtTarget, 10, clamp(t, 0, 1));
+  if (!Number.isFinite(wr) || wr <= 0) return 0;
+  return clamp(10 * wr, 0, 10);
 }
 
 /**
@@ -121,13 +85,8 @@ function calcHandicapScore(input) {
 
   const bench = lookupHandicapBenchmark(h);
 
-  const avgScore = calcAvgScore(avg, bench);           // 대략 0~95
-  const winScore = calcWinScore(winRate, {
-    target: 0.63,          // ✅ 요구사항: 0.63을 적정 기준으로
-    scoreAtTarget: 2.5,    // ✅ avg=expected(90)일 때 총점 92.5 = 적정 중앙
-    floor: 0.45,
-    ceil: 0.8,
-  }); // 0~10
+  const avgScore = calcAvgScore(avg, bench);
+  const winScore = calcWinScore(winRate);
 
   const total = avgScore + winScore;
   const verdict = judge(total);

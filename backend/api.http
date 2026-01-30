@@ -1,0 +1,155 @@
+@baseUrl = http://localhost:4000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGRjZTk3ZjljMzVmZTBiM2FjZTZiYTMiLCJpYXQiOjE3Njg5ODAxMzYsImV4cCI6MTc3MTU3MjEzNn0.7u0fbjQQrr9ZigafThBzrr9aGFtj0xuCKFQ34RJ0PA4
+
+@gameId = 6976f84df8040bc4501559bc
+
+### Health Check
+GET {{baseUrl}}/api/health
+
+### Register
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "test1@example.com",
+  "password": "1234",
+  "nickname": "test1",
+  "handicap": 25
+}
+
+### Login (token 받기)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "jinwoo3358@naver.com",
+  "password": "Aa834646"
+}
+
+### Me (로그인 확인)
+GET {{baseUrl}}/api/me
+Authorization: Bearer {{token}}
+
+### Games - List (내 게임 목록)
+GET {{baseUrl}}/api/me/games?limit=5
+Authorization: Bearer {{token}}
+
+### 기본
+GET http://localhost:4000/api/me/games?limit=50
+Authorization: Bearer {{token}}
+
+### 기간
+GET http://localhost:4000/api/me/games?from=2025-12-01&to=2025-12-31&limit=10
+Authorization: Bearer {{token}}
+
+### Stats
+GET http://localhost:4000/api/me/stats?limit=10
+Authorization: Bearer {{token}}
+
+###
+
+GET http://localhost:4000/api/me/stats?from=2025-10-01&to=2025-12-31
+Authorization: Bearer {{token}}
+
+### (5) List Games (최근 20개)
+GET {{baseUrl}}/api/me/games?limit=20
+Authorization: Bearer {{token}}
+
+
+### (6) List Games (기간 from/to)
+GET {{baseUrl}}/api/me/games?from=2026-01-01&to=2026-01-31&limit=200
+Authorization: Bearer {{token}}
+
+### (4) Create Game
+# @name createGame
+POST {{baseUrl}}/api/me/games
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "score": 25,
+  "inning": 35,
+  "result": "WIN",
+  "gameType": "1v1",
+  "gameDate": "2026-01-20",
+  "memo": "REST Client로 생성"
+}
+
+### (7) Get One Game
+GET {{baseUrl}}/api/me/games/6976f84df8040bc4501559bc
+Authorization: Bearer {{token}}
+
+
+### (8) Update Game (PATCH 형태로 일부만)
+PATCH  {{baseUrl}}/api/me/games/{{gameId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "score": 30,
+  "memo": "점수/메모 수정"
+}
+
+
+### (9) Delete Game
+DELETE {{baseUrl}}/api/me/games/{{gameId}}
+Authorization: Bearer {{token}}
+
+
+### (10) Stats - all
+GET {{baseUrl}}/api/me/stats?mode=all
+Authorization: Bearer {{token}}
+
+
+### (11) Stats - recent limit
+GET {{baseUrl}}/api/me/stats?mode=limit&limit=10
+Authorization: Bearer {{token}}
+
+
+### (12) Stats - range
+GET {{baseUrl}}/api/me/stats?mode=range&from=2026-01-01&to=2026-01-31
+Authorization: Bearer {{token}}
+
+### me insights - recent 20 (default)
+GET http://localhost:4000/api/me/insights
+Authorization: Bearer {{token}}
+
+### me insights - recent 10
+GET http://localhost:4000/api/me/insights?mode=limit&limit=10
+Authorization: Bearer {{token}}
+
+### me insights - range
+GET http://localhost:4000/api/me/insights?mode=range&from=2026-01-01&to=2026-01-31
+Authorization: Bearer {{token}}
+
+### me insights - all
+GET http://localhost:4000/api/me/insights?mode=all
+Authorization: Bearer {{token}}
+
+### (1) 이번달 랭킹 - AVG 기준 (기본값)
+GET {{baseUrl}}/api/ranking
+Authorization: Bearer {{token}}
+
+### (2) 이번달 랭킹 - AVG 기준 (명시)
+GET {{baseUrl}}/api/ranking?mode=thisMonth&metric=avg&limit=50
+Authorization: Bearer {{token}}
+
+### (3) 이번달 랭킹 - WINRATE 기준
+GET {{baseUrl}}/api/ranking?mode=thisMonth&metric=winRate&limit=50
+Authorization: Bearer {{token}}
+
+### (4) 전체 랭킹 - AVG 기준
+GET {{baseUrl}}/api/ranking?mode=all&metric=avg&limit=50
+Authorization: Bearer {{token}}
+
+### (5) 전체 랭킹 - WINRATE 기준
+GET {{baseUrl}}/api/ranking?mode=all&metric=winRate&limit=50
+Authorization: Bearer {{token}}
+
+### (6) 잘못된 파라미터 테스트(400 기대)
+GET {{baseUrl}}/api/ranking?mode=foo&metric=bar
+Authorization: Bearer {{token}}
+
+###
+GET http://localhost:4000/api/users/68de0f35cc714adb3c55f361/dashboard?recent=10
+Authorization: Bearer {{token}}

@@ -5,6 +5,7 @@ import { useGames } from "../features/games/useGames";
 import GameListWithEdit from "../features/games/components/GameListWithEdit";
 import type { Game } from "../features/games/types";
 import GamePeriodFilter from "../features/games/components/GamePeriodFilter";
+import GameCalendarCard from "../features/games/components/GameCalendarCard";
 
 function startOfThisMonth() {
   const d = new Date();
@@ -22,8 +23,24 @@ function getYmdParts(iso: string) {
   return { y, m0: m1 - 1 }; // 0-based month
 }
 
-function ymd(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+function toDate(v: unknown): Date | null {
+  if (!v) return null;
+  if (v instanceof Date) return v;
+
+  // 문자열/숫자(타임스탬프)면 Date로 변환 시도
+  if (typeof v === "string" || typeof v === "number") {
+    const d = new Date(v);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  return null;
+}
+
+function ymd(v: unknown) {
+  const d = toDate(v);
+  if (!d) return ""; // 또는 undefined 처리해도 됨
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate()
+  ).padStart(2, "0")}`;
 }
 
 function yearMonthToRange(selectedYear: number, selectedMonth0: number | null) {
@@ -122,6 +139,10 @@ export default function GamesPage() {
         pillVariant={pillVariant}
         clearAllFilters={clearAllFilters}
       />
+
+      {!filtered.loading && !filtered.error && (
+        <GameCalendarCard games={filtered.games} initialDate={query.from ?? filtered.games[0]?.gameDate} />
+      )}
 
       {filtered.loading && <div style={{ padding: 12 }}>Loading...</div>}
       {filtered.error && <div style={{ padding: 12, whiteSpace: "pre-wrap" }}>Error: {filtered.error}</div>}

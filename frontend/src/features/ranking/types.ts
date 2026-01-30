@@ -1,5 +1,7 @@
 export type RankingMode = "thisMonth" | "all";
 export type RankingMetric = "avg" | "winRate";
+export type RankingSortMetric = RankingMetric | "handicap";
+export type RankingSortDirection = "asc" | "desc";
 
 export type RankingUser = {
   id: string;
@@ -24,9 +26,13 @@ export type RankingItem = {
   stats: RankingStats;
 };
 
-export type RankingResponse = {
+export type RankingWindow = {
   mode: RankingMode;
+  range: { from: string | null; to: string | null };
+};
+
+export type RankingResponse = {
+  window: RankingWindow;
   metric: RankingMetric;
-  limit: number;
   items: RankingItem[];
 };

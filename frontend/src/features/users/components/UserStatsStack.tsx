@@ -2,15 +2,7 @@
 import React from "react";
 import { Card, Group, Text, Badge, Divider, SimpleGrid } from "@mantine/core";
 import type { StatsSummary } from "../types";
-
-function fmtPct(x: number) {
-  if (!Number.isFinite(x)) return "-";
-  return (x * 100).toFixed(1);
-}
-function fmt3(x: number) {
-  if (!Number.isFinite(x)) return "-";
-  return x.toFixed(3);
-}
+import { fmt3, fmtPct } from "../../../shared/utils/number";
 
 function StatsCard({ title, badge, stats }: { title: string; badge: string; stats: StatsSummary }) {
   return (
@@ -43,7 +35,7 @@ function StatsCard({ title, badge, stats }: { title: string; badge: string; stat
             승률
           </Text>
           <Text fw={950} style={{ fontVariantNumeric: "tabular-nums" }}>
-            {fmtPct(stats.winRate)}%
+            {fmtPct(stats.winRate, 1, "-")}%
           </Text>
         </div>
 

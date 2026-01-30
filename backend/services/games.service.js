@@ -11,7 +11,7 @@ const httpErrorMod = require("../utils/httpError");
 const { buildDateRange } = require("../utils/date");
 
 const { lookupHandicapBenchmark } = require("./insights/handicap.lookup");
-const { rateGame } = require("./ratings/rating.scoring");
+const { rateGame, DEFAULT_PARAMS } = require("./ratings/rating.scoring");
 
 /** httpError 모듈 형태가 프로젝트마다 달라서(함수/클래스) 안전하게 래핑 */
 function httpError(status, message) {
@@ -40,8 +40,9 @@ function attachExtraToDoc(doc, handicap) {
   const scored = rateGame({
     score: doc.score,
     inning: doc.inning,
-    expected: bm.expected,
     handicap,
+    band: { min: bm.min, max: bm.max, expected: bm.expected },
+    params: DEFAULT_PARAMS,
   });
 
   // ✅ DB 저장 X, 응답용 임시 필드
@@ -51,6 +52,8 @@ function attachExtraToDoc(doc, handicap) {
     expectedAvg: bm.expected,
 
     rating: scored.rating,
+    ratingRaw: scored.ratingRaw,
+    ratingClamped: scored.ratingClamped,
     // effRating: scored.effRating,
     // volRating: scored.volRating,
 

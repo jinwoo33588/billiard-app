@@ -2,14 +2,10 @@ import React from "react";
 import { Badge, Group, Text } from "@mantine/core";
 import { useNavigate } from "react-router-dom"; // ✅ 추가
 import type { RankingItem } from "../types";
+import { badgeFromWinRate } from "../../../shared/utils/formBadges";
+import { fmt3, fmtPct } from "../../../shared/utils/number";
+import { Tooltip } from "@mantine/core";
 
-function fmt3(n: number) {
-  return Number.isFinite(n) ? n.toFixed(3) : "-";
-}
-function pct0to100(x: number) {
-  if (!Number.isFinite(x)) return "-";
-  return Math.round(x * 100);
-}
 
 export default function RankingRow({
   item,
@@ -43,6 +39,9 @@ export default function RankingRow({
   const games = item.stats.gamesCount ?? 0;
   const avg = games > 0 ? item.stats.avg : NaN;
   const win = games > 0 ? item.stats.winRate : NaN;
+  const winPct = fmtPct(win, 0, "-");
+
+  const winBadge = badgeFromWinRate(games > 0 ? item.stats.winRate : null);
 
   const goProfile = () => {
     navigate(`/users/${item.user.id}`);
@@ -67,6 +66,7 @@ export default function RankingRow({
             : isMe
             ? "0 6px 18px rgba(0,0,0,0.06)"
             : undefined,
+        position: "relative",
         display: "grid",
         gridTemplateColumns: "44px 1fr auto",
         alignItems: "center",
@@ -87,6 +87,22 @@ export default function RankingRow({
         (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
       }}
     >
+      {isMe ? (
+        <Badge
+          radius="xl"
+          variant="filled"
+          style={{
+            fontWeight: 900,
+            position: "absolute",
+            top: -8,
+            left: -8,
+            boxShadow: "0 6px 14px rgba(0,0,0,0.12)",
+            pointerEvents: "none",
+          }}
+        >
+          ME
+        </Badge>
+      ) : null}
       {/* rank */}
       <div style={{ textAlign: "center" }}>
         <Text fw={950} style={{ fontVariantNumeric: "tabular-nums" }}>
@@ -101,12 +117,6 @@ export default function RankingRow({
             {name}
           </Text>
 
-          {isMe ? (
-            <Badge radius="xl" variant="filled" style={{ fontWeight: 900 }}>
-              ME
-            </Badge>
-          ) : null}
-
           {h !== null ? (
             <Badge
               radius="xl"
@@ -117,11 +127,28 @@ export default function RankingRow({
                {h}점
             </Badge>
           ) : null}
-        </Group>
+          {/* ✅ 승률 배지 */}
+          <Tooltip label={winBadge.hint} withArrow>
+    <Badge
+      radius="xl"
+      variant="light"
+      color={winBadge.color}
+      style={{ border: "1px solid rgba(0,0,0,0.08)", fontWeight: 900 }}
+    >
+      {winBadge.label}
+      
+    </Badge>
+  </Tooltip>
 
-        <Text size="xs" c="dimmed" mt={4} lineClamp={1}>
+        </Group>
+     
+         <Text size="xs" c="dimmed" mt={4} lineClamp={1}>
           {games}판 · {item.stats.wins}승 {item.stats.draws}무 {item.stats.loses}패
-        </Text>
+        </Text> 
+        
+       
+        
+        
       </div>
 
       {/* stats */}
@@ -133,7 +160,7 @@ export default function RankingRow({
           {fmt3(avg)}
         </Text>
         <Text size="sm" fw={900} c="dimmed" style={{ fontVariantNumeric: "tabular-nums" }}>
-          {Number.isFinite(win) ? `${pct0to100(win)}%` : "-"}
+          {winPct === "-" ? "-" : `${winPct}%`}
         </Text>
       </div>
     </div>

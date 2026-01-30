@@ -17,7 +17,7 @@ async function listMyGames(req, res) {
   // ✅ 쿼리 검증/파싱을 validator에 위임
   // - { limit, from, to } 형태로 받는 걸 추천
   const { limit, from, to } = validateListMyGamesQuery(req.query);
-  console.log("[listMyGames query]", { from, to, limit, raw: req.query });
+  // console.log("[listMyGames query]", { from, to, limit, raw: req.query });
 
   const docs = await gamesService.listMyGames(req.user.userId, { limit, from, to });
   res.json(docs.map((d) => d.toPublic()));

@@ -16,6 +16,14 @@ export type Game = {
 
   createdAt?: string;
   updatedAt?: string;
+
+  // ✅ 서버에서 계산해서 내려오는 extra 필드들 (없을 수도 있음)
+  rating?: number;
+  ratingRaw?: number;
+  ratingClamped?: number;
+  expectedAvg?: number;
+  handicapUsed?: number;
+  avg?: number;
 };
 
 // 생성 요청 바디(프론트 -> 백엔드)

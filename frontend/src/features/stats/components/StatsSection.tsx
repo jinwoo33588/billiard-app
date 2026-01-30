@@ -11,6 +11,7 @@ import {
   Loader,
 } from "@mantine/core";
 import type { StatsSummary } from "../types";
+import { fmt3, fmtInt, fmtPct } from "../../../shared/utils/number";
 
 function glassBadgeStyle(color: string) {
   return {
@@ -20,18 +21,6 @@ function glassBadgeStyle(color: string) {
   } as const;
 }
 
-function fmtInt(n: number) {
-  return new Intl.NumberFormat("ko-KR").format(n);
-}
-
-function fmt3(n: number) {
-  return Number.isFinite(n) ? n.toFixed(3) : "0.000";
-}
-
-function pct0to100_1(n0to1: number) {
-  const v = Number.isFinite(n0to1) ? n0to1 * 100 : 0;
-  return v.toFixed(1);
-}
 
 type Props = {
   title: string;                 // "전체" / "이번달" / "최근 10게임"
@@ -44,13 +33,13 @@ export default function StatsSection({ title, subtitle, stats, loading = false }
   const gamesCount = stats?.gamesCount ?? 0;
 
   // ✅ 승률은 "무 제외" 기준 (서버의 winRate 사용)
-  const winRate = stats ? pct0to100_1(stats.winRate) : "0.0";
+  const winRate = stats ? fmtPct(stats.winRate, 1, "0.0") : "0.0";
 
   const wins = stats?.wins ?? 0;
   const draws = stats?.draws ?? 0;
   const loses = stats?.loses ?? 0;
 
-  const avg = stats ? fmt3(stats.avg) : "0.000";
+  const avg = stats ? fmt3(stats.avg, "0.000") : "0.000";
   const totalInning = stats?.sums?.inning ?? 0;
 
   return (

@@ -63,8 +63,10 @@ function defaultForm(): GameUpsertForm {
 }
 
 function formFromGame(g: Game): GameUpsertForm {
+  const rawDate = g.gameDate ? new Date(g.gameDate) : new Date();
+  const safeDate = Number.isNaN(rawDate.getTime()) ? new Date() : rawDate;
   return {
-    gameDate: g.gameDate ? new Date(g.gameDate) : new Date(),
+    gameDate: safeDate,
     gameType: (g.gameType ?? "UNKNOWN") as Game["gameType"],
     result: (g.result ?? "UNKNOWN") as Game["result"],
     score: typeof g.score === "number" ? g.score : "",
@@ -115,6 +117,12 @@ export default function GameUpsertModal({
     if (!Number.isFinite(s) || !Number.isFinite(i) || i <= 0) return null;
     return (s / i).toFixed(3);
   }, [form.score, form.inning]);
+
+  const gameDateValue = useMemo(() => {
+    const d = form.gameDate;
+    if (!(d instanceof Date) || Number.isNaN(d.getTime())) return "";
+    return d.toISOString().slice(0, 10);
+  }, [form.gameDate]);
 
   const errors = useMemo(() => {
     const e: Record<string, string> = {};
@@ -187,8 +195,12 @@ export default function GameUpsertModal({
         <Grid>
           <Grid.Col span={12}>
             <DateFieldFlatpickr
-              value={form.gameDate.toISOString().slice(0, 10)}
-              onChange={(v) => setForm((s) => ({ ...s, gameDate: new Date(v) }))}
+              value={gameDateValue}
+              onChange={(v) => {
+                const next = new Date(v);
+                if (Number.isNaN(next.getTime())) return;
+                setForm((s) => ({ ...s, gameDate: next }));
+              }}
               error={touched ? errors.gameDate : undefined}
               
             />

@@ -62,7 +62,8 @@ async function getUserDashboard(userId, { recent = 10 } = {}) {
 
   // ✅ 최근 게임 리스트(게임 응답에 rating/avg 붙여둔 로직을 그대로 재사용)
   // gamesService.listMyGames가 "plain object(=toPublic 필요없는 형태)"로 돌려주게 만들어둔 상태라면 그대로 OK
-  const recentGames = await gamesService.listMyGames(userId, { limit: recent });
+  const recentDocs = await gamesService.listMyGames(userId, { limit: recent });
+  const recentGames = recentDocs.map((d) => (typeof d.toPublic === "function" ? d.toPublic() : d));
 
   return {
     user: {

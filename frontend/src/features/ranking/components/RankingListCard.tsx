@@ -30,7 +30,9 @@ export default function RankingListCard({
             랭킹
           </Text>
           <Text size="xs" c="dimmed" mt={4} lineClamp={1}>
-            {data ? `${data.mode === "thisMonth" ? "이번달" : "전체"} · ${data.metric === "avg" ? "AVG" : "승률"} 기준` : ""}
+            {data
+              ? `${data.window.mode === "thisMonth" ? "이번달" : "전체"} · ${data.metric === "avg" ? "AVG" : "승률"} 기준`
+              : ""}
           </Text>
         </div>
 

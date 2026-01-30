@@ -7,6 +7,7 @@ const meGamesRoutes = require("./routes/me.games.routes");
 const insightsRoutes = require("./routes/insights.routes");
 const rankingRoutes = require("./routes/ranking.routes");
 const usersRoutes = require("./routes/users.routes");
+const adminRoutes = require("./routes/admin.routes");
 
 
 // const gamesRoutes = require("./routes/games.routes");
@@ -27,6 +28,7 @@ app.use("/api/me/games", meGamesRoutes);
 app.use("/api/me/insights", insightsRoutes);
 app.use("/api/ranking", rankingRoutes);
 app.use("/api/users", usersRoutes);
+app.use("/api/admin", adminRoutes);
 // app.use("/api/stats", statsRoutes);
 
 // 마지막에 에러 미들웨어

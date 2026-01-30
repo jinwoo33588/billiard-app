@@ -7,11 +7,16 @@ import { useGames } from "../features/games/useGames";
 import HandicapScoreCard from "../features/insights/components/HandicapScoreCard";
 import RecentStatsCard from "../features/insights/components/RecentStatsCard";
 import RecentRatedGamesCard from "../features/insights/components/RecentRatedGamesCard";
+import FormTrendCard from "../features/insights/components/FormTrendCard";
+import StreakCard from "../features/insights/components/StreakCard";
+import RatingBadgeDonutCard from "../features/insights/components/RatingBadgeDonutCard";
+import BestWorstGameCard from "../features/insights/components/BestWorstGameCard";
 // 또는 GameListWithEdit 재사용해도 됨
 
 export default function InsightsPage() {
-  const iq = useInsights({ mode: "limit", limit: 10 });
-  const gq = useGames({ limit: 10 });
+  const iq = useInsights({ mode: "limit", limit: 30 });
+  const gq = useGames({ limit: 30 });
+  const recentGames = gq.games.slice(0, 10);
 
   if (iq.loading) return <div style={{ padding: 12 }}>Loading...</div>;
   if (iq.error || !iq.data) return <div style={{ padding: 12 }}>Error: {iq.error}</div>;
@@ -19,10 +24,14 @@ export default function InsightsPage() {
   return (
     <div style={{ padding: 12 }}>
       <Stack gap="md">
-        <HandicapScoreCard data={iq.data.handicapScore} />
+        <HandicapScoreCard data={iq.data} />
+        {!gq.loading && !gq.error ? <FormTrendCard games={gq.games} /> : null}
+        {!gq.loading && !gq.error ? <StreakCard games={gq.games} limit={30} /> : null}
+        {!gq.loading && !gq.error ? <RatingBadgeDonutCard games={gq.games} /> : null}
+        {!gq.loading && !gq.error ? <BestWorstGameCard games={gq.games} /> : null}
         {/* <RecentStatsCard title="최근 10판 요약" stats={iq.data.stats} /> */}
 
-        {!gq.loading && !gq.error ? <RecentRatedGamesCard games={gq.games as any} /> : null}
+        {/* {!gq.loading && !gq.error ? <RecentRatedGamesCard games={recentGames} /> : null} */}
       </Stack>
     </div>
   );

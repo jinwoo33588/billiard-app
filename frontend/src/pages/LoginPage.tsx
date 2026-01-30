@@ -16,7 +16,7 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      nav("/me");
+      nav("/");
     } catch (e: any) {
       // axios 에러면 보통 e.response.data.message 형태
       const msg = e?.response?.data?.message ?? "Login failed";

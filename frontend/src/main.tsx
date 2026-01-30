@@ -4,6 +4,7 @@ import { MantineProvider } from "@mantine/core";
 import "./shared/components/flatpickr.css";
 import "@mantine/core/styles.css";
 import "./index.css"; 
+import "@mantine/dates/styles.css";
 
 import { BrowserRouter } from "react-router-dom";
 import App from "./app/App";

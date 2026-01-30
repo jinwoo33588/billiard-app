@@ -4,20 +4,9 @@ import { Group, Text, Divider, Badge } from "@mantine/core";
 import InsightCardShell from "./InsightCardShell";
 import type { Game } from "../../games/types";
 import { badgeFromRatingAndResult } from "../../games/utils/ratingBadge";
-
-function fmt1(n: number) {
-  return Number.isFinite(n) ? n.toFixed(1) : "-";
-}
-function fmt3(n: number) {
-  return Number.isFinite(n) ? n.toFixed(3) : "-";
-}
-
-function resultBadge(r: Game["result"]) {
-  if (r === "WIN") return { label: "승", color: "green" as const };
-  if (r === "LOSE") return { label: "패", color: "red" as const };
-  if (r === "DRAW") return { label: "무", color: "gray" as const };
-  return { label: "기타", color: "gray" as const };
-}
+import { fmt1, fmt3 } from "../../../shared/utils/number";
+import { calcAvg } from "../../../shared/utils/gameMath";
+import { getGameResultLabel, getGameResultTone } from "../../../shared/utils/gameLabels";
 
 export default function RecentRatedGamesCard({
   title = "최근 경기 평점",
@@ -41,10 +30,11 @@ export default function RecentRatedGamesCard({
 
       <div style={{ display: "grid", gap: 10 }}>
         {games.map((g) => {
-          const rating = (g as any).rating as number | undefined;
-          const avg = (g as any).avg ?? g.score / Math.max(1, g.inning);
+          const rating = g.rating;
+          const avg = g.avg ?? calcAvg(g.score, g.inning);
 
-          const rb = resultBadge(g.result);
+          const rb = getGameResultTone(g.result);
+          const label = getGameResultLabel(g.result);
           const ib = badgeFromRatingAndResult(rating, g.result);
 
           return (
@@ -89,7 +79,7 @@ export default function RecentRatedGamesCard({
         fontVariantNumeric: "tabular-nums",
       }}
     >
-      {g.inning}이닝
+        {g.inning}이닝
     </Text>
 
     {/* 점수 */}
@@ -128,10 +118,10 @@ export default function RecentRatedGamesCard({
         size="xs"
         radius="xl"
         variant="light"
-        color={rb.color}
+        color={rb.mantineColor}
         style={{ fontWeight: 900, border: "1px solid rgba(0,0,0,0.08)" }}
       >
-        {rb.label}
+        {label}
       </Badge>
 
       <Badge

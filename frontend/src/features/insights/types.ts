@@ -48,5 +48,6 @@ export type HandicapScore = {
 export type InsightsResponse = {
   window: WindowSpec;
   stats: StatsSummary;
-  handicapScore: HandicapScore;
+  handicapScore: HandicapScore | null;
+  note?: string;
 };

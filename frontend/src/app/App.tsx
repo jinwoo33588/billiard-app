@@ -11,12 +11,16 @@ import RankingPage from "../pages/RankingPage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import UserProfilePage from "../pages/UserProfilePage";
+import AdminPage from "../pages/AdminPage";
 
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+
+      {/* ✅ 관리자 페이지는 인증 없이 접근 */}
+      <Route path="/admin" element={<AdminPage />} />
 
       {/* 1) 인증 가드 */}
       <Route element={<RequireAuth />}>
