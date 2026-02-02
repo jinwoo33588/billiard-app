@@ -8,18 +8,18 @@ import StatsTabHeader from "../features/stats/components/StatsTabHeader";
 import type { StatsTab } from "../features/stats/components/StatsTabHeader";
 import { badgeFromMeanRating, badgeFromWinRate } from "../shared/utils/formBadges";
 import GameCalendarCard from "../features/games/components/GameCalendarCard";
-import { dayKeyLocal } from "../shared/utils/date";
 
 export default function HomePage() {
   const [tab, setTab] = useState<StatsTab>("thisMonth");
   const [recentN, setRecentN] = useState(10);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [recentVisible, setRecentVisible] = useState(10);
 
   const { loading, error, meta, statsAll, statsThisMonth, statsRecent, recentGames } =
-    useHomeDashboard({ recentN });
+    useHomeDashboard({ recentN, recentGamesLimit: 100 });
   const monthGames = useGames({ limit: 500, from: meta.fromThisMonth, to: meta.toToday });
 
-  // ✅ 최근 N판 rating 평균
+  // 최근 N판 rating 평균
   const meanRating = useMemo(() => {
     const xs = (recentGames ?? [])
       .map((g: any) => Number(g.rating))
@@ -28,7 +28,7 @@ export default function HomePage() {
     return xs.reduce((a, b) => a + b, 0) / xs.length;
   }, [recentGames]);
 
-  // ✅ 최근 N판 승률(너 규칙: statsRecent.winRate가 "무 제외"로 이미 계산됨)
+  // 최근 N판 승률(너 규칙: statsRecent.winRate가 "무 제외"로 이미 계산됨)
   const recentWinRate = useMemo(() => {
     const wr = (statsRecent as any)?.winRate;
     return Number.isFinite(wr) ? Number(wr) : null;
@@ -56,14 +56,12 @@ export default function HomePage() {
       />
     );
 
-  const listSource = monthGames.games;
-  const filteredList = selectedDate
-    ? listSource.filter((g) => dayKeyLocal(g.gameDate) === selectedDate)
-    : listSource;
+  const listGames = (recentGames ?? []).slice(0, recentVisible);
+  const canLoadMore = (recentGames?.length ?? 0) > listGames.length;
 
   return (
     <Stack gap="md" style={{ padding: 12 }}>
-      {/* ✅ 헤더 */}
+      {/* 헤더 */}
       <Group justify="space-between" align="center" wrap="nowrap">
         <div style={{ minWidth: 0 }}>
           <Text fw={950} style={{ letterSpacing: -0.3, lineHeight: 1.1 }}>
@@ -74,7 +72,7 @@ export default function HomePage() {
           </Text>
         </div>
 
-        {/* ✅ 요즘 폼 배지 2개 */}
+        {/*  요즘 폼 배지 2개 */}
         <Group gap={8} wrap="nowrap">
           <Tooltip label={ratingBadge.hint || ""} withArrow disabled={!ratingBadge.hint}>
             <Badge
@@ -112,7 +110,6 @@ export default function HomePage() {
           games={monthGames.games}
           initialDate={meta.fromThisMonth}
           compact
-          showList={false}
           lockMonth
           autoSelect={false}
           selectedDate={selectedDate}
@@ -122,16 +119,16 @@ export default function HomePage() {
 
       <div>
         <Group justify="space-between" align="center" mb={8}>
-          <Text fw={900}>
-            {selectedDate ? `${selectedDate} 게임` : "이번달 게임"}
-          </Text>
-          {selectedDate ? (
-            <Button size="xs" variant="light" onClick={() => setSelectedDate(null)}>
-              날짜 선택 취소
-            </Button>
-          ) : null}
+          <Text fw={900}>{`최근 게임`}</Text>
         </Group>
-        <GameListWithEdit games={filteredList} />
+        <GameListWithEdit games={listGames} />
+        {canLoadMore ? (
+          <Group justify="center" mt={10}>
+            <Button variant="light" onClick={() => setRecentVisible((v) => v + 10)}>
+              더보기
+            </Button>
+          </Group>
+        ) : null}
       </div>
 
       {error ? <div style={{ whiteSpace: "pre-wrap" }}>{error}</div> : null}

@@ -39,6 +39,7 @@ export default function StatsSection({ title, subtitle, stats, loading = false }
   const loses = stats?.loses ?? 0;
 
   const avg = stats ? fmt3(stats.avg, "0.000") : "0.000";
+  const expectedWinRate = stats ? fmtPct(stats.expectedWinRate, 1, "-") : "-";
   const totalInning = stats?.sums?.inning ?? 0;
 
   return (
@@ -111,6 +112,10 @@ export default function StatsSection({ title, subtitle, stats, loading = false }
               %
             </Text>
           </Group>
+
+          <Text size="xs" c="dimmed" mt={4}>
+            기대승률 {expectedWinRate}%
+          </Text>
 
           <Group justify="center" gap={6} mt={10} wrap="wrap">
             <Badge

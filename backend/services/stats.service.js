@@ -22,11 +22,20 @@ function normalizeResult(row, meta) {
     inningSum: 0,
     bestAvg: 0,
     bestScore: 0,
+    twoTeamCount: 0,
+    threeTeamCount: 0,
+    unknownTeamCount: 0,
   };
 
   const winLoseTotal = base.wins + base.loses; // ✅ 무 제외
   const winRate = safeDiv(base.wins, winLoseTotal);
   const avg = safeDiv(base.scoreSum, base.inningSum);
+  const expectedTotal =
+    (base.twoTeamCount || 0) + (base.threeTeamCount || 0) + (base.unknownTeamCount || 0);
+  const expectedWinRate = safeDiv(
+    (base.twoTeamCount || 0) * 0.5 + (base.threeTeamCount || 0) * (2 / 3) + (base.unknownTeamCount || 0) * 0.5,
+    expectedTotal || base.gamesCount || 0
+  );
 
   return {
     ...meta, // { mode, range, limit }
@@ -36,6 +45,7 @@ function normalizeResult(row, meta) {
     loses: base.loses,
 
     winRate,
+    expectedWinRate,
     avg,
 
     sums: {
@@ -75,6 +85,34 @@ function buildGroupPipeline(match) {
             $cond: [
               { $gt: ["$inning", 0] },
               { $divide: ["$score", "$inning"] },
+              0,
+            ],
+          },
+        },
+
+        twoTeamCount: {
+          $sum: {
+            $cond: [
+              { $in: ["$gameType", ["1v1", "2v2", "3v3"]] },
+              1,
+              0,
+            ],
+          },
+        },
+        threeTeamCount: {
+          $sum: {
+            $cond: [
+              { $in: ["$gameType", ["2v2v2", "3v3v3"]] },
+              1,
+              0,
+            ],
+          },
+        },
+        unknownTeamCount: {
+          $sum: {
+            $cond: [
+              { $in: ["$gameType", ["UNKNOWN", null]] },
+              1,
               0,
             ],
           },

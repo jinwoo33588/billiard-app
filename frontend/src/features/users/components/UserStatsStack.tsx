@@ -36,6 +36,9 @@ function StatsCard({ title, badge, stats }: { title: string; badge: string; stat
           <Text fw={950} style={{ fontVariantNumeric: "tabular-nums" }}>
             {fmtPct(stats.winRate, 1, "-")}%
           </Text>
+          <Text size="xs" c="dimmed" fw={800} mt={2}>
+            기대승률 {fmtPct(stats.expectedWinRate, 1, "-")}%
+          </Text>
         </div>
 
         <div>

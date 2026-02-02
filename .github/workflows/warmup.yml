@@ -1,0 +1,14 @@
+name: Warmup Backend
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health
+        run: |
+          curl -fsS "https://billiard-app-backend.onrender.com/api/health" >/dev/null

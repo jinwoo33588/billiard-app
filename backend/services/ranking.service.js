@@ -60,6 +60,9 @@ async function getRanking({ mode, metric, limit }) {
               loses: { $sum: { $cond: [{ $eq: ["$result", "LOSE"] }, 1, 0] } },
               scoreSum: { $sum: "$score" },
               inningSum: { $sum: "$inning" },
+              twoTeamCount: { $sum: { $cond: [{ $in: ["$gameType", ["1v1", "2v2", "3v3"]] }, 1, 0] } },
+              threeTeamCount: { $sum: { $cond: [{ $in: ["$gameType", ["2v2v2", "3v3v3"]] }, 1, 0] } },
+              unknownTeamCount: { $sum: { $cond: [{ $in: ["$gameType", ["UNKNOWN", null]] }, 1, 0] } },
             },
           },
           {
@@ -74,6 +77,31 @@ async function getRanking({ mode, metric, limit }) {
                   in: { $cond: [{ $gt: ["$$den", 0] }, { $divide: ["$wins", "$$den"] }, 0] },
                 },
               },
+              expectedWinRate: {
+                $let: {
+                  vars: {
+                    total: { $add: ["$twoTeamCount", "$threeTeamCount", "$unknownTeamCount"] },
+                  },
+                  in: {
+                    $cond: [
+                      { $gt: ["$$total", 0] },
+                      {
+                        $divide: [
+                          {
+                            $add: [
+                              { $multiply: ["$twoTeamCount", 0.5] },
+                              { $multiply: ["$threeTeamCount", 0.6666667] },
+                              { $multiply: ["$unknownTeamCount", 0.5] },
+                            ],
+                          },
+                          "$$total",
+                        ],
+                      },
+                      0,
+                    ],
+                  },
+                },
+              },
             },
           },
           {
@@ -85,6 +113,7 @@ async function getRanking({ mode, metric, limit }) {
               loses: 1,
               avg: 1,
               winRate: 1,
+              expectedWinRate: 1,
             },
           },
         ],

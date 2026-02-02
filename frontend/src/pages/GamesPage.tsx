@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
 import type { DatesRangeValue } from "@mantine/dates";
 import { useGames } from "../features/games/useGames";
+import { useStats } from "../features/stats/useStats";
 
 import GameListWithEdit from "../features/games/components/GameListWithEdit";
 import GamePeriodFilter from "../features/games/components/GamePeriodFilter";
 import GameCalendarCard from "../features/games/components/GameCalendarCard";
+import GamePeriodStatsCard from "../features/games/components/GamePeriodStatsCard";
 
 function startOfThisMonth() {
   const d = new Date();
@@ -78,6 +80,7 @@ export default function GamesPage() {
 
   // ✅ 2) 실제 리스트용: 필터 적용
   const filtered = useGames({ limit: 200, from: query.from, to: query.to });
+  const periodStats = useStats({ from: query.from, to: query.to });
 
   // ✅ pill 계산은 meta.games 기준으로
   const { years, monthsInYear, monthCounts } = useMemo(() => {
@@ -137,6 +140,13 @@ export default function GamesPage() {
         monthCounts={monthCounts}
         pillVariant={pillVariant}
         clearAllFilters={clearAllFilters}
+      />
+
+      <GamePeriodStatsCard
+        stats={periodStats.stats}
+        loading={periodStats.loading}
+        from={query.from}
+        to={query.to}
       />
 
       {!filtered.loading && !filtered.error && (

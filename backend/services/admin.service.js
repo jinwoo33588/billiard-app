@@ -10,6 +10,15 @@ function safeDiv(a, b) {
   return b > 0 ? a / b : 0;
 }
 
+function calcExpectedWinRate(row) {
+  const two = row.twoTeamCount || 0;
+  const three = row.threeTeamCount || 0;
+  const unknown = row.unknownTeamCount || 0;
+  const total = two + three + unknown;
+  if (total <= 0) return 0;
+  return safeDiv(two * 0.5 + three * (2 / 3) + unknown * 0.5, total);
+}
+
 async function getOverview() {
   const totalUsers = await User.countDocuments();
   const totalGames = await Game.countDocuments();
@@ -40,6 +49,9 @@ function summarizeGames(games) {
     bestScore: 0,
     bestAvg: 0,
     lastGameDate: null,
+    twoTeamCount: 0,
+    threeTeamCount: 0,
+    unknownTeamCount: 0,
   };
 
   if (!games || !games.length) return base;
@@ -56,6 +68,10 @@ function summarizeGames(games) {
 
     const avg = g.inning > 0 ? g.score / g.inning : 0;
     base.bestAvg = Math.max(base.bestAvg, avg);
+
+    if (["1v1", "2v2", "3v3"].includes(g.gameType)) base.twoTeamCount += 1;
+    else if (["2v2v2", "3v3v3"].includes(g.gameType)) base.threeTeamCount += 1;
+    else base.unknownTeamCount += 1;
 
     if (!base.lastGameDate || new Date(g.gameDate) > new Date(base.lastGameDate)) {
       base.lastGameDate = g.gameDate;
@@ -135,6 +151,15 @@ async function listUsers({
               $cond: [{ $gt: ["$inning", 0] }, { $divide: ["$score", "$inning"] }, 0],
             },
           },
+          twoTeamCount: {
+            $sum: { $cond: [{ $in: ["$gameType", ["1v1", "2v2", "3v3"]] }, 1, 0] },
+          },
+          threeTeamCount: {
+            $sum: { $cond: [{ $in: ["$gameType", ["2v2v2", "3v3v3"]] }, 1, 0] },
+          },
+          unknownTeamCount: {
+            $sum: { $cond: [{ $in: ["$gameType", ["UNKNOWN", null]] }, 1, 0] },
+          },
         },
       },
     ]);
@@ -147,6 +172,7 @@ async function listUsers({
 
     const winLose = row.wins + row.loses;
     const winRate = safeDiv(row.wins, winLose);
+    const expectedWinRate = calcExpectedWinRate(row);
     const avg = safeDiv(row.scoreSum, row.inningSum);
 
     return {
@@ -162,6 +188,7 @@ async function listUsers({
       draws: row.draws,
       loses: row.loses,
       winRate,
+      expectedWinRate,
       avg,
       bestScore: row.bestScore,
       bestAvg: row.bestAvg,

@@ -5,7 +5,17 @@ import InsightCardShell from "./InsightCardShell";
 import { fmt1 } from "../../../shared/utils/number";
 import { calcAvg } from "../../../shared/utils/gameMath";
 
-function Sparkline({ values, width = 220, height = 46 }: { values: number[]; width?: number; height?: number }) {
+function Sparkline({
+  values,
+  baseline = 50,
+  width = 220,
+  height = 46,
+}: {
+  values: number[];
+  baseline?: number;
+  width?: number;
+  height?: number;
+}) {
   if (values.length < 2) return null;
 
   const min = Math.min(...values);
@@ -23,9 +33,20 @@ function Sparkline({ values, width = 220, height = 46 }: { values: number[]; wid
 
   const lastX = pad + (w * (values.length - 1)) / (values.length - 1 || 1);
   const lastY = pad + (h * (1 - (values[values.length - 1] - min) / range));
+  const rawBaseY = pad + (h * (1 - (baseline - min) / range));
+  const baseY = Math.min(pad + h, Math.max(pad, rawBaseY));
 
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+      <line
+        x1={pad}
+        x2={pad + w}
+        y1={baseY}
+        y2={baseY}
+        stroke="rgba(0,0,0,0.18)"
+        strokeWidth={1}
+        strokeDasharray="4 3"
+      />
       <polyline
         points={points.join(" ")}
         fill="none"
@@ -42,7 +63,7 @@ function Sparkline({ values, width = 220, height = 46 }: { values: number[]; wid
 export default function FormTrendCard({
   games,
   title = "폼 추세",
-  limit = 12,
+  limit = 20,
 }: {
   games: (Game & { rating?: number; avg?: number })[];
   title?: string;
@@ -64,6 +85,8 @@ export default function FormTrendCard({
   const last = series.length ? series[series.length - 1] : NaN;
   const first = series.length ? series[0] : NaN;
   const delta = Number.isFinite(last - first) ? last - first : NaN;
+  const avg =
+    series.length > 0 ? series.reduce((a, b) => a + b, 0) / series.length : NaN;
 
   return (
     <InsightCardShell>
@@ -79,23 +102,23 @@ export default function FormTrendCard({
 
         <div style={{ textAlign: "right" }}>
           <Text size="xs" c="dimmed" fw={900} style={{ lineHeight: 1 }}>
-            최신
+            평균
           </Text>
           <Text fw={950} style={{ fontSize: 20, fontVariantNumeric: "tabular-nums" }}>
-            {fmt1(last)}
+            {fmt1(avg)}
           </Text>
-          {Number.isFinite(delta) ? (
+          {/* {Number.isFinite(delta) ? (
             <Text size="xs" c={delta >= 0 ? "teal" : "red"} fw={900}>
               {delta >= 0 ? "+" : ""}
               {fmt1(delta)}
             </Text>
-          ) : null}
+          ) : null} */}
         </div>
       </Group>
 
       <div style={{ marginTop: 12, display: "flex", justifyContent: "center" }}>
         {series.length >= 2 ? (
-          <Sparkline values={series} />
+          <Sparkline values={series} baseline={50} />
         ) : (
           <Text size="sm" c="dimmed">
             데이터가 부족합니다.

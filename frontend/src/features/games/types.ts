@@ -23,6 +23,7 @@ export type Game = {
   ratingClamped?: number;
   expectedAvg?: number;
   handicapUsed?: number;
+  handicapAtGame?: number;
   avg?: number;
 };
 

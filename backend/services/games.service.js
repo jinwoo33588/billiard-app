@@ -32,15 +32,18 @@ async function getUserHandicap(userId) {
 }
 
 /** doc에 extra(=handicap/rating 등) 붙이기 */
-function attachExtraToDoc(doc, handicap) {
+function attachExtraToDoc(doc, fallbackHandicap) {
   if (!doc) return doc;
 
-  const bm = lookupHandicapBenchmark(handicap);
+  const handicapUsed = Number.isFinite(doc.handicapAtGame)
+    ? Number(doc.handicapAtGame)
+    : Number(fallbackHandicap);
+  const bm = lookupHandicapBenchmark(handicapUsed);
 
   const scored = rateGame({
     score: doc.score,
     inning: doc.inning,
-    handicap,
+    handicap: handicapUsed,
     band: { min: bm.min, max: bm.max, expected: bm.expected },
     params: DEFAULT_PARAMS,
   });
@@ -48,7 +51,7 @@ function attachExtraToDoc(doc, handicap) {
   // ✅ DB 저장 X, 응답용 임시 필드
   doc.$locals = doc.$locals || {};
   doc.$locals.extra = {
-    handicapUsed: handicap,
+    handicapUsed,
     expectedAvg: bm.expected,
 
     rating: scored.rating,
@@ -76,8 +79,6 @@ async function listMyGames(userId, { limit, from, to } = {}) {
   if (typeof limit === "number" && limit > 0) q.limit(limit);
 
   const docs = await q;
-
-  // ✅ handicap/benchmark는 1번만
   const handicap = await getUserHandicap(userId);
 
   // ✅ docs는 Document 그대로 유지
@@ -85,9 +86,9 @@ async function listMyGames(userId, { limit, from, to } = {}) {
 }
 
 async function createMyGame(userId, payload) {
-  const doc = await Game.create({ ...payload, userId });
-  const handicap = await getUserHandicap(userId);
-  return attachExtraToDoc(doc, handicap);
+  const handicapAtGame = await getUserHandicap(userId);
+  const doc = await Game.create({ ...payload, userId, handicapAtGame });
+  return attachExtraToDoc(doc, handicapAtGame);
 }
 
 async function getMyGame(userId, gameId) {

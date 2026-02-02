@@ -14,6 +14,7 @@ export type StatsSummary = {
 
   // 백엔드가 winRate로 주는 걸 기준으로
   winRate: number;
+  expectedWinRate: number;
 
   avg: number;
 

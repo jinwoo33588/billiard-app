@@ -18,6 +18,7 @@ export type StatsSummary = {
   loses: number;
 
   winRate: number; // 너는 winrate 계속 쓴다고 했으니 이거 고정
+  expectedWinRate: number; // 팀 구성 기반 기대 승률
   avg: number;
 
   sums: { score: number; inning: number };

@@ -40,6 +40,13 @@ const gameSchema = new mongoose.Schema(
       required: true,
     },
 
+    // ✅ 게임 입력 당시 핸디(고정 저장)
+    handicapAtGame: {
+      type: Number,
+      min: 0,
+      default: null,
+    },
+
     gameDate: {
       type: Date,
       required: true,
@@ -66,6 +73,7 @@ gameSchema.methods.toPublic = function () {
     inning: this.inning,
     result: this.result,
     gameType: this.gameType,
+    handicapAtGame: this.handicapAtGame ?? null,
     gameDate: this.gameDate?.toISOString(),
     memo: this.memo ?? "",
     createdAt: this.createdAt?.toISOString(),

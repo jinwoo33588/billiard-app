@@ -6,6 +6,7 @@ import { dayKeyLocal } from "../../shared/utils/date";
 
 type Options = {
   recentN?: number; // ✅ 여기만 바꾸면 홈 전체 recent 기준이 바뀜
+  recentGamesLimit?: number; // ✅ 최근 게임 리스트는 더 크게 가져오기
 };
 
 function monthStartKeyLocal(now: Date) {
@@ -14,13 +15,14 @@ function monthStartKeyLocal(now: Date) {
 
 export function useHomeDashboard(options?: Options) {
   const recentN = options?.recentN ?? 10;
+  const recentGamesLimit = options?.recentGamesLimit ?? recentN;
 
   const now = useMemo(() => new Date(), []);
   const fromThisMonth = useMemo(() => monthStartKeyLocal(now), [now]);
   const toToday = useMemo(() => dayKeyLocal(now), [now]);
 
-  // ✅ recent 기준을 여기서 통일
-  const games = useGames({ limit: recentN });
+  // ✅ 최근 게임 리스트는 더 크게 가져와도 OK
+  const games = useGames({ limit: recentGamesLimit });
   const statsAll = useStats();
   const statsThisMonth = useStats({ from: fromThisMonth, to: toToday });
   const statsRecent = useStats({ limit: recentN });

@@ -1,10 +1,10 @@
 // frontend/src/features/insights/components/RecentStatsCard.tsx
-import { Group, Badge, Divider, SimpleGrid } from "@mantine/core";
+import { Group, Badge, Divider, SimpleGrid, Text } from "@mantine/core";
 import type { StatsSummary } from "../types";
 import InsightCardShell from "./InsightCardShell";
 import Metric from "../../../shared/components/Metric";
 import Pill from "../../../shared/components/Pill";
-import { fmt3 } from "../../../shared/utils/number";
+import { fmt3, fmtPct } from "../../../shared/utils/number";
 
 export default function RecentStatsCard({ stats }: { stats: StatsSummary }) {
   const winRatePct = Math.round((stats.winRate ?? 0) * 100);
@@ -33,6 +33,9 @@ export default function RecentStatsCard({ stats }: { stats: StatsSummary }) {
   {/* ✅ 왼쪽: 승률 + (승/무/패) */}
   <div style={{ textAlign: "center" }}>
     <Metric label="승률" value={`${winRatePct}`} suffix="%" strong />
+    <Text size="xs" c="dimmed" fw={800} mt={4}>
+      기대승률 {fmtPct(stats.expectedWinRate, 1, "-")}%
+    </Text>
 
     {/* 승/무/패 pill을 승률 아래에 작게 */}
     <Group justify="center" gap={6} mt={8} wrap="wrap">

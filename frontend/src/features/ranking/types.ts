@@ -18,6 +18,7 @@ export type RankingStats = {
 
   avg: number;        // 0 games면 0으로 내려올 수도 있음
   winRate: number;    // 0 games면 0으로 내려올 수도 있음
+  expectedWinRate: number; // 0~1 (팀 구성 기반 기대 승률)
 };
 
 export type RankingItem = {

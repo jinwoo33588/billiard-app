@@ -18,6 +18,7 @@ export type AdminUserSummary = {
   draws: number;
   loses: number;
   winRate: number;
+  expectedWinRate: number;
   avg: number;
   bestScore: number;
   bestAvg: number;

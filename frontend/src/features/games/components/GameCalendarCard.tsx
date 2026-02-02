@@ -147,13 +147,9 @@ export default function GameCalendarCard({
   useEffect(() => {
     if (!autoSelect) return;
     if (selectedDateValue) return;
-    const todayKey = ymd(new Date());
-    if (dayMap.has(todayKey)) {
-      setSelectedDateValue(todayKey);
-      return;
-    }
-    const firstKey = Array.from(dayMap.keys()).sort()[0];
-    if (firstKey) setSelectedDateValue(firstKey);
+    const keys = Array.from(dayMap.keys()).sort();
+    const latestKey = keys.length ? keys[keys.length - 1] : null;
+    if (latestKey) setSelectedDateValue(latestKey);
   }, [autoSelect, dayMap, selectedDateValue]);
 
   const year = viewDate.getFullYear();

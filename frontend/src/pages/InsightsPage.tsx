@@ -8,11 +8,12 @@ import FormTrendCard from "../features/insights/components/FormTrendCard";
 import StreakCard from "../features/insights/components/StreakCard";
 import RatingBadgeDonutCard from "../features/insights/components/RatingBadgeDonutCard";
 import BestWorstGameCard from "../features/insights/components/BestWorstGameCard";
+import TeamTypeStatsCard from "../features/insights/components/TeamTypeStatsCard";
 // 또는 GameListWithEdit 재사용해도 됨
 
 export default function InsightsPage() {
-  const iq = useInsights({ mode: "limit", limit: 30 });
-  const gq = useGames({ limit: 30 });
+  const iq = useInsights({ mode: "limit", limit: 20 });
+  const gq = useGames({ limit: 20 });
 
   if (iq.loading) return <div style={{ padding: 12 }}>Loading...</div>;
   if (iq.error || !iq.data) return <div style={{ padding: 12 }}>Error: {iq.error}</div>;
@@ -22,6 +23,7 @@ export default function InsightsPage() {
       <Stack gap="md">
         <HandicapScoreCard data={iq.data} />
         {!gq.loading && !gq.error ? <FormTrendCard games={gq.games} /> : null}
+        {!gq.loading && !gq.error ? <TeamTypeStatsCard games={gq.games} /> : null}
         {!gq.loading && !gq.error ? <StreakCard games={gq.games} limit={30} /> : null}
         {!gq.loading && !gq.error ? <RatingBadgeDonutCard games={gq.games} /> : null}
         {!gq.loading && !gq.error ? <BestWorstGameCard games={gq.games} /> : null}

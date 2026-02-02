@@ -66,6 +66,10 @@ export default function StatsBlock(){
             <Text size="sm" c="dimmed">%</Text>
           </Group>
 
+          <Text size="xs" c="dimmed" mt={4}>
+            기대승률 ##
+          </Text>
+
           <Group justify="center" gap={6} mt={10} wrap="wrap">
             <Badge radius="xl" variant="light" size="sm" style={glassBadgeStyle("var(--mantine-color-green-7)")}>
               #승

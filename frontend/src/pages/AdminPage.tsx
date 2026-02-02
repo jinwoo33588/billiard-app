@@ -262,7 +262,14 @@ export default function AdminPage() {
                         </Text>
                       </Table.Td>
                       <Table.Td>{fmt3(u.avg)}</Table.Td>
-                      <Table.Td>{fmtPct(u.winRate, 0)}%</Table.Td>
+                      <Table.Td>
+                        <Text size="sm" fw={900} style={{ fontVariantNumeric: "tabular-nums" }}>
+                          {fmtPct(u.winRate, 0)}%
+                        </Text>
+                        <Text size="xs" c="dimmed" fw={800}>
+                          기대승률 {fmtPct(u.expectedWinRate, 0)}%
+                        </Text>
+                      </Table.Td>
                       <Table.Td>{Number.isFinite(u.expectedInnings) ? fmt1(u.expectedInnings) : "-"}</Table.Td>
                       <Table.Td>
                         <Badge

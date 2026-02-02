@@ -38,6 +38,7 @@ export default function RankingRow({
   const games = item.stats.gamesCount ?? 0;
   const avg = games > 0 ? item.stats.avg : NaN;
   const win = games > 0 ? item.stats.winRate : NaN;
+  const expectedWin = games > 0 ? item.stats.expectedWinRate : NaN;
   const winPct = fmtPct(win, 0, "-");
 
   const winBadge = badgeFromWinRate(games > 0 ? item.stats.winRate : null);
@@ -160,6 +161,9 @@ export default function RankingRow({
         </Text>
         <Text size="sm" fw={900} c="dimmed" style={{ fontVariantNumeric: "tabular-nums" }}>
           {winPct === "-" ? "-" : `${winPct}%`}
+        </Text>
+        <Text size="xs" c="dimmed" fw={800} style={{ fontVariantNumeric: "tabular-nums" }}>
+          기대승률 {fmtPct(expectedWin, 0, "-")}%
         </Text>
       </div>
     </div>

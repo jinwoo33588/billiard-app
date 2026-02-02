@@ -271,17 +271,10 @@ export default function HandicapScoreCard({ data, handicapScore, span = 2 }: Pro
 
   return (
     <InsightCardShell>
-      <Group justify="space-between" align="flex-start" wrap="nowrap">
-        <div style={{ minWidth: 0 }}>
-          <Text fw={950} style={{ letterSpacing: -0.3, lineHeight: 1.1 }}>
-            핸디 평가
-          </Text>
-          <Text size="xs" c="dimmed" mt={3}>
-            현재 HCP {safe.handicap}
-            {typeof safe.expected === "number" ? ` · 기대 AVG ${fmt3(safe.expected)}` : ""}
-            {typeof safe.gamesCount === "number" ? ` · ${safe.gamesCount}판 기준` : ""}
-          </Text>
-        </div>
+      <Group justify="space-between" align="center" wrap="nowrap">
+        <Text fw={950} style={{ letterSpacing: -0.3, lineHeight: 1.1 }}>
+          핸디 평가
+        </Text>
 
         <Group gap={8} wrap="nowrap">
           <Button size="xs" variant="subtle" onClick={() => setOpenGuide(true)}>
@@ -297,6 +290,12 @@ export default function HandicapScoreCard({ data, handicapScore, span = 2 }: Pro
           </Badge>
         </Group>
       </Group>
+
+      <Text size="xs" c="dimmed" mt={4}>
+        {safe.handicap}점
+        {typeof safe.expected === "number" ? ` · 기대 AVG ${fmt3(safe.expected)}` : ""}
+        {typeof safe.gamesCount === "number" ? ` · ${safe.gamesCount}판 기준` : ""}
+      </Text>
 
       <div style={{ marginTop: 14 }}>
         <Track
@@ -373,16 +372,48 @@ export default function HandicapScoreCard({ data, handicapScore, span = 2 }: Pro
               <Table.Th>상한</Table.Th>
             </Table.Tr>
           </Table.Thead>
-          <Table.Tbody>
-            {HANDICAP_BENCHMARKS.map((item) => (
-              <Table.Tr key={item.handicap}>
-                <Table.Td>{item.handicap}</Table.Td>
-                <Table.Td>{fmt3(item.expected)}</Table.Td>
-                <Table.Td>{fmt3(item.min)}</Table.Td>
-                <Table.Td>{fmt3(item.max)}</Table.Td>
-              </Table.Tr>
-            ))}
-          </Table.Tbody>
+        <Table.Tbody>
+          {HANDICAP_BENCHMARKS.map((item) => (
+            <Table.Tr key={item.handicap}>
+              <Table.Td
+                style={
+                  item.handicap === safe.handicap
+                    ? { background: "rgba(72, 149, 255, 0.12)", fontWeight: 900 }
+                    : undefined
+                }
+              >
+                {item.handicap}
+              </Table.Td>
+              <Table.Td
+                style={
+                  item.handicap === safe.handicap
+                    ? { background: "rgba(72, 149, 255, 0.12)", fontWeight: 900 }
+                    : undefined
+                }
+              >
+                {fmt3(item.expected)}
+              </Table.Td>
+              <Table.Td
+                style={
+                  item.handicap === safe.handicap
+                    ? { background: "rgba(72, 149, 255, 0.12)", fontWeight: 900 }
+                    : undefined
+                }
+              >
+                {fmt3(item.min)}
+              </Table.Td>
+              <Table.Td
+                style={
+                  item.handicap === safe.handicap
+                    ? { background: "rgba(72, 149, 255, 0.12)", fontWeight: 900 }
+                    : undefined
+                }
+              >
+                {fmt3(item.max)}
+              </Table.Td>
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
         </Table>
 
         <Divider my="md" />
