@@ -1,5 +1,15 @@
 import { useMemo, useState } from "react";
-import { Stack, Group, Text, Badge, Tooltip, Button } from "@mantine/core";
+import {
+  Stack,
+  Group,
+  Text,
+  Badge,
+  Tooltip,
+  Button,
+  SimpleGrid,
+  useMantineTheme,
+} from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { useHomeDashboard } from "../features/home/useHomeDashboard";
 import { useGames } from "../features/games/useGames";
 import StatsSection from "../features/stats/components/StatsSection";
@@ -14,6 +24,8 @@ export default function HomePage() {
   const [recentN, setRecentN] = useState(10);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [recentVisible, setRecentVisible] = useState(10);
+  const theme = useMantineTheme();
+  const isDesktop = useMediaQuery(`(min-width: ${theme.breakpoints.md})`);
 
   const { loading, error, meta, statsAll, statsThisMonth, statsRecent, recentGames } =
     useHomeDashboard({ recentN, recentGamesLimit: 100 });
@@ -60,7 +72,7 @@ export default function HomePage() {
   const canLoadMore = (recentGames?.length ?? 0) > listGames.length;
 
   return (
-    <Stack gap="md" style={{ padding: 12 }}>
+    <Stack gap={{ base: "md", lg: "lg" }}>
       {/* 헤더 */}
       <Group justify="space-between" align="center" wrap="nowrap">
         <div style={{ minWidth: 0 }}>
@@ -102,34 +114,38 @@ export default function HomePage() {
 
       <StatsTabHeader tab={tab} setTab={setTab} recentN={recentN} setRecentN={setRecentN} />
 
-      {statsByTab}
+      <SimpleGrid cols={{ base: 1, md: 2 }} spacing={{ base: "md", lg: "lg" }}>
+        <Stack gap="md">
+          {statsByTab}
 
-      {!monthGames.loading && !monthGames.error ? (
-        <GameCalendarCard
-          title="승패 캘린더"
-          games={monthGames.games}
-          initialDate={meta.fromThisMonth}
-          compact
-          lockMonth
-          autoSelect={false}
-          selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
-        />
-      ) : null}
+          {!monthGames.loading && !monthGames.error ? (
+            <GameCalendarCard
+              title="승패 캘린더"
+              games={monthGames.games}
+              initialDate={meta.fromThisMonth}
+              compact={!isDesktop}
+              lockMonth
+              autoSelect={false}
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
+            />
+          ) : null}
+        </Stack>
 
-      <div>
-        <Group justify="space-between" align="center" mb={8}>
-          <Text fw={900}>{`최근 게임`}</Text>
-        </Group>
-        <GameListWithEdit games={listGames} />
-        {canLoadMore ? (
-          <Group justify="center" mt={10}>
-            <Button variant="light" onClick={() => setRecentVisible((v) => v + 10)}>
-              더보기
-            </Button>
+        <div>
+          <Group justify="space-between" align="center" mb={8}>
+            <Text fw={900}>{`최근 게임`}</Text>
           </Group>
-        ) : null}
-      </div>
+          <GameListWithEdit games={listGames} />
+          {canLoadMore ? (
+            <Group justify="center" mt={10}>
+              <Button variant="light" onClick={() => setRecentVisible((v) => v + 10)}>
+                더보기
+              </Button>
+            </Group>
+          ) : null}
+        </div>
+      </SimpleGrid>
 
       {error ? <div style={{ whiteSpace: "pre-wrap" }}>{error}</div> : null}
     </Stack>

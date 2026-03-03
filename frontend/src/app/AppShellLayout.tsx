@@ -1,7 +1,7 @@
 // src/app/AppShellLayout.tsx
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { AppShell } from "@mantine/core";
+import { AppShell, Container } from "@mantine/core";
 
 import { useAuth } from "../features/auth/useAuth";
 import BottomNav from "./BottomNav";
@@ -26,7 +26,9 @@ export default function AppShellLayout() {
 
       <AppShell.Main>
         <div style={{ height: "calc(100dvh - 56px - 72px)", overflow: "auto", padding: 0 }}>
-          <Outlet />
+          <Container size="md" px={{ base: 12, sm: "md", lg: "xl" }} py="md">
+            <Outlet />
+          </Container>
         </div>
 
         {/* ✅ 모달은 Footer 밖 */}
