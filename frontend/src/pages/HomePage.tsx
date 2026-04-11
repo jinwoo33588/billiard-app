@@ -16,7 +16,10 @@ import StatsSection from "../features/stats/components/StatsSection";
 import GameListWithEdit from "../features/games/components/GameListWithEdit";
 import StatsTabHeader from "../features/stats/components/StatsTabHeader";
 import type { StatsTab } from "../features/stats/components/StatsTabHeader";
-import { badgeFromMeanRating, badgeFromWinRate } from "../shared/utils/formBadges";
+import {
+  badgeFromMeanRating,
+  badgeFromWinRate,
+} from "../shared/utils/formBadges";
 import GameCalendarCard from "../features/games/components/GameCalendarCard";
 
 export default function HomePage() {
@@ -27,9 +30,20 @@ export default function HomePage() {
   const theme = useMantineTheme();
   const isDesktop = useMediaQuery(`(min-width: ${theme.breakpoints.md})`);
 
-  const { loading, error, meta, statsAll, statsThisMonth, statsRecent, recentGames } =
-    useHomeDashboard({ recentN, recentGamesLimit: 100 });
-  const monthGames = useGames({ limit: 500, from: meta.fromThisMonth, to: meta.toToday });
+  const {
+    loading,
+    error,
+    meta,
+    statsAll,
+    statsThisMonth,
+    statsRecent,
+    recentGames,
+  } = useHomeDashboard({ recentN, recentGamesLimit: 100 });
+  const monthGames = useGames({
+    limit: 500,
+    from: meta.fromThisMonth,
+    to: meta.toToday,
+  });
 
   // 최근 N판 rating 평균
   const meanRating = useMemo(() => {
@@ -46,12 +60,23 @@ export default function HomePage() {
     return Number.isFinite(wr) ? Number(wr) : null;
   }, [statsRecent]);
 
-  const ratingBadge = useMemo(() => badgeFromMeanRating(meanRating), [meanRating]);
-  const winBadge = useMemo(() => badgeFromWinRate(recentWinRate), [recentWinRate]);
+  const ratingBadge = useMemo(
+    () => badgeFromMeanRating(meanRating),
+    [meanRating],
+  );
+  const winBadge = useMemo(
+    () => badgeFromWinRate(recentWinRate),
+    [recentWinRate],
+  );
 
   const statsByTab =
     tab === "all" ? (
-      <StatsSection title="전체" subtitle="전체 기록 기준" stats={statsAll} loading={loading} />
+      <StatsSection
+        title="전체"
+        subtitle="전체 기록 기준"
+        stats={statsAll}
+        loading={loading}
+      />
     ) : tab === "thisMonth" ? (
       <StatsSection
         title="이번달"
@@ -72,7 +97,7 @@ export default function HomePage() {
   const canLoadMore = (recentGames?.length ?? 0) > listGames.length;
 
   return (
-    <Stack gap={{ base: "md", lg: "lg" }}>
+    <Stack>
       {/* 헤더 */}
       <Group justify="space-between" align="center" wrap="nowrap">
         <div style={{ minWidth: 0 }}>
@@ -86,7 +111,11 @@ export default function HomePage() {
 
         {/*  요즘 폼 배지 2개 */}
         <Group gap={8} wrap="nowrap">
-          <Tooltip label={ratingBadge.hint || ""} withArrow disabled={!ratingBadge.hint}>
+          <Tooltip
+            label={ratingBadge.hint || ""}
+            withArrow
+            disabled={!ratingBadge.hint}
+          >
             <Badge
               radius="xl"
               variant="light"
@@ -98,7 +127,11 @@ export default function HomePage() {
             </Badge>
           </Tooltip>
 
-          <Tooltip label={winBadge.hint || ""} withArrow disabled={!winBadge.hint}>
+          <Tooltip
+            label={winBadge.hint || ""}
+            withArrow
+            disabled={!winBadge.hint}
+          >
             <Badge
               radius="xl"
               variant="light"
@@ -112,7 +145,12 @@ export default function HomePage() {
         </Group>
       </Group>
 
-      <StatsTabHeader tab={tab} setTab={setTab} recentN={recentN} setRecentN={setRecentN} />
+      <StatsTabHeader
+        tab={tab}
+        setTab={setTab}
+        recentN={recentN}
+        setRecentN={setRecentN}
+      />
 
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing={{ base: "md", lg: "lg" }}>
         <Stack gap="md">
@@ -139,7 +177,10 @@ export default function HomePage() {
           <GameListWithEdit games={listGames} />
           {canLoadMore ? (
             <Group justify="center" mt={10}>
-              <Button variant="light" onClick={() => setRecentVisible((v) => v + 10)}>
+              <Button
+                variant="light"
+                onClick={() => setRecentVisible((v) => v + 10)}
+              >
                 더보기
               </Button>
             </Group>
