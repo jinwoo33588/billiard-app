@@ -13,4 +13,10 @@ async function login(req, res) {
   return res.json({ token, user: user.toPublic() });
 }
 
-module.exports = { register, login };
+async function guestLogin(req, res) {
+  const { userId } = req.params;
+  const { token, user } = await authService.guestLogin(userId);
+  return res.json({ token, user: user.toPublic() });
+}
+
+module.exports = { register, login, guestLogin };

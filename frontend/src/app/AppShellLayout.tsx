@@ -12,10 +12,16 @@ import { createMyGameApi } from "../features/games/games.api";
 import { emitGamesChanged } from "../features/games/useGames";
 
 export default function AppShellLayout() {
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
   const [createOpen, setCreateOpen] = useState(false);
 
-  const openCreate = () => setCreateOpen(true);
+  const openCreate = () => {
+    if (isGuest) {
+      alert("게스트 모드에서는 데이터를 추가할 수 없습니다.");
+      return;
+    }
+    setCreateOpen(true);
+  };
   // const closeCreate = () => setCreateOpen(false);
 
   return (

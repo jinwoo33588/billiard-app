@@ -14,7 +14,7 @@ export default function TopBar({
   user: UserLike | null;
 }){
   const nav = useNavigate();
-  const { logout } = useAuth();
+  const { logout, isGuest } = useAuth();
 
   return(
     <Container fluid px="sm" h="100%">
@@ -25,8 +25,8 @@ export default function TopBar({
         {user ?(
           <Group gap="xs" wrap="nowrap">
             {/* User 배지 */}
-            <Badge variant="light" radius="xl">
-              {user.nickname} · {user.handicap}점
+            <Badge variant={isGuest ? "filled" : "light"} radius="xl" color={isGuest ? "yellow" : undefined}>
+              {isGuest ? "👁️ 게스트: " : ""}{user.nickname} · {user.handicap}점
             </Badge>
 
             {/* 프로필 메뉴*/}
@@ -39,11 +39,15 @@ export default function TopBar({
 
               <Menu.Dropdown>
                 <Menu.Label>계정</Menu.Label>
-                <Menu.Item leftSection={<IconPencil size={16} />} >
-                  프로필 편집
-                </Menu.Item>
+                {!isGuest && (
+                  <>
+                    <Menu.Item leftSection={<IconPencil size={16} />} >
+                      프로필 편집
+                    </Menu.Item>
 
-                <Menu.Divider />
+                    <Menu.Divider />
+                  </>
+                )}
 
                 <Menu.Item
                   color="red"
@@ -58,7 +62,7 @@ export default function TopBar({
 
                 <Menu.Divider />
                 <Text size="xs" c="dimmed" px="sm" pb="xs">
-                  {user.nickname ?? "user"} / 핸디 {user.handicap ?? 0}
+                  {isGuest ? "게스트 모드" : `${user.nickname ?? "user"} / 핸디 ${user.handicap ?? 0}`}
                 </Text>
               </Menu.Dropdown>
 

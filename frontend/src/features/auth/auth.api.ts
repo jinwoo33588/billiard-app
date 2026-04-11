@@ -12,6 +12,11 @@ export async function loginApi(payload: LoginPayload): Promise<AuthResponse> {
   return res.data;
 }
 
+export async function guestLoginApi(userId: string): Promise<AuthResponse> {
+  const res = await axiosInstance.post<AuthResponse>(`/api/auth/guest/${userId}`);
+  return res.data;
+}
+
 export async function getMeApi(): Promise<UserPublic> {
   const res = await axiosInstance.get<UserPublic>(EP.me);
   return res.data;

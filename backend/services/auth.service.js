@@ -34,23 +34,23 @@ const { HttpError } = require("../utils/httpError");                // HttpError
 
 /**
  * ✅ 토큰 발급 함수
- * - 입력: userId (문자열)
+ * - 입력: userId (문자열), isGuest (선택사항)
  * - 출력: JWT 문자열
  *
  * 왜 분리?
  * - register/login 둘 다 토큰이 필요하므로 중복 제거
  */
-function signToken(userId) {
+function signToken(userId, isGuest = false) {
   const secret = process.env.JWT_SECRET_KEY;                        // process.env.JWT_SECRET_KEY는 dotenv가 index.js에서 읽어서 세팅해 둔 값 (Node 프로세스 전체에서 공유되므로 여기서도 접근 가능)
   if (!secret) throw new Error("JWT_SECRET_KEY is missing");        // secret이 없으면 토큰 발급이 불가능 -> 서버 설정 문제
 
   /**
    * jwt.sign(payload, secret, options)
-   * - payload: 토큰에 담을 데이터 (여기서는 userId만 담는다)
+   * - payload: 토큰에 담을 데이터 (userId + isGuest 플래그)
    * - secret: 서명 키(비밀키)
    * - options.expiresIn: 만료기간
    */
-  return jwt.sign({ userId }, secret, { expiresIn: "30d" });
+  return jwt.sign({ userId, isGuest }, secret, { expiresIn: "30d" });
 }
 
 /**
@@ -151,4 +151,28 @@ async function login({ email, password }) {
   return { token, user };
 }
 
-module.exports = { register, login };
+/**
+ * ✅ 게스트 로그인 서비스
+ * - 특정 사용자 ID를 게스트로 조회한다.
+ * - 게스트는 데이터를 볼 수는 있지만 수정/삭제할 수 없다.
+ *
+ * @param {string} userId - 게스트로 접근할 사용자 ID
+ * @returns {Promise<{token: string, user: any}>}
+ */
+async function guestLogin(userId) {
+  /**
+   * 1) userId로 사용자 조회
+   */
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new HttpError(404, "User not found");
+  }
+
+  /**
+   * 2) 게스트 토큰 발급 (isGuest = true)
+   */
+  const token = signToken(user._id.toString(), true);
+  return { token, user };
+}
+
+module.exports = { register, login, guestLogin };

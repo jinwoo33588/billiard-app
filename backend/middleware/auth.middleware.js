@@ -17,7 +17,10 @@ function authMiddleware(req, res, next) {
     }
 
     // ✅ 여기서 표준화: 이후엔 req.user.userId는 항상 ObjectId
-    req.user = { userId: new mongoose.Types.ObjectId(payload.userId) };
+    req.user = {
+      userId: new mongoose.Types.ObjectId(payload.userId),
+      isGuest: payload.isGuest || false, // 게스트 플래그 추가
+    };
 
     next();
   } catch {

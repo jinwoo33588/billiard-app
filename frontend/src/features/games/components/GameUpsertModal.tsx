@@ -15,6 +15,7 @@ import {
 } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons-react";
 import DateFieldFlatpickr from "../../../shared/components/DateFieldFlatpickr";
+import { useAuth } from "../../auth/useAuth";
 import type { Game } from "../types";
 
 type Mode = "create" | "edit";
@@ -92,6 +93,7 @@ export default function GameUpsertModal({
   showDelete = false,
   onDelete,
 }: Props) {
+  const { isGuest } = useAuth();
   const title = mode === "create" ? "새 경기 기록" : "경기 기록 수정";
 
   const [form, setForm] = useState<GameUpsertForm>(() => defaultForm());
@@ -192,6 +194,17 @@ export default function GameUpsertModal({
           </Alert>
         )}
 
+        {isGuest && (
+          <Alert
+            icon={<IconAlertCircle size={16} />}
+            color="yellow"
+            variant="light"
+            mb="sm"
+          >
+            게스트 모드에서는 데이터를 수정할 수 없습니다.
+          </Alert>
+        )}
+
         <Grid>
           <Grid.Col span={12}>
             <DateFieldFlatpickr
@@ -215,7 +228,7 @@ export default function GameUpsertModal({
               value={form.inning === "" ? "" : String(form.inning)}
               onChange={(e) => setNumericField("inning", e.currentTarget.value)}
               error={touched ? errors.inning : undefined}
-              disabled={saving}
+              disabled={saving || isGuest}
             />
           </Grid.Col>
 
@@ -228,7 +241,7 @@ export default function GameUpsertModal({
               value={form.score === "" ? "" : String(form.score)}
               onChange={(e) => setNumericField("score", e.currentTarget.value)}
               error={touched ? errors.score : undefined}
-              disabled={saving}
+              disabled={saving || isGuest}
             />
           </Grid.Col>
 
@@ -255,7 +268,7 @@ export default function GameUpsertModal({
                 variant={form.result === "WIN" ? "filled" : "light"}
                 onClick={() => setForm((s) => ({ ...s, result: "WIN" }))}
                 type="button"
-                disabled={saving}
+                disabled={saving || isGuest}
               >
                 승
               </Button>
@@ -266,7 +279,7 @@ export default function GameUpsertModal({
                 variant={form.result === "DRAW" ? "filled" : "light"}
                 onClick={() => setForm((s) => ({ ...s, result: "DRAW" }))}
                 type="button"
-                disabled={saving}
+                disabled={saving || isGuest}
               >
                 무
               </Button>
@@ -277,7 +290,7 @@ export default function GameUpsertModal({
                 variant={form.result === "LOSE" ? "filled" : "light"}
                 onClick={() => setForm((s) => ({ ...s, result: "LOSE" }))}
                 type="button"
-                disabled={saving}
+                disabled={saving || isGuest}
               >
                 패
               </Button>
@@ -296,7 +309,7 @@ export default function GameUpsertModal({
                   gameType: (v as Game["gameType"]) ?? "UNKNOWN",
                 }))
               }
-              disabled={saving}
+              disabled={saving || isGuest}
             />
           </Grid.Col>
 
@@ -309,7 +322,7 @@ export default function GameUpsertModal({
               autosize
               minRows={3}
               description={`${form.memo.length}/500`}
-              disabled={saving}
+              disabled={saving || isGuest}
             />
           </Grid.Col>
         </Grid>
@@ -321,7 +334,7 @@ export default function GameUpsertModal({
               variant="light"
               onClick={handleDelete}
               type="button"
-              disabled={saving}
+              disabled={saving || isGuest}
               loading={saving}
             >
               삭제
@@ -339,7 +352,7 @@ export default function GameUpsertModal({
 
           <Button
             onClick={submit}
-            disabled={!canSubmit || saving}
+            disabled={!canSubmit || saving || isGuest}
             type="button"
             loading={saving}
           >

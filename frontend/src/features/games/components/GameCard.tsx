@@ -5,6 +5,7 @@ import type { Game } from "../types";
 import { getGameResultLabel, getGameResultTone, getGameTypeLabel } from "../../../shared/utils/gameLabels";
 import { fmt0, fmt1, fmt3 } from "../../../shared/utils/number";
 import { calcAvg } from "../../../shared/utils/gameMath";
+import { useAuth } from "../../auth/useAuth";
 
 type Props = {
   game: Game;
@@ -23,6 +24,7 @@ function GameCardBase({
   opened = false,
   onToggle,
 }: Props) {
+  const { isGuest } = useAuth();
   const avg = fmt3(calcAvg(game.score, game.inning));
   const tone = getGameResultTone(game.result);
 
@@ -120,7 +122,7 @@ function GameCardBase({
             {getGameResultLabel(game.result)}
           </Badge>
 
-          {showActions && (
+          {showActions && !isGuest && (
             <div style={{ width: W.menu, display: "flex", justifyContent: "flex-end" }}>
               <Menu width={160} position="bottom-end" withinPortal>
                 <Menu.Target>

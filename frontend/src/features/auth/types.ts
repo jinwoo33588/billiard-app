@@ -27,8 +27,10 @@ export type LoginPayload = {
 export type AuthContextValue = {
   user: UserPublic | null;
   loading: boolean;
+  isGuest: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
+  guestLogin: (userId: string) => Promise<void>;
   logout: () => void;
   refreshMe: () => Promise<void>;
 };
