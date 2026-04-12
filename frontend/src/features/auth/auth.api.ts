@@ -21,7 +21,8 @@ export async function loginApi(payload: LoginPayload): Promise<AuthResponse> {
 
 export async function guestLoginApi(userId: string): Promise<AuthResponse> {
   const res = await axiosInstance.post<AuthResponse>(
-    `/api/auth/guest/${userId}`,
+    `${EP.guest}/${userId}`,
+    {},
   );
   return res.data;
 }
