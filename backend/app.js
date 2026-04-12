@@ -28,7 +28,6 @@ app.use("/api/me/insights", insightsRoutes);
 app.use("/api/ranking", rankingRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/admin", adminRoutes);
 // app.use("/api/stats", statsRoutes);
 
 // 마지막에 에러 미들웨어
