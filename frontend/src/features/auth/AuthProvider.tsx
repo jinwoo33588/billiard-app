@@ -31,16 +31,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
-        const rawBase = String(import.meta.env.VITE_API_BASE_URL || "").replace(
-          /\/$/,
-          "",
-        );
-        const healthUrl = rawBase
-          ? rawBase.endsWith("/api")
-            ? `${rawBase}/health`
-            : `${rawBase}/api/health`
-          : "/api/health";
-        void fetch(healthUrl).catch(() => {});
         await refreshMe();
 
         // 로컬스토리지에서 isGuest 플래그 복원

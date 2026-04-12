@@ -31,10 +31,14 @@ function normalizeResult(row, meta) {
   const winRate = safeDiv(base.wins, winLoseTotal);
   const avg = safeDiv(base.scoreSum, base.inningSum);
   const expectedTotal =
-    (base.twoTeamCount || 0) + (base.threeTeamCount || 0) + (base.unknownTeamCount || 0);
+    (base.twoTeamCount || 0) +
+    (base.threeTeamCount || 0) +
+    (base.unknownTeamCount || 0);
   const expectedWinRate = safeDiv(
-    (base.twoTeamCount || 0) * 0.5 + (base.threeTeamCount || 0) * (2 / 3) + (base.unknownTeamCount || 0) * 0.5,
-    expectedTotal || base.gamesCount || 0
+    (base.twoTeamCount || 0) * 0.5 +
+      (base.threeTeamCount || 0) * (2 / 3) +
+      (base.unknownTeamCount || 0) * 0.5,
+    expectedTotal || base.gamesCount || 0,
   );
 
   return {
@@ -92,29 +96,17 @@ function buildGroupPipeline(match) {
 
         twoTeamCount: {
           $sum: {
-            $cond: [
-              { $in: ["$gameType", ["1v1", "2v2", "3v3"]] },
-              1,
-              0,
-            ],
+            $cond: [{ $in: ["$gameType", ["1v1", "2v2", "3v3"]] }, 1, 0],
           },
         },
         threeTeamCount: {
           $sum: {
-            $cond: [
-              { $in: ["$gameType", ["2v2v2", "3v3v3"]] },
-              1,
-              0,
-            ],
+            $cond: [{ $in: ["$gameType", ["2v2v2", "3v3v3"]] }, 1, 0],
           },
         },
         unknownTeamCount: {
           $sum: {
-            $cond: [
-              { $in: ["$gameType", ["UNKNOWN", null]] },
-              1,
-              0,
-            ],
+            $cond: [{ $in: ["$gameType", ["UNKNOWN", null]] }, 1, 0],
           },
         },
       },
@@ -155,21 +147,33 @@ async function getMyStats(userId, opt) {
 
     const ids = recent.map((d) => d._id);
     if (ids.length === 0) {
-      return normalizeResult(null, { mode, range: { from: null, to: null }, limit });
+      return normalizeResult(null, {
+        mode,
+        range: { from: null, to: null },
+        limit,
+      });
     }
 
     // ✅ 해당 id들만 집계
     const match = { userId, _id: { $in: ids } };
     const [row] = await Game.aggregate(buildGroupPipeline(match));
 
-    return normalizeResult(row, { mode, range: { from: null, to: null }, limit });
+    return normalizeResult(row, {
+      mode,
+      range: { from: null, to: null },
+      limit,
+    });
   }
 
   // 3) all
   {
     const match = { userId };
     const [row] = await Game.aggregate(buildGroupPipeline(match));
-    return normalizeResult(row, { mode: "all", range: { from: null, to: null }, limit: null });
+    return normalizeResult(row, {
+      mode: "all",
+      range: { from: null, to: null },
+      limit: null,
+    });
   }
 }
 
