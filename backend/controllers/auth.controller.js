@@ -1,4 +1,7 @@
-const { validateRegister, validateLogin } = require("../validators/auth.validator");
+const {
+  validateRegister,
+  validateLogin,
+} = require("../validators/auth.validator");
 const authService = require("../services/auth.service");
 
 async function register(req, res) {

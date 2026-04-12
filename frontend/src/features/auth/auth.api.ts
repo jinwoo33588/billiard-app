@@ -1,8 +1,15 @@
 import axiosInstance from "../../api/axiosInstance";
 import { EP } from "../../api/endpoints";
-import type { AuthResponse, RegisterPayload, LoginPayload, UserPublic } from "./types";
+import type {
+  AuthResponse,
+  RegisterPayload,
+  LoginPayload,
+  UserPublic,
+} from "./types";
 
-export async function registerApi(payload: RegisterPayload): Promise<AuthResponse> {
+export async function registerApi(
+  payload: RegisterPayload,
+): Promise<AuthResponse> {
   const res = await axiosInstance.post<AuthResponse>(EP.register, payload);
   return res.data;
 }
@@ -13,7 +20,9 @@ export async function loginApi(payload: LoginPayload): Promise<AuthResponse> {
 }
 
 export async function guestLoginApi(userId: string): Promise<AuthResponse> {
-  const res = await axiosInstance.post<AuthResponse>(`/api/auth/guest/${userId}`);
+  const res = await axiosInstance.post<AuthResponse>(
+    `/api/auth/guest/${userId}`,
+  );
   return res.data;
 }
 

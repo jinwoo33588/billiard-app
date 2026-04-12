@@ -26,11 +26,10 @@
  * - Error: HttpError (에러 미들웨어에서 status/message 통일 처리)
  */
 
-
-const bcrypt = require("bcrypt");                                   // bcrypt: 비밀번호를 안전하게 "해시"하기 위한 라이브러리
-const jwt = require("jsonwebtoken");                                // jsonwebtoken: JWT 토큰을 발급/검증하는 라이브러리 (검증은 auth.middleware가 담당)
-const User = require("../models/User");                             // User 모델: MongoDB(users 컬렉션)와 연결된 Mongoose 모델 (findOne, create 같은 DB 작업을 함수처럼 호출 가능)
-const { HttpError } = require("../utils/httpError");                // HttpError: status 코드를 가진 커스텀 에러
+const bcrypt = require("bcrypt"); // bcrypt: 비밀번호를 안전하게 "해시"하기 위한 라이브러리
+const jwt = require("jsonwebtoken"); // jsonwebtoken: JWT 토큰을 발급/검증하는 라이브러리 (검증은 auth.middleware가 담당)
+const User = require("../models/User"); // User 모델: MongoDB(users 컬렉션)와 연결된 Mongoose 모델 (findOne, create 같은 DB 작업을 함수처럼 호출 가능)
+const { HttpError } = require("../utils/httpError"); // HttpError: status 코드를 가진 커스텀 에러
 
 /**
  * ✅ 토큰 발급 함수
@@ -41,8 +40,8 @@ const { HttpError } = require("../utils/httpError");                // HttpError
  * - register/login 둘 다 토큰이 필요하므로 중복 제거
  */
 function signToken(userId, isGuest = false) {
-  const secret = process.env.JWT_SECRET_KEY;                        // process.env.JWT_SECRET_KEY는 dotenv가 index.js에서 읽어서 세팅해 둔 값 (Node 프로세스 전체에서 공유되므로 여기서도 접근 가능)
-  if (!secret) throw new Error("JWT_SECRET_KEY is missing");        // secret이 없으면 토큰 발급이 불가능 -> 서버 설정 문제
+  const secret = process.env.JWT_SECRET_KEY; // process.env.JWT_SECRET_KEY는 dotenv가 index.js에서 읽어서 세팅해 둔 값 (Node 프로세스 전체에서 공유되므로 여기서도 접근 가능)
+  if (!secret) throw new Error("JWT_SECRET_KEY is missing"); // secret이 없으면 토큰 발급이 불가능 -> 서버 설정 문제
 
   /**
    * jwt.sign(payload, secret, options)

@@ -9,7 +9,6 @@ const rankingRoutes = require("./routes/ranking.routes");
 const usersRoutes = require("./routes/users.routes");
 const adminRoutes = require("./routes/admin.routes");
 
-
 // const gamesRoutes = require("./routes/games.routes");
 // const statsRoutes = require("./routes/stats.routes");
 
@@ -28,6 +27,7 @@ app.use("/api/me/games", meGamesRoutes);
 app.use("/api/me/insights", insightsRoutes);
 app.use("/api/ranking", rankingRoutes);
 app.use("/api/users", usersRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/admin", adminRoutes);
 // app.use("/api/stats", statsRoutes);
 

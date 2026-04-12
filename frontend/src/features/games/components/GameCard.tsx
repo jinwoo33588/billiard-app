@@ -2,7 +2,11 @@ import { memo } from "react";
 import { Card, Text, Badge, ActionIcon, Menu } from "@mantine/core";
 import { IconDotsVertical, IconPencil, IconTrash } from "@tabler/icons-react";
 import type { Game } from "../types";
-import { getGameResultLabel, getGameResultTone, getGameTypeLabel } from "../../../shared/utils/gameLabels";
+import {
+  getGameResultLabel,
+  getGameResultTone,
+  getGameTypeLabel,
+} from "../../../shared/utils/gameLabels";
 import { fmt0, fmt1, fmt3 } from "../../../shared/utils/number";
 import { calcAvg } from "../../../shared/utils/gameMath";
 import { useAuth } from "../../auth/useAuth";
@@ -48,7 +52,8 @@ function GameCardBase({
           ? "0 14px 32px rgba(255, 255, 255, 0.18)"
           : "0 8px 20px rgba(0,0,0,0.04)",
         background: "rgba(255,255,255,0.98)",
-        transition: "box-shadow 180ms ease, border-color 180ms ease, background 180ms ease",
+        transition:
+          "box-shadow 180ms ease, border-color 180ms ease, background 180ms ease",
         position: "relative",
       }}
     >
@@ -95,7 +100,14 @@ function GameCardBase({
         </div>
 
         {/* mid: stats inline */}
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10, minWidth: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            gap: 10,
+            minWidth: 0,
+          }}
+        >
           <Num label="이닝" value={String(game.inning)} width={W.inning} />
           <Divider />
           <Num label="점수" value={String(game.score)} width={W.score} />
@@ -123,7 +135,13 @@ function GameCardBase({
           </Badge>
 
           {showActions && !isGuest && (
-            <div style={{ width: W.menu, display: "flex", justifyContent: "flex-end" }}>
+            <div
+              style={{
+                width: W.menu,
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
               <Menu width={160} position="bottom-end" withinPortal>
                 <Menu.Target>
                   <ActionIcon
@@ -244,7 +262,15 @@ function Num({
 }
 
 function Divider() {
-  return <div style={{ width: 1, height: 14, background: "var(--mantine-color-gray-3)" }} />;
+  return (
+    <div
+      style={{
+        width: 1,
+        height: 14,
+        background: "var(--mantine-color-gray-3)",
+      }}
+    />
+  );
 }
 
 function DetailItem({
@@ -266,10 +292,18 @@ function DetailItem({
         borderLeft: divider ? "1px solid rgba(72, 149, 255, 0.25)" : undefined,
       }}
     >
-      <Text size="xs" c="dimmed" fw={900} style={{ lineHeight: 1, letterSpacing: -0.2 }}>
+      <Text
+        size="xs"
+        c="dimmed"
+        fw={900}
+        style={{ lineHeight: 1, letterSpacing: -0.2 }}
+      >
         {label}
       </Text>
-      <Text fw={900} style={{ fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
+      <Text
+        fw={900}
+        style={{ fontVariantNumeric: "tabular-nums", lineHeight: 1 }}
+      >
         {value}
       </Text>
     </div>

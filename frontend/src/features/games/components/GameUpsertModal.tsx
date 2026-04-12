@@ -128,9 +128,23 @@ export default function GameUpsertModal({
 
   const errors = useMemo(() => {
     const e: Record<string, string> = {};
-    if (form.score === "" || !Number.isFinite(Number(form.score)) || Number(form.score) < 0) e.score = "점수를 입력하세요.";
-    if (form.inning === "" || !Number.isFinite(Number(form.inning)) || Number(form.inning) < 1) e.inning = "이닝을 입력하세요.";
-    if (!(form.gameDate instanceof Date) || Number.isNaN(form.gameDate.getTime())) e.gameDate = "날짜를 선택하세요.";
+    if (
+      form.score === "" ||
+      !Number.isFinite(Number(form.score)) ||
+      Number(form.score) < 0
+    )
+      e.score = "점수를 입력하세요.";
+    if (
+      form.inning === "" ||
+      !Number.isFinite(Number(form.inning)) ||
+      Number(form.inning) < 1
+    )
+      e.inning = "이닝을 입력하세요.";
+    if (
+      !(form.gameDate instanceof Date) ||
+      Number.isNaN(form.gameDate.getTime())
+    )
+      e.gameDate = "날짜를 선택하세요.";
     if (form.memo.length > 500) e.memo = "메모는 500자 이내로 작성해주세요.";
     return e;
   }, [form]);
@@ -139,7 +153,10 @@ export default function GameUpsertModal({
 
   const setNumericField = (key: "score" | "inning", raw: string) => {
     const onlyDigits = raw.replace(/\D/g, "");
-    setForm((s) => ({ ...s, [key]: onlyDigits === "" ? "" : Number(onlyDigits) }));
+    setForm((s) => ({
+      ...s,
+      [key]: onlyDigits === "" ? "" : Number(onlyDigits),
+    }));
   };
 
   const submit = async () => {
@@ -215,7 +232,6 @@ export default function GameUpsertModal({
                 setForm((s) => ({ ...s, gameDate: next }));
               }}
               error={touched ? errors.gameDate : undefined}
-              
             />
           </Grid.Col>
 
@@ -317,7 +333,9 @@ export default function GameUpsertModal({
             <Textarea
               label="메모"
               value={form.memo}
-              onChange={(e) => setForm((s) => ({ ...s, memo: e.currentTarget.value }))}
+              onChange={(e) =>
+                setForm((s) => ({ ...s, memo: e.currentTarget.value }))
+              }
               error={touched ? errors.memo : undefined}
               autosize
               minRows={3}

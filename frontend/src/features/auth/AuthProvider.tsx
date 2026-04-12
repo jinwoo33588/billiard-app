@@ -1,4 +1,10 @@
-import React, { createContext, useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { getMeApi, loginApi, registerApi, guestLoginApi } from "./auth.api";
 import type { AuthContextValue, RegisterPayload, UserPublic } from "./types";
 
@@ -25,7 +31,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
-        const rawBase = String(import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+        const rawBase = String(import.meta.env.VITE_API_BASE_URL || "").replace(
+          /\/$/,
+          "",
+        );
         const healthUrl = rawBase
           ? rawBase.endsWith("/api")
             ? `${rawBase}/health`
@@ -33,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           : "/api/health";
         void fetch(healthUrl).catch(() => {});
         await refreshMe();
-        
+
         // 로컬스토리지에서 isGuest 플래그 복원
         const savedIsGuest = localStorage.getItem("isGuest") === "true";
         setIsGuest(savedIsGuest);
@@ -86,8 +95,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // 역할: Context value를 메모이제이션 → 불필요한 리렌더 줄임
   const value = useMemo<AuthContextValue>(
-    () => ({ user, loading, isGuest, login, register, guestLogin, logout, refreshMe }),
-    [user, loading, isGuest, login, register, guestLogin, logout, refreshMe]
+    () => ({
+      user,
+      loading,
+      isGuest,
+      login,
+      register,
+      guestLogin,
+      logout,
+      refreshMe,
+    }),
+    [user, loading, isGuest, login, register, guestLogin, logout, refreshMe],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

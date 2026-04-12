@@ -13,7 +13,6 @@ router.use(authMiddleware);
 router.get("/", asyncHandler(meController.getMe));
 router.put("/", guestCheckMiddleware, asyncHandler(meController.updateMe));
 
-
 router.get("/stats", asyncHandler(statsController.getMyStats));
 
 module.exports = router;

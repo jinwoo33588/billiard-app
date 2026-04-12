@@ -36,11 +36,15 @@ export default function LoginPage() {
             id: user.id,
             nickname: user.nickname,
             handicap: user.handicap,
-          }))
+          })),
         );
       })
       .catch((e: any) => {
-        setGuestUsersError(e?.response?.data?.message ?? e?.message ?? "사용자 목록을 불러오는 중 오류가 발생했습니다.");
+        setGuestUsersError(
+          e?.response?.data?.message ??
+            e?.message ??
+            "사용자 목록을 불러오는 중 오류가 발생했습니다.",
+        );
       })
       .finally(() => setLoadingGuestUsers(false));
   }, [activeTab, guestUsers.length]);
@@ -92,9 +96,19 @@ export default function LoginPage() {
   return (
     <div style={{ maxWidth: 720, margin: "0 auto", padding: 16 }}>
       <h2 style={{ margin: "12px 0 8px" }}>로그인</h2>
-      <p style={{ marginTop: 0, color: "#666" }}>계정으로 로그인하거나, 아래에서 바로 게스트 체험을 시작해보세요.</p>
+      <p style={{ marginTop: 0, color: "#666" }}>
+        계정으로 로그인하거나, 아래에서 바로 게스트 체험을 시작해보세요.
+      </p>
 
-      <div style={{ display: "flex", gap: 8, marginTop: 16, marginBottom: 16, borderBottom: "1px solid #ddd" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          marginTop: 16,
+          marginBottom: 16,
+          borderBottom: "1px solid #ddd",
+        }}
+      >
         <button
           type="button"
           onClick={() => {
@@ -136,20 +150,34 @@ export default function LoginPage() {
       </div>
 
       {err && (
-        <div style={{ background: "#ffecec", padding: 12, borderRadius: 10, marginTop: 12 }}>
+        <div
+          style={{
+            background: "#ffecec",
+            padding: 12,
+            borderRadius: 10,
+            marginTop: 12,
+          }}
+        >
           {err}
         </div>
       )}
 
       {activeTab === "login" && (
-        <form onSubmit={onSubmit} style={{ display: "grid", gap: 12, marginTop: 12 }}>
+        <form
+          onSubmit={onSubmit}
+          style={{ display: "grid", gap: 12, marginTop: 12 }}
+        >
           <label style={{ display: "grid", gap: 6 }}>
             <span style={{ fontSize: 14 }}>이메일</span>
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="a@a.com"
-              style={{ padding: 12, borderRadius: 10, border: "1px solid #ddd" }}
+              style={{
+                padding: 12,
+                borderRadius: 10,
+                border: "1px solid #ddd",
+              }}
               autoComplete="email"
             />
           </label>
@@ -161,7 +189,11 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••"
               type="password"
-              style={{ padding: 12, borderRadius: 10, border: "1px solid #ddd" }}
+              style={{
+                padding: 12,
+                borderRadius: 10,
+                border: "1px solid #ddd",
+              }}
               autoComplete="current-password"
             />
           </label>
@@ -183,14 +215,29 @@ export default function LoginPage() {
       {activeTab === "guest" && (
         <div style={{ display: "grid", gap: 14, marginTop: 12 }}>
           <div style={{ color: "#666", fontSize: 13 }}>
-            <p style={{ margin: 0 }}>사용자 목록을 클릭하면 해당 사용자로 게스트 로그인이 됩니다.</p>
+            <p style={{ margin: 0 }}>
+              사용자 목록을 클릭하면 해당 사용자로 게스트 로그인이 됩니다.
+            </p>
             <p style={{ margin: 0 }}>(기록 추가/수정/삭제는 불가능합니다)</p>
           </div>
 
           {loadingGuestUsers ? (
-            <div style={{ padding: 12, background: "#f5f5f5", borderRadius: 10 }}>사용자 목록을 불러오는 중...</div>
+            <div
+              style={{ padding: 12, background: "#f5f5f5", borderRadius: 10 }}
+            >
+              사용자 목록을 불러오는 중...
+            </div>
           ) : guestUsersError ? (
-            <div style={{ padding: 12, background: "#ffecec", borderRadius: 10, color: "#a00" }}>{guestUsersError}</div>
+            <div
+              style={{
+                padding: 12,
+                background: "#ffecec",
+                borderRadius: 10,
+                color: "#a00",
+              }}
+            >
+              {guestUsersError}
+            </div>
           ) : (
             <div style={{ display: "grid", gap: 10 }}>
               {guestUsers.slice(0, 12).map((user) => (
@@ -215,7 +262,9 @@ export default function LoginPage() {
                   <span>
                     <strong>{user.nickname}</strong> · 핸디 {user.handicap}
                   </span>
-                  <span style={{ color: "#666", fontSize: 12 }}>게스트로 보기</span>
+                  <span style={{ color: "#666", fontSize: 12 }}>
+                    게스트로 보기
+                  </span>
                 </button>
               ))}
             </div>
@@ -228,7 +277,11 @@ export default function LoginPage() {
                 value={guestUserId}
                 onChange={(e) => setGuestUserId(e.target.value)}
                 placeholder="User ID 입력"
-                style={{ padding: 12, borderRadius: 10, border: "1px solid #ddd" }}
+                style={{
+                  padding: 12,
+                  borderRadius: 10,
+                  border: "1px solid #ddd",
+                }}
               />
             </label>
 

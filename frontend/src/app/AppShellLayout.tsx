@@ -31,7 +31,13 @@ export default function AppShellLayout() {
       </AppShell.Header>
 
       <AppShell.Main>
-        <div style={{ height: "calc(100dvh - 56px - 72px)", overflow: "auto", padding: 0 }}>
+        <div
+          style={{
+            height: "calc(100dvh - 56px - 72px)",
+            overflow: "auto",
+            padding: 0,
+          }}
+        >
           <Container size="md" px={{ base: 12, sm: "md", lg: "xl" }} py="md">
             <Outlet />
           </Container>
