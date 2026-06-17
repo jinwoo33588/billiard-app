@@ -9,7 +9,7 @@ type State = {
   games: Game[];
 };
 
-const GAMES_CHANGED_EVENT = "games:changed";
+export const GAMES_CHANGED_EVENT = "games:changed";
 
 export function emitGamesChanged() {
   window.dispatchEvent(new Event(GAMES_CHANGED_EVENT));

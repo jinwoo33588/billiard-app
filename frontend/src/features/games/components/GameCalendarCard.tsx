@@ -166,6 +166,20 @@ export default function GameCalendarCard({
 
   const selectedGames = selectedDateValue ? dayMap.get(selectedDateValue) ?? [] : [];
 
+  const dailyStats = useMemo(() => {
+    if (!selectedGames.length) return null;
+    const scoreSum = selectedGames.reduce((s, g) => s + Number(g.score || 0), 0);
+    const inningSum = selectedGames.reduce((s, g) => s + Number(g.inning || 0), 0);
+    return {
+      scoreSum,
+      inningSum,
+      avg: inningSum > 0 ? scoreSum / inningSum : null,
+      wins: selectedGames.filter((g) => g.result === "WIN").length,
+      loses: selectedGames.filter((g) => g.result === "LOSE").length,
+      draws: selectedGames.filter((g) => g.result === "DRAW").length,
+    };
+  }, [selectedGames]);
+
   const cellHeight = compact ? 32 : 44;
   const cellGap = compact ? 4 : 6;
   const weekdayGap = compact ? 4 : 6;
@@ -463,66 +477,88 @@ export default function GameCalendarCard({
         </Group>
 
         {selectedGames.length ? (
-          <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
-            {selectedGames.map((g) => {
-              const rating = g.rating;
-              const avg = g.avg ?? calcAvg(g.score, g.inning);
-              const result = getGameResultTone(g.result);
-              const resultLabel = getGameResultLabel(g.result);
-              const badge = badgeFromRatingAndResult(rating, g.result);
-
-              return (
-                <div
-                  key={g.id}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr auto",
-                    alignItems: "center",
-                    gap: 10,
-                    padding: "8px 10px",
-                    borderRadius: 10,
-                    border: "1px solid rgba(0,0,0,0.08)",
-                    background: "rgba(255,255,255,0.9)",
-                  }}
-                >
-                  <div style={{ minWidth: 0 }}>
-                    <Group gap={6} wrap="nowrap">
-                      <Badge
-                        size="xs"
-                        radius="xl"
-                        variant="light"
-                        color={result.mantineColor}
-                        style={{ fontWeight: 900, border: "1px solid rgba(0,0,0,0.08)" }}
-                      >
-                        {resultLabel}
-                      </Badge>
-                      <Badge
-                        size="xs"
-                        radius="xl"
-                        variant="light"
-                        color={badge.color}
-                        style={{ fontWeight: 900, border: "1px solid rgba(0,0,0,0.08)" }}
-                      >
-                        {badge.label}
-                      </Badge>
-                    </Group>
-                    <Text size="sm" fw={900} style={{ marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
-                      {g.inning}이닝 · {g.score}점 · AVG {fmt3(avg)}
-                    </Text>
-                  </div>
-                  <div style={{ textAlign: "right", minWidth: 60 }}>
-                    <Text size="xs" c="dimmed" fw={900}>
-                      RATING
-                    </Text>
-                    <Text fw={950} style={{ fontVariantNumeric: "tabular-nums" }}>
-                      {fmt1(rating ?? NaN)}
-                    </Text>
-                  </div>
+            <>
+              {dailyStats && (
+                <div style={{
+                  marginTop: 8,
+                  padding: "8px 12px",
+                  borderRadius: 10,
+                  background: "rgba(0,0,0,0.04)",
+                  border: "1px solid rgba(0,0,0,0.07)",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}>
+                  <Text size="xs" c="dimmed" fw={900}>
+                    {dailyStats.wins}승 {dailyStats.draws > 0 ? `${dailyStats.draws}무 ` : ""}{dailyStats.loses}패
+                    · {dailyStats.scoreSum}점 / {dailyStats.inningSum}이닝
+                  </Text>
+                  <Text fw={950} size="sm" style={{ fontVariantNumeric: "tabular-nums" }}>
+                    AVG {dailyStats.avg !== null ? fmt3(dailyStats.avg) : "-"}
+                  </Text>
                 </div>
-              );
-            })}
-          </div>
-        ) : (
+              )}
+              <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
+                {selectedGames.map((g) => {
+                  const rating = g.rating;
+                  const avg = g.avg ?? calcAvg(g.score, g.inning);
+                  const result = getGameResultTone(g.result);
+                  const resultLabel = getGameResultLabel(g.result);
+                  const badge = badgeFromRatingAndResult(rating, g.result);
+
+                  return (
+                    <div
+                      key={g.id}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr auto",
+                        alignItems: "center",
+                        gap: 10,
+                        padding: "8px 10px",
+                        borderRadius: 10,
+                        border: "1px solid rgba(0,0,0,0.08)",
+                        background: "rgba(255,255,255,0.9)",
+                      }}
+                    >
+                      <div style={{ minWidth: 0 }}>
+                        <Group gap={6} wrap="nowrap">
+                          <Badge
+                            size="xs"
+                            radius="xl"
+                            variant="light"
+                            color={result.mantineColor}
+                            style={{ fontWeight: 900, border: "1px solid rgba(0,0,0,0.08)" }}
+                          >
+                            {resultLabel}
+                          </Badge>
+                          <Badge
+                            size="xs"
+                            radius="xl"
+                            variant="light"
+                            color={badge.color}
+                            style={{ fontWeight: 900, border: "1px solid rgba(0,0,0,0.08)" }}
+                          >
+                            {badge.label}
+                          </Badge>
+                        </Group>
+                        <Text size="sm" fw={900} style={{ marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
+                          {g.inning}이닝 · {g.score}점 · AVG {fmt3(avg)}
+                        </Text>
+                      </div>
+                      <div style={{ textAlign: "right", minWidth: 60 }}>
+                        <Text size="xs" c="dimmed" fw={900}>
+                          RATING
+                        </Text>
+                        <Text fw={950} style={{ fontVariantNumeric: "tabular-nums" }}>
+                          {fmt1(rating ?? NaN)}
+                        </Text>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
           <Text size="sm" c="dimmed" style={{ marginTop: 6 }}>
             선택한 날짜의 게임이 없습니다.
           </Text>

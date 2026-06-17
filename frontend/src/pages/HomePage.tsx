@@ -163,7 +163,7 @@ export default function HomePage() {
               initialDate={meta.fromThisMonth}
               compact={!isDesktop}
               lockMonth
-              autoSelect={false}
+              autoSelect={true}
               selectedDate={selectedDate}
               onSelectDate={setSelectedDate}
             />

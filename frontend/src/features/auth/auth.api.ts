@@ -31,3 +31,11 @@ export async function getMeApi(): Promise<UserPublic> {
   const res = await axiosInstance.get<UserPublic>(EP.me);
   return res.data;
 }
+
+export async function updateMeApi(patch: {
+  nickname?: string;
+  handicap?: number;
+}): Promise<UserPublic> {
+  const res = await axiosInstance.put<UserPublic>(EP.me, patch);
+  return res.data;
+}

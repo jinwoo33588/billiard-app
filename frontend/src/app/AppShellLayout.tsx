@@ -10,10 +10,12 @@ import TopBar from "./TopBar";
 import GameUpsertModal from "../features/games/components/GameUpsertModal";
 import { createMyGameApi } from "../features/games/games.api";
 import { emitGamesChanged } from "../features/games/useGames";
+import ProfileEditModal from "../features/auth/components/ProfileEditModal";
 
 export default function AppShellLayout() {
   const { user, isGuest } = useAuth();
   const [createOpen, setCreateOpen] = useState(false);
+  const [profileEditOpen, setProfileEditOpen] = useState(false);
 
   const openCreate = () => {
     if (isGuest) {
@@ -27,7 +29,7 @@ export default function AppShellLayout() {
   return (
     <AppShell header={{ height: 56 }} footer={{ height: 72 }} padding={0}>
       <AppShell.Header>
-        <TopBar user={user} />
+        <TopBar user={user} onProfileEdit={() => setProfileEditOpen(true)} />
       </AppShell.Header>
 
       <AppShell.Main>
@@ -44,6 +46,11 @@ export default function AppShellLayout() {
         </div>
 
         {/* ✅ 모달은 Footer 밖 */}
+        <ProfileEditModal
+          opened={profileEditOpen}
+          onClose={() => setProfileEditOpen(false)}
+        />
+
         <GameUpsertModal
           opened={createOpen}
           onClose={() => setCreateOpen(false)}

@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { StatsSummary } from "./types";
 import { getMyStats, type GetMyStatsParams } from "./stats.api";
+import { GAMES_CHANGED_EVENT } from "../games/useGames";
 
 type State = {
   loading: boolean;
@@ -18,6 +19,13 @@ export function useStats(params?: GetMyStatsParams) {
 
   const [tick, setTick] = useState(0);
   const reload = useCallback(() => setTick((t) => t + 1), []);
+
+  // 게임 추가/수정/삭제 시 자동 갱신
+  useEffect(() => {
+    const onChanged = () => setTick((t) => t + 1);
+    window.addEventListener(GAMES_CHANGED_EVENT, onChanged);
+    return () => window.removeEventListener(GAMES_CHANGED_EVENT, onChanged);
+  }, []);
 
   useEffect(() => {
     let mounted = true;

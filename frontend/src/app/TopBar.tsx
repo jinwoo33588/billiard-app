@@ -16,7 +16,13 @@ type UserLike = {
   handicap?: number | null;
 };
 
-export default function TopBar({ user }: { user: UserLike | null }) {
+export default function TopBar({
+  user,
+  onProfileEdit,
+}: {
+  user: UserLike | null;
+  onProfileEdit?: () => void;
+}) {
   const nav = useNavigate();
   const { logout, isGuest } = useAuth();
 
@@ -55,7 +61,10 @@ export default function TopBar({ user }: { user: UserLike | null }) {
                 <Menu.Label>계정</Menu.Label>
                 {!isGuest && (
                   <>
-                    <Menu.Item leftSection={<IconPencil size={16} />}>
+                    <Menu.Item
+                      leftSection={<IconPencil size={16} />}
+                      onClick={onProfileEdit}
+                    >
                       프로필 편집
                     </Menu.Item>
 
